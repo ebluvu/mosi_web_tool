@@ -6,37 +6,107 @@
     <title>Mosi Room Data Generator</title>
 </head>
 <body>
-    <h1>Mosi 房間數據生成器</h1>
-    <form id="upload-form" action="/upload" method="POST" enctype="multipart/form-data">
-        <label>上傳圖片：</label>
-        <input type="file" name="image" required><br><br>
+    <h1>Mosi圖片轉房間數據產生器</h1>
+    <form id="upload-form">
+        <label for="file">上傳圖片:</label>
+        <input type="file" id="file" name="file" accept="image/*" required>
+        <button type="submit">上傳</button>
+    </form>
 
-        <label>精靈寬度：</label>
-        <input type="number" name="sprite_width" value="20" required><br><br>
+    <img id="preview" src="" alt="圖片預覽" style="display: none; max-width: 300px;">
 
-        <label>精靈高度：</label>
-        <input type="number" name="sprite_height" value="20" required><br><br>
+    <form id="generate-form" style="display: none;">
+        <h3>精靈設定</h3>
+        <label>精靈名稱: <input type="text" id="spriteName" value="rest"></label><br>
+        <label>精靈寬度: <input type="number" id="spriteWidth" value="20"></label><br>
+        <label>精靈高度: <input type="number" id="spriteHeight" value="20"></label><br>
+        <label>是否為主角: <input type="checkbox" id="isAvatar"></label><br>
+        <label>是否為牆: <input type="checkbox" id="isWall" checked></label><br>
+        <label>是否為道具: <input type="checkbox" id="isItem"></label><br>
+        <label>是否為透明化: <input type="checkbox" id="isTransparent" checked></label><br>
+        <label>顏色索引:
+            <select id="colorIndex">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+            </select>
+        </label><br>
 
-        <label>房間寬度：</label>
-        <input type="number" name="room_width" value="9" required><br><br>
-
-        <label>房間高度：</label>
-        <input type="number" name="room_height" value="9" required><br><br>
+        <h3>房間設定</h3>
+        <label>房間名稱: <input type="text" id="roomName" value="rest"></label><br>
+        <label>調色盤名稱: <input type="text" id="paletteName" value="palette-1"></label><br>
+        <label>樂曲名稱: <input type="text" id="musicName" value="song-1"></label><br>
+        <label>房間寬度: <input type="number" id="roomWidth" value="9"></label><br>
+        <label>房間長度: <input type="number" id="roomHeight" value="9"></label><br>
 
         <button type="submit">生成數據</button>
     </form>
-    <pre id="result"></pre>
+
+    <textarea id="output" style="display: none; width: 100%; height: 300px;"></textarea>
+    <button id="download-btn" style="display: none;">下載.JSON文件</button>
 
     <script>
-        const form = document.getElementById('upload-form');
-        const result = document.getElementById('result');
+        const uploadForm = document.getElementById("upload-form");
+        const generateForm = document.getElementById("generate-form");
+        const preview = document.getElementById("preview");
+        const output = document.getElementById("output");
+        const downloadBtn = document.getElementById("download-btn");
 
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const formData = new FormData(form);
-            const response = await fetch('/upload', { method: 'POST', body: formData });
+        uploadForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = new FormData(uploadForm);
+            const response = await fetch("/upload", {
+                method: "POST",
+                body: formData,
+            });
             const data = await response.json();
-            result.textContent = JSON.stringify(data, null, 4);
+            preview.src = data.filepath;
+            preview.style.display = "block";
+            generateForm.style.display = "block";
+        });
+
+        generateForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = {
+                imagePath: preview.src,
+                spriteName: document.getElementById("spriteName").value,
+                spriteWidth: document.getElementById("spriteWidth").value,
+                spriteHeight: document.getElementById("spriteHeight").value,
+                isAvatar: document.getElementById("isAvatar").checked,
+                isWall: document.getElementById("isWall").checked,
+                isItem: document.getElementById("isItem").checked,
+                isTransparent: document.getElementById("isTransparent").checked,
+                colorIndex: document.getElementById("colorIndex").value,
+                roomName: document.getElementById("roomName").value,
+                paletteName: document.getElementById("paletteName").value,
+                musicName: document.getElementById("musicName").value,
+                roomWidth: document.getElementById("roomWidth").value,
+                roomHeight: document.getElementById("roomHeight").value,
+            };
+            const response = await fetch("/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData),
+            });
+            const jsonData = await response.json();
+            output.value = JSON.stringify(jsonData, null, 4);
+            output.style.display = "block";
+            downloadBtn.style.display = "block";
+        });
+
+        downloadBtn.addEventListener("click", () => {
+            const blob = new Blob([output.value], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "room_data.json";
+            a.click();
+            URL.revokeObjectURL(url);
         });
     </script>
 </body>
