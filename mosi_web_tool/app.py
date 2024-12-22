@@ -38,8 +38,10 @@ def uploaded_file(filename):
 
 @app.route("/generate", methods=["POST"])
 def generate():
-    data = request.json
     try:
+        # 使用 request.form 來獲取其他資料
+        data = request.form
+
         # 從請求中獲取上傳的圖片
         if 'image' not in request.files:
             return jsonify({'error': 'No image file uploaded'}), 400
