@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mosi Room Data Generator</title>
+</head>
+<body>
+    <h1>Mosi 房間數據生成器</h1>
+    <form id="upload-form" action="/upload" method="POST" enctype="multipart/form-data">
+        <label>上傳圖片：</label>
+        <input type="file" name="image" required><br><br>
+
+        <label>精靈寬度：</label>
+        <input type="number" name="sprite_width" value="20" required><br><br>
+
+        <label>精靈高度：</label>
+        <input type="number" name="sprite_height" value="20" required><br><br>
+
+        <label>房間寬度：</label>
+        <input type="number" name="room_width" value="9" required><br><br>
+
+        <label>房間高度：</label>
+        <input type="number" name="room_height" value="9" required><br><br>
+
+        <button type="submit">生成數據</button>
+    </form>
+    <pre id="result"></pre>
+
+    <script>
+        const form = document.getElementById('upload-form');
+        const result = document.getElementById('result');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(form);
+            const response = await fetch('/upload', { method: 'POST', body: formData });
+            const data = await response.json();
+            result.textContent = JSON.stringify(data, null, 4);
+        });
+    </script>
+</body>
+</html>
