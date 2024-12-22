@@ -117,16 +117,27 @@
             URL.revokeObjectURL(url);
         });
 
-        // 上傳圖片並預覽
-        imageUploader.addEventListener("change", (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    preview.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
+        document.getElementById('uploadForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    const imgPreview = document.getElementById('imgPreview');
+                    imgPreview.src = `/uploads/${data.filename}`; // 確保圖片預覽正確
+                    imgPreview.style.display = "block";
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                alert('Error uploading image');
+            });
         });
     </script>
 </body>
