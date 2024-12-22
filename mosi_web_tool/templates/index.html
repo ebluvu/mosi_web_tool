@@ -19,7 +19,6 @@
         <button type="submit">上傳</button>
     </form>
 
-    <canvas id="imageCanvas"></canvas>
     <img id="preview" alt="圖片預覽" style="max-width: 300px;">
 
     <form id="generate-form">
@@ -91,28 +90,40 @@
 
         generateForm.addEventListener("submit", async (e) => {
             e.preventDefault();
+            
             const formData = new FormData();
+            
+            // 保留圖片作為 FormData 中的一部分
             formData.append('image', preview.src);
-            formData.append('spriteName', document.getElementById("spriteName").value);
-            formData.append('spriteWidth', document.getElementById("spriteWidth").value);
-            formData.append('spriteHeight', document.getElementById("spriteHeight").value);
-            formData.append('isAvatar', document.getElementById("isAvatar").checked);
-            formData.append('isWall', document.getElementById("isWall").checked);
-            formData.append('isItem', document.getElementById("isItem").checked);
-            formData.append('isTransparent', document.getElementById("isTransparent").checked);
-            formData.append('colorIndex', document.getElementById("colorIndex").value);
-            formData.append('roomName', document.getElementById("roomName").value);
-            formData.append('paletteName', document.getElementById("paletteName").value);
-            formData.append('musicName', document.getElementById("musicName").value);
-            formData.append('roomWidth', document.getElementById("roomWidth").value);
-            formData.append('roomHeight', document.getElementById("roomHeight").value);
+            
+            // 其他資料作為 JSON 格式
+            const data = {
+                spriteName: document.getElementById("spriteName").value,
+                spriteWidth: document.getElementById("spriteWidth").value,
+                spriteHeight: document.getElementById("spriteHeight").value,
+                isAvatar: document.getElementById("isAvatar").checked,
+                isWall: document.getElementById("isWall").checked,
+                isItem: document.getElementById("isItem").checked,
+                isTransparent: document.getElementById("isTransparent").checked,
+                colorIndex: document.getElementById("colorIndex").value,
+                roomName: document.getElementById("roomName").value,
+                paletteName: document.getElementById("paletteName").value,
+                musicName: document.getElementById("musicName").value,
+                roomWidth: document.getElementById("roomWidth").value,
+                roomHeight: document.getElementById("roomHeight").value
+            };
+
+            // 將資料轉換為 JSON 字串並附加到 FormData
+            formData.append('data', JSON.stringify(data));
 
             const response = await fetch("/generate", {
                 method: "POST",
-                body: formData,
+                body: formData,  // 使用 FormData 發送圖片及其他資料
             });
+
+            // 處理回應
             const jsonData = await response.json();
-            output.value = JSON.stringify(jsonData, null, 4);
+            output.value = JSON.stringify(jsonData, null, 4);  // 顯示生成的數據
             output.style.display = "block";
             downloadBtn.style.display = "block";
         });
