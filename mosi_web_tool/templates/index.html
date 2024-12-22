@@ -76,8 +76,8 @@
                 if (data.error) {
                     alert(data.error);
                 } else {
-                    const preview = document.getElementById('preview');
-                    preview.src = data.filepath; // 使用返回的filepath
+                    // 顯示圖片預覽
+                    preview.src = data.filepath;  // 使用返回的圖片路徑
                     preview.style.display = "block";
                     generateForm.style.display = "block";
                 }
@@ -93,8 +93,9 @@
             
             const formData = new FormData();
             
-            // 保留圖片作為 FormData 中的一部分
-            formData.append('image', preview.src);
+            // 直接將圖片文件傳送給後端
+            const fileInput = document.getElementById('file');
+            formData.append('image', fileInput.files[0]);  // 這裡傳送的是圖片文件，不是 preview.src
             
             // 其他資料作為 JSON 格式
             const data = {
