@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mosi圖片轉房間數據產生器</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #preview { max-width: 300px; max-height: 300px; margin: 10px 0; }
+        textarea { width: 100%; height: 150px; margin-top: 10px; }
+        .input-group { margin-bottom: 10px; }
+    </style>
 </head>
 <body>
     <h1>Mosi圖片轉房間數據產生器</h1>
@@ -13,9 +19,10 @@
         <button type="submit">上傳</button>
     </form>
 
-    <img id="preview" src="" alt="圖片預覽" style="display: none; max-width: 300px;">
+    <canvas id="imageCanvas"></canvas>
+    <img id="preview" alt="圖片預覽" style="max-width: 300px;">
 
-    <form id="generate-form" style="display: none;">
+    <form id="generate-form">
         <h3>精靈設定</h3>
         <label>精靈名稱: <input type="text" id="spriteName" value="sprite"></label><br>
         <label>精靈寬度: <input type="number" id="spriteWidth" value="8"></label><br>
@@ -47,19 +54,16 @@
         <button type="submit">生成數據</button>
     </form>
 
-    <textarea id="output" style="display: none; width: 100%; height: 300px;"></textarea>
-    <button id="download-btn" style="display: none;">下載.JSON文件</button>
+    <textarea id="output" style="width: 100%; height: 300px;"></textarea>
+    <button id="download-btn">下載.JSON文件</button>
 
     <script>
+        const imageUploader = document.getElementById("imageUploader");
         const uploadForm = document.getElementById("upload-form");
         const generateForm = document.getElementById("generate-form");
         const preview = document.getElementById("preview");
         const output = document.getElementById("output");
         const downloadBtn = document.getElementById("download-btn");
-        const imageUrl = `/uploads/${uploadedFileName}`; // 使用 Flask 提供的圖片路徑
-        const imgPreview = document.getElementById('imgPreview');
-        imgPreview.src = imageUrl;
-        imgPreview.style.display = "block"; // 顯示圖片
 
         uploadForm.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -92,23 +96,11 @@
                 roomWidth: document.getElementById("roomWidth").value,
                 roomHeight: document.getElementById("roomHeight").value,
             };
-            try {
-                const response = await fetch("/generate", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(formData),
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    jsonOutput.value = JSON.stringify(data, null, 2);
-                } else {
-                    alert('Failed to generate JSON.');
-                }
-            } catch (error) {
-                console.error('Error generating JSON:', error);
-                alert('Error generating JSON.');
-            }
+            const response = await fetch("/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData),
+            });
             const jsonData = await response.json();
             output.value = JSON.stringify(jsonData, null, 4);
             output.style.display = "block";
@@ -125,27 +117,16 @@
             URL.revokeObjectURL(url);
         });
 
-        document.getElementById('uploadForm').addEventListener('submit', (event) => {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            fetch('/upload', {
-                method: 'POST',
-                body: formData,
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert(data.error);
-                } else {
-                    const imgPreview = document.getElementById('imgPreview');
-                    imgPreview.src = `/uploads/${data.filename}`; // 確保圖片預覽正確
-                    imgPreview.style.display = "block";
-                }
-            })
-            .catch(error => {
-                console.error(error);
-                alert('Error uploading image');
-            });
+        // 上傳圖片並預覽
+        imageUploader.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
         });
     </script>
 </body>
