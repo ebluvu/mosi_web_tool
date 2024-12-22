@@ -118,7 +118,7 @@ def generate():
                     "y": y
                 })
 
-        return jsonify(room_data)
+        return jsonify(json.loads(json.dumps(room_data, sort_keys=False)))
 
     except Exception as e:
         print(f"Error: {e}")
