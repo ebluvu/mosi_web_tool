@@ -40,7 +40,10 @@ def uploaded_file(filename):
 def generate():
     try:
         # 使用 request.form 來獲取其他資料
-        data = request.form
+        data = request.form.get('data')
+        if not data:
+            return jsonify({'error': 'No data received'}), 400
+        data = json.loads(data)  # 解析為字典
 
         # 從請求中獲取上傳的圖片
         if 'image' not in request.files:
