@@ -4,57 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mosi圖片轉房間數據產生器</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        #preview { max-width: 300px; max-height: 300px; margin: 10px 0; }
-        textarea { width: 100%; height: 150px; margin-top: 10px; }
-        .input-group { margin-bottom: 10px; }
-    </style>
+    <link rel="stylesheet" type="text/css" href="static/style.css">
 </head>
 <body>
-    <h1>Mosi圖片轉房間數據產生器</h1>
-    <form id="upload-form">
-        <label for="file">上傳圖片:</label>
-        <input type="file" id="file" name="file" accept="image/*" required>
-        <button type="submit">上傳</button>
-    </form>
+    <header>
+        <h1>Mosi圖片轉房間數據產生器</h1>
+        <p>轉換任何圖片至<a href="https://ebluvu.itch.io/mosi-ch">Mosi中文版</a>的房間數據</p>
+        <p><a href="https://ebluvu.notion.site/M-si-5216b6a6c587449cb18c31ddd0dee61b">關於</a>｜有任何疑問歡迎聯繫我</p>
+    </header>
 
-    <img id="preview" alt="圖片預覽" style="max-width: 300px;">
+    <div class="flex-container" bis_skin_checked="1">
+        
+        <div class="section" id="upload-img" bis_skin_checked="1">
+            <h2>圖片</h2>
+            <img id="preview" alt="預覽" src="static/rest.png" style="max-width: 300px;">
+            <form id="upload-form">
+                <input type="file" id="file" name="file" accept="image/*" required>
+                <button type="submit">上傳</button>
+            </form>
+        </div>
 
-    <form id="generate-form">
-        <h3>精靈設定</h3>
-        <label>精靈名稱: <input type="text" id="spriteName" value="sprite"></label><br>
-        <label>精靈寬度: <input type="number" id="spriteWidth" value="8"></label><br>
-        <label>精靈高度: <input type="number" id="spriteHeight" value="8"></label><br>
-        <label>是否為主角: <input type="checkbox" id="isAvatar"></label><br>
-        <label>是否為牆: <input type="checkbox" id="isWall"></label><br>
-        <label>是否為道具: <input type="checkbox" id="isItem"></label><br>
-        <label>是否為透明化: <input type="checkbox" id="isTransparent"></label><br>
-        <label>顏色索引:
-            <select id="colorIndex">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-            </select>
-        </label><br>
+            <div class="section" id="generate-form" bis_skin_checked="1">
+                <h2>精靈設定</h2>
+                <label>精靈名稱: <input type="text" id="spriteName" value="sprite"></label><br>
+                <label>精靈寬度: <input type="number" id="spriteWidth" value="8"></label><br>
+                <label>精靈高度: <input type="number" id="spriteHeight" value="8"></label><br>
+                <label>是否為主角: <input type="checkbox" id="isAvatar"></label><br>
+                <label>是否為牆: <input type="checkbox" id="isWall"></label><br>
+                <label>是否為道具: <input type="checkbox" id="isItem"></label><br>
+                <label>是否為透明化: <input type="checkbox" id="isTransparent"></label><br>
+                <label>顏色索引:
+                    <select id="colorIndex">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                    </select>
+                </label><br>
+            </div>
 
-        <h3>房間設定</h3>
-        <label>房間名稱: <input type="text" id="roomName" value="room-1"></label><br>
-        <label>調色盤名稱: <input type="text" id="paletteName" value="palette-1"></label><br>
-        <label>樂曲名稱: <input type="text" id="musicName" value="song-1"></label><br>
-        <label>房間寬度: <input type="number" id="roomWidth" value="8"></label><br>
-        <label>房間長度: <input type="number" id="roomHeight" value="8"></label><br>
+                
+            <div class="section" id="generate-form" bis_skin_checked="1">
+                <h2>房間設定</h2>
+                <label>房間名稱: <input type="text" id="roomName" value="room-1"></label><br>
+                <label>調色盤名稱: <input type="text" id="paletteName" value="palette-1"></label><br>
+                <label>樂曲名稱: <input type="text" id="musicName" value="song-1"></label><br>
+                <label>房間寬度: <input type="number" id="roomWidth" value="8"></label><br>
+                <label>房間長度: <input type="number" id="roomHeight" value="8"></label><br>
+            </div>
 
-        <button type="submit">生成數據</button>
-    </form>
-
-    <textarea id="output" style="width: 100%; height: 300px;"></textarea>
-    <button id="download-btn">下載.JSON文件</button>
+        <div class="section" id="data" bis_skin_checked="1">
+            <h2>結果</h2>
+            <textarea id="output"></textarea>
+            <button type="submit">生成數據</button>
+            <button id="download-btn">下載.JSON文件</button>
+        </div>
+    </div>
 
     <script>
         const imageUploader = document.getElementById("imageUploader");
