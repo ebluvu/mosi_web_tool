@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mosi Room Data Generator</title>
+    <title>Mosi圖片轉房間數據產生器</title>
 </head>
 <body>
     <h1>Mosi圖片轉房間數據產生器</h1>
@@ -17,13 +17,13 @@
 
     <form id="generate-form" style="display: none;">
         <h3>精靈設定</h3>
-        <label>精靈名稱: <input type="text" id="spriteName" value="rest"></label><br>
-        <label>精靈寬度: <input type="number" id="spriteWidth" value="20"></label><br>
-        <label>精靈高度: <input type="number" id="spriteHeight" value="20"></label><br>
+        <label>精靈名稱: <input type="text" id="spriteName" value="sprite"></label><br>
+        <label>精靈寬度: <input type="number" id="spriteWidth" value="8"></label><br>
+        <label>精靈高度: <input type="number" id="spriteHeight" value="8"></label><br>
         <label>是否為主角: <input type="checkbox" id="isAvatar"></label><br>
-        <label>是否為牆: <input type="checkbox" id="isWall" checked></label><br>
+        <label>是否為牆: <input type="checkbox" id="isWall"></label><br>
         <label>是否為道具: <input type="checkbox" id="isItem"></label><br>
-        <label>是否為透明化: <input type="checkbox" id="isTransparent" checked></label><br>
+        <label>是否為透明化: <input type="checkbox" id="isTransparent"></label><br>
         <label>顏色索引:
             <select id="colorIndex">
                 <option value="1">1</option>
@@ -38,11 +38,11 @@
         </label><br>
 
         <h3>房間設定</h3>
-        <label>房間名稱: <input type="text" id="roomName" value="rest"></label><br>
+        <label>房間名稱: <input type="text" id="roomName" value="room-1"></label><br>
         <label>調色盤名稱: <input type="text" id="paletteName" value="palette-1"></label><br>
         <label>樂曲名稱: <input type="text" id="musicName" value="song-1"></label><br>
-        <label>房間寬度: <input type="number" id="roomWidth" value="9"></label><br>
-        <label>房間長度: <input type="number" id="roomHeight" value="9"></label><br>
+        <label>房間寬度: <input type="number" id="roomWidth" value="8"></label><br>
+        <label>房間長度: <input type="number" id="roomHeight" value="8"></label><br>
 
         <button type="submit">生成數據</button>
     </form>
@@ -56,6 +56,10 @@
         const preview = document.getElementById("preview");
         const output = document.getElementById("output");
         const downloadBtn = document.getElementById("download-btn");
+        const imageUrl = `/uploads/${uploadedFileName}`; // 使用 Flask 提供的圖片路徑
+        const imgPreview = document.getElementById('imgPreview');
+        imgPreview.src = imageUrl;
+        imgPreview.style.display = "block"; // 顯示圖片
 
         uploadForm.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -88,11 +92,23 @@
                 roomWidth: document.getElementById("roomWidth").value,
                 roomHeight: document.getElementById("roomHeight").value,
             };
-            const response = await fetch("/generate", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-            });
+            try {
+                const response = await fetch("/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    jsonOutput.value = JSON.stringify(data, null, 2);
+                } else {
+                    alert('Failed to generate JSON.');
+                }
+            } catch (error) {
+                console.error('Error generating JSON:', error);
+                alert('Error generating JSON.');
+            }
             const jsonData = await response.json();
             output.value = JSON.stringify(jsonData, null, 4);
             output.style.display = "block";
@@ -107,6 +123,29 @@
             a.download = "room_data.json";
             a.click();
             URL.revokeObjectURL(url);
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    const imgPreview = document.getElementById('imgPreview');
+                    imgPreview.src = `/uploads/${data.filename}`; // 確保圖片預覽正確
+                    imgPreview.style.display = "block";
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                alert('Error uploading image');
+            });
         });
     </script>
 </body>
