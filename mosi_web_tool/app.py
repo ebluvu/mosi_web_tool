@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from PIL import Image
 from werkzeug.utils import secure_filename
+import json
 import os
 
 app = Flask(__name__)
