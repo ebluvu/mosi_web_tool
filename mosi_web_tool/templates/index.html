@@ -65,17 +65,27 @@
         const output = document.getElementById("output");
         const downloadBtn = document.getElementById("download-btn");
 
-        uploadForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const formData = new FormData(uploadForm);
-            const response = await fetch("/upload", {
-                method: "POST",
+        document.getElementById('uploadForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            fetch('/upload', {
+                method: 'POST',
                 body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    const imgPreview = document.getElementById('imgPreview');
+                    imgPreview.src = `/uploads/${data.filename}`; // 確保圖片預覽正確
+                    imgPreview.style.display = "block";
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                alert('Error uploading image');
             });
-            const data = await response.json();
-            preview.src = data.filepath;
-            preview.style.display = "block";
-            generateForm.style.display = "block";
         });
 
         generateForm.addEventListener("submit", async (e) => {
@@ -117,28 +127,6 @@
             URL.revokeObjectURL(url);
         });
 
-        document.getElementById('uploadForm').addEventListener('submit', (event) => {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            fetch('/upload', {
-                method: 'POST',
-                body: formData,
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert(data.error);
-                } else {
-                    const imgPreview = document.getElementById('imgPreview');
-                    imgPreview.src = `/uploads/${data.filename}`; // 確保圖片預覽正確
-                    imgPreview.style.display = "block";
-                }
-            })
-            .catch(error => {
-                console.error(error);
-                alert('Error uploading image');
-            });
-        });
     </script>
 </body>
 </html>
