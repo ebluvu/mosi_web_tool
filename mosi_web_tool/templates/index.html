@@ -65,9 +65,9 @@
         const output = document.getElementById("output");
         const downloadBtn = document.getElementById("download-btn");
 
-        document.getElementById('uploadForm').addEventListener('submit', (event) => {
-            event.preventDefault();
-            const formData = new FormData(event.target);
+        uploadForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = new FormData(uploadForm);
             fetch('/upload', {
                 method: 'POST',
                 body: formData,
@@ -77,9 +77,10 @@
                 if (data.error) {
                     alert(data.error);
                 } else {
-                    const imgPreview = document.getElementById('imgPreview');
-                    imgPreview.src = `/uploads/${data.filename}`; // 確保圖片預覽正確
-                    imgPreview.style.display = "block";
+                    const preview = document.getElementById('preview');
+                    preview.src = `/uploads/${data.filename}`; // 確保圖片預覽正確
+                    preview.style.display = "block";
+                    generateForm.style.display = "block";
                 }
             })
             .catch(error => {
