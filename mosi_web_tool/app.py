@@ -78,5 +78,6 @@ def upload_file():
     # 回傳 JSON 結果
     return jsonify(room_data)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))  # Render 使用環境變數 PORT 指定埠號
+    app.run(host="0.0.0.0", port=port)       # 綁定到 0.0.0.0
