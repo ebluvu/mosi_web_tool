@@ -6,7 +6,14 @@ import os
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "uploads"
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+# 確保上傳資料夾存在
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route("/")
 def index():
@@ -28,7 +35,25 @@ def upload():
 @app.route("/generate", methods=["POST"])
 def generate():
     data = request.json
+    try:
+        # 從請求中獲取上傳的圖片
+        if 'image' not in request.files:
+            return jsonify({'error': 'No image file uploaded'}), 400
+        file = request.files['image']
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+        if not allowed_file(file.filename):
+            return jsonify({'error': 'Invalid file type'}), 400
 
+        # 保存圖片到本地
+        filename = secure_filename(file.filename)
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(image_path)
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": str(e)}), 500
+    
     # 圖片路徑
     image_path = data["imagePath"]
     image = Image.open(image_path).convert("1")  # 轉為二值圖像（黑白）
