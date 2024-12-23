@@ -14,58 +14,64 @@
     </header>
 
     <div class="flex-container" bis_skin_checked="1">
-        
+        <!-- 圖片上傳區域 -->
         <div class="section" id="upload-img" bis_skin_checked="1">
             <h2>圖片</h2>
             <img id="preview" alt="預覽" src="static/rest.png" style="max-width: 300px;">
             <form id="upload-form">
+                <!-- 圖片選擇按鈕 -->
                 <input type="file" id="file" name="file" accept="image/*" required>
                 <button type="submit">上傳</button>
             </form>
         </div>
-
-        <form class="section" id="generate-form" bis_skin_checked="1">
-            <h2>精靈設定</h2>
-            <label>精靈名稱: <input type="text" id="spriteName" value="sprite"></label><br>
-            <label>精靈寬度: <input type="number" id="spriteWidth" value="8"></label><br>
-            <label>精靈高度: <input type="number" id="spriteHeight" value="8"></label><br>
-            <label>是否為主角: <input type="checkbox" id="isAvatar"></label><br>
-            <label>是否為牆: <input type="checkbox" id="isWall"></label><br>
-            <label>是否為道具: <input type="checkbox" id="isItem"></label><br>
-            <label>是否為透明化: <input type="checkbox" id="isTransparent"></label><br>
-            <label>顏色索引:
-                <select id="colorIndex">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                </select>
-            </label><br>
-        </form>
-
-            
-        <form class="section" id="generate-form" bis_skin_checked="1">
+      
+        <!-- 精靈與房間設置表單區域 -->
+          <div class="section" form="generate-form" bis_skin_checked="1">
+              <h2>精靈設定</h2>
+              <!-- 各種精靈屬性設置 -->
+              <label>精靈名稱: <input type="text" id="spriteName" value="sprite"></label><br>
+              <label>精靈寬度: <input type="number" id="spriteWidth" value="8"></label><br>
+              <label>精靈高度: <input type="number" id="spriteHeight" value="8"></label><br>
+              <label>是否為主角: <input type="checkbox" id="isAvatar"></label><br>
+              <label>是否為牆: <input type="checkbox" id="isWall"></label><br>
+              <label>是否為道具: <input type="checkbox" id="isItem"></label><br>
+              <label>是否為透明化: <input type="checkbox" id="isTransparent"></label><br>
+              <label>顏色索引:
+                  <select id="colorIndex">
+                      <!-- 顏色選項 -->
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                      <option value="6">6</option>
+                      <option value="7">7</option>
+                      <option value="8">8</option>
+                  </select>
+              </label><br>
+          </div>
+      
+          <div class="section" form="generate-form" bis_skin_checked="1">
             <h2>房間設定</h2>
+            <!-- 各種房間屬性設置 -->
             <label>房間名稱: <input type="text" id="roomName" value="room-1"></label><br>
             <label>調色盤名稱: <input type="text" id="paletteName" value="palette-1"></label><br>
             <label>樂曲名稱: <input type="text" id="musicName" value="song-1"></label><br>
             <label>房間寬度: <input type="number" id="roomWidth" value="8"></label><br>
             <label>房間長度: <input type="number" id="roomHeight" value="8"></label><br>
-        </form>
+         </div>
 
+        <!-- 結果顯示與下載區域 -->
         <div class="section" id="data" bis_skin_checked="1">
             <h2>結果</h2>
             <textarea id="output"></textarea>
-            <button type="submit">生成數據</button>
+            <button id="generate-btn" form="generate-form" type="submit">生成數據</button>
             <button id="download-btn">下載.JSON文件</button>
         </div>
     </div>
 
     <script>
+        // 獲取表單與 DOM 元素
         const imageUploader = document.getElementById("imageUploader");
         const uploadForm = document.getElementById("upload-form");
         const generateForm = document.getElementById("generate-form");
@@ -73,6 +79,7 @@
         const output = document.getElementById("output");
         const downloadBtn = document.getElementById("download-btn");
 
+        // 處理圖片上傳的事件監聽器
         uploadForm.addEventListener("submit", async (e) => {
             e.preventDefault();
             const formData = new FormData(uploadForm);
@@ -83,6 +90,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
+                    // 處理上傳錯誤
                     alert(data.error);
                 } else {
                     // 顯示圖片預覽
@@ -97,17 +105,18 @@
             });
         });
 
+        // 處理數據生成的事件監聽器
         generateForm.addEventListener("submit", async (e) => {
             e.preventDefault();
             
             const formData = new FormData();
             
-            // 直接將圖片文件傳送給後端
+            // 獲取文件輸入與表單數據
             const fileInput = document.getElementById('file');
-            formData.append('image', fileInput.files[0]);  // 這裡傳送的是圖片文件，不是 preview.src
+            formData.append('image', fileInput.files[0]);  // 圖片文件
             
-            // 其他資料作為 JSON 格式
             const data = {
+                // 將精靈與房間的屬性打包為 JSON
                 spriteName: document.getElementById("spriteName").value,
                 spriteWidth: document.getElementById("spriteWidth").value,
                 spriteHeight: document.getElementById("spriteHeight").value,
@@ -123,21 +132,20 @@
                 roomHeight: document.getElementById("roomHeight").value
             };
 
-            // 將資料轉換為 JSON 字串並附加到 FormData
             formData.append('data', JSON.stringify(data));
 
             const response = await fetch("/generate", {
                 method: "POST",
-                body: formData,  // 使用 FormData 發送圖片及其他資料
+                body: formData,
             });
 
-            // 處理回應
             const jsonData = await response.json();
             output.value = JSON.stringify(jsonData, null, 4);  // 顯示生成的數據
             output.style.display = "block";
             downloadBtn.style.display = "block";
         });
 
+        // 處理下載按鈕的點擊事件
         downloadBtn.addEventListener("click", () => {
             const blob = new Blob([output.value], { type: "application/json" });
             const url = URL.createObjectURL(blob);
