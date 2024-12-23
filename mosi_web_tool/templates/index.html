@@ -24,43 +24,46 @@
             </form>
         </div>
 
-        <div class="section" id="sprite" form="generate-form" bis_skin_checked="1">
-            <h2>精靈設定</h2>
-            <label>精靈名稱: <input type="text" id="spriteName" value="sprite"></label><br>
-            <label>精靈寬度: <input type="number" id="spriteWidth" value="8"></label><br>
-            <label>精靈高度: <input type="number" id="spriteHeight" value="8"></label><br>
-            <label>是否為主角: <input type="checkbox" id="isAvatar"></label><br>
-            <label>是否為牆: <input type="checkbox" id="isWall"></label><br>
-            <label>是否為道具: <input type="checkbox" id="isItem"></label><br>
-            <label>是否為透明化: <input type="checkbox" id="isTransparent"></label><br>
-            <label>顏色索引:
-                <select id="colorIndex">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                </select>
-            </label><br>
-        </div>
+        <form class="section" id="generate-form" bis_skin_checked="1">
+            <div class="settings-container">
+            <div class="section sprite-settings">
+                <h2>精靈設定</h2>
+                <label>精靈名稱: <input type="text" id="spriteName" value="sprite"></label><br>
+                <label>精靈寬度: <input type="number" id="spriteWidth" value="8"></label><br>
+                <label>精靈高度: <input type="number" id="spriteHeight" value="8"></label><br>
+                <label>是否為主角: <input type="checkbox" id="isAvatar"></label><br>
+                <label>是否為牆: <input type="checkbox" id="isWall"></label><br>
+                <label>是否為道具: <input type="checkbox" id="isItem"></label><br>
+                <label>是否為透明化: <input type="checkbox" id="isTransparent"></label><br>
+                <label>顏色索引:
+                    <select id="colorIndex">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                    </select>
+                </label><br>
+            </div>
 
-            
-        <div class="section" id="room" form="generate-form" bis_skin_checked="1">
-            <h2>房間設定</h2>
-            <label>房間名稱: <input type="text" id="roomName" value="room-1"></label><br>
-            <label>調色盤名稱: <input type="text" id="paletteName" value="palette-1"></label><br>
-            <label>樂曲名稱: <input type="text" id="musicName" value="song-1"></label><br>
-            <label>房間寬度: <input type="number" id="roomWidth" value="8"></label><br>
-            <label>房間長度: <input type="number" id="roomHeight" value="8"></label><br>
+            <div class="section sprite-settings">
+                <h2>房間設定</h2>
+                <label>房間名稱: <input type="text" id="roomName" value="room-1"></label><br>
+                <label>調色盤名稱: <input type="text" id="paletteName" value="palette-1"></label><br>
+                <label>樂曲名稱: <input type="text" id="musicName" value="song-1"></label><br>
+                <label>房間寬度: <input type="number" id="roomWidth" value="8"></label><br>
+                <label>房間長度: <input type="number" id="roomHeight" value="8"></label><br>
+                <button type="submit">生成數據</button>
+            </div>
         </div>
+        </form>
 
         <div class="section" id="data" bis_skin_checked="1">
             <h2>結果</h2>
             <textarea id="output"></textarea>
-            <button id="generate-btn" form="generate-form" type="submit">生成數據</button>
             <button id="download-btn">下載.JSON文件</button>
         </div>
     </div>
