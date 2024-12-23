@@ -71,6 +71,9 @@ def generate():
         sprites_per_row = image.width // sprite_width
 
         sprite_data = []
+        tile_list = []  # 新增的 tile_list
+        valid_sprite_count = 0  # 用來追蹤有效精靈的索引
+
         for sprite_index in range(room_width * room_height):
             x = (sprite_index % sprites_per_row) * sprite_width
             y = (sprite_index // sprites_per_row) * sprite_height
@@ -82,43 +85,43 @@ def generate():
                 for px in range(sprite_crop.width)
             ]
 
-            sprite_data.append({
-                "name": f"{data['spriteName']}_{sprite_index + 1}",
-                "isAvatar": data["isAvatar"],
-                "isWall": data["isWall"],
-                "isItem": data["isItem"],
-                "isTransparent": data["isTransparent"],
-                "colorIndex": int(data["colorIndex"]),
-                "width": sprite_width,
-                "height": sprite_height,
-                "frameList": [binary_data]
-            })
+            # 檢查是否為空白精靈（所有像素值均為 0）
+            if any(binary_data):
+                valid_sprite_count += 1
+                sprite_data.append({
+                    "name": f"{data['spriteName']}_{valid_sprite_count}",
+                    "isAvatar": data["isAvatar"],
+                    "isWall": data["isWall"],
+                    "isItem": data["isItem"],
+                    "isTransparent": data["isTransparent"],
+                    "colorIndex": int(data["colorIndex"]),
+                    "width": sprite_width,
+                    "height": sprite_height,
+                    "frameList": [binary_data]
+                })
+
+                # 生成對應的 tileList
+                tile_list.append({
+                    "spriteName": f"{data['spriteName']}_{valid_sprite_count}",
+                    "x": sprite_index % room_width,
+                    "y": sprite_index // room_width
+                })
 
         # 生成房間數據
         room_data = {
             "name": data["roomName"],
             "paletteName": data["paletteName"],
             "musicName": data["musicName"],
-            "tileList": [],
+            "tileList": tile_list,  # 使用過濾後的 tile_list
             "scriptList": {"on-enter": "", "on-exit": ""},
             "width": room_width,
             "height": room_height,
             "spriteWidth": sprite_width,
             "spriteHeight": sprite_height,
-            "spriteList": sprite_data
+            "spriteList": sprite_data  # 使用過濾後的 sprite_data
         }
 
-        # 自動生成 tileList
-        for y in range(room_data["height"]):
-            for x in range(room_data["width"]):
-                sprite_index = y * room_data["width"] + x
-                room_data["tileList"].append({
-                    "spriteName": f"{data['spriteName']}_{sprite_index + 1}",
-                    "x": x,
-                    "y": y
-                })
-
-        return jsonify(json.loads(json.dumps(room_data, sort_keys=False)))
+        return jsonify(room_data)
 
     except Exception as e:
         print(f"Error: {e}")
