@@ -68,9 +68,11 @@ textarea {
   width: 256px;
   font-family: monospace;
 }
-textarea,
-input {
+textarea, input {
   text-align: left;
+  margin: 1em;
+  padding: 0.25em;
+  font-size: 1em;
 }
 .box256 {
   height: 256px;
@@ -96,6 +98,15 @@ input {
   display: flex;
       flex-wrap: wrap;
       justify-content: center;
+      align-content: space-between;
+}
+.settings-container {
+  display: flex;
+  justify-content: space-between;
+}
+.sprite-settings, .room-settings {
+  flex: 1;
+  box-sizing: border-box;
 }
 #brightness {
   width: 256px;
