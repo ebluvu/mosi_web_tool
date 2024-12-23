@@ -108,6 +108,18 @@ textarea, input {
   flex: 1;
   box-sizing: border-box;
 }
+@media (max-width: 768px) {
+  .settings-container {
+    flex-direction: column; /* 小螢幕時改為上下排列 */
+    align-items: stretch;  /* 確保子元素撐滿寬度 */
+    gap: 10px; /* 增加上下區塊間距 */
+  }
+
+  .sprite-settings, .room-settings {
+    flex: none; /* 取消 flex: 1，讓每個區塊自動撐滿父容器 */
+    width: 100%; /* 設定寬度為 100% */
+  }
+}
 #brightness {
   width: 256px;
 }
