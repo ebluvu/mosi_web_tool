@@ -67,6 +67,18 @@
             <textarea id="output"></textarea>
             <button id="download-btn">下載.JSON文件</button>
         </div>
+
+        <div class="section" id="merge-rooms" bis_skin_checked="1">
+            <h2>房間合併工具</h2>
+            <form id="merge-form">
+                <label for="merge-files">上傳多個房間數據 (.json): </label>
+                <input type="file" id="merge-files" name="merge-files" accept=".json" multiple required>
+                <button type="submit">合併房間數據</button>
+            </form>
+            <textarea id="merge-output" style="display: none;"></textarea>
+            <button id="merge-download-btn" style="display: none;">下載合併後數據</button>
+        </div>
+
     </div>
 
     <script>
@@ -175,6 +187,71 @@
                     }
                 })
                 .catch(error => console.error("清除數據時發生錯誤：", error));
+        });
+
+        document.getElementById("merge-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const files = document.getElementById("merge-files").files;
+            if (files.length < 2) {
+                alert("請上傳至少兩個房間數據檔案！");
+                return;
+            }
+
+            let mergedData = null;
+
+            for (const file of files) {
+                const text = await file.text();
+                const jsonData = JSON.parse(text);
+
+                // 如果是第一個檔案，初始化合併數據
+                if (!mergedData) {
+                    mergedData = { ...jsonData }; // 深拷貝第一個房間數據
+                    mergedData.spriteList = [...jsonData.spriteList]; // 複製精靈數據
+                    mergedData.tileList = [...jsonData.tileList]; // 複製瓷磚數據
+                } else {
+                    // 檢查基礎設定是否一致
+                    if (
+                        jsonData.roomName !== mergedData.roomName ||
+                        jsonData.paletteName !== mergedData.paletteName ||
+                        jsonData.musicName !== mergedData.musicName ||
+                        jsonData.roomWidth !== mergedData.roomWidth ||
+                        jsonData.roomHeight !== mergedData.roomHeight
+                    ) {
+                        alert(`檔案 ${file.name} 的基礎設定與其他房間不一致，無法合併！`);
+                        return;
+                    }
+
+                    // 合併精靈數據 (檢查避免重複)
+                    jsonData.spriteList.forEach(sprite => {
+                        if (!mergedData.spriteList.some(s => s.id === sprite.id)) {
+                            mergedData.spriteList.push(sprite);
+                        }
+                    });
+
+                    // 合併瓷磚數據 (直接追加)
+                    mergedData.tileList.push(...jsonData.tileList);
+                }
+            }
+
+            // 顯示合併後數據
+            const mergeOutput = document.getElementById("merge-output");
+            mergeOutput.value = JSON.stringify(mergedData, null, 4);
+            mergeOutput.style.display = "block";
+
+            // 顯示下載按鈕
+            const mergeDownloadBtn = document.getElementById("merge-download-btn");
+            mergeDownloadBtn.style.display = "block";
+
+            mergeDownloadBtn.addEventListener("click", () => {
+                const blob = new Blob([mergeOutput.value], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "merged_room_data.json";
+                a.click();
+                URL.revokeObjectURL(url);
+            });
         });
 
     </script>
