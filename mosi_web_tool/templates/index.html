@@ -57,6 +57,7 @@
                 <label>房間寬度: <input type="number" id="roomWidth" value="8"></label><br>
                 <label>房間長度: <input type="number" id="roomHeight" value="8"></label><br>
                 <button type="submit">生成數據</button>
+                <button type="button" id="clearButton">重置數據</button>
             </div>
         </div>
         </form>
@@ -149,6 +150,27 @@
             a.download = "room_data.json";
             a.click();
             URL.revokeObjectURL(url);
+        });
+
+        document.getElementById("clearButton").addEventListener("click", function () {
+            // 清空表單數據
+            const form = document.getElementById("dataForm");
+            form.reset();
+
+            // 清除圖片預覽
+            const preview = document.getElementById("imagePreview");
+            preview.src = "";
+
+            // 通知後端清除暫存檔案
+            fetch("/clear", { method: "POST" })
+            .then(response => {
+                if (response.ok) {
+                alert("數據已清除！");
+                } else {
+                alert("清除失敗，請重試！");
+                }
+            })
+            .catch(error => console.error("清除數據時發生錯誤：", error));
         });
 
     </script>
