@@ -135,5 +135,17 @@ def generate():
         print(f"Error: {e}")
         return jsonify({"error": str(e)}), 500
 
+@app.route("/clear", methods=["POST"])
+def clear():
+    try:
+        # 刪除上傳資料夾中的所有文件
+        for filename in os.listdir(UPLOAD_FOLDER):
+            file_path = os.path.join(UPLOAD_FOLDER, filename)
+            os.remove(file_path)
+        return jsonify({"success": True}), 200
+    except Exception as e:
+        print(f"清除暫存檔案時發生錯誤：{e}")
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
