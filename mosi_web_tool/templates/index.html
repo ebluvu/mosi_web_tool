@@ -222,9 +222,9 @@
                         return;
                     }
 
-                    // 合併精靈數據 (檢查避免重複)
+                    // 合併精靈數據 (檢查避免重複 ID)
                     jsonData.spriteList.forEach(sprite => {
-                        if (!mergedData.spriteList.some(s => s.id === sprite.id)) {
+                        if (!mergedData.spriteList.some(s => JSON.stringify(s) === JSON.stringify(sprite))) {
                             mergedData.spriteList.push(sprite);
                         }
                     });
