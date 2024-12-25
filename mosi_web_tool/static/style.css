@@ -143,3 +143,43 @@ textarea, input {
 #save {
   margin-top: 0;
 }
+/* 文件列表區域 */
+#file-list {
+  list-style-type: none;
+  padding: 0;
+  border: 2px dashed #594A54;
+  border-radius: 8px;
+  margin-top: 10px;
+  max-width: 400px;
+  /* background-color: #f9f9f9; */
+}
+
+/* 每個檔案列表項目 */
+#file-list li {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  margin: 5px;
+  background-color: #D3CBD0;
+  border: 1px solid #594A54;
+  border-radius: 5px;
+  cursor: grab;
+  transition: background-color 0.3s;
+}
+
+#file-list li img {
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+/* 拖曳時的 hover 效果 */
+#file-list li.drag-hover {
+  background-color: #9c758f;
+  border-color: #594A54;
+}
+
+/* 拖曳時的區域效果 */
+#file-list.dragging {
+  border: 2px dashed #594A54;
+}
