@@ -262,45 +262,51 @@
             fileList.innerHTML = ""; // 清空之前的清單
             Array.from(mergeFilesInput.files).forEach((file, index) => {
                 const listItem = document.createElement("li");
-                listItem.textContent = file.name;
+                listItem.innerHTML = `
+                    <img src="static/file-icon.png" alt="File Icon"> ${file.name}
+                `;
                 listItem.draggable = true;
                 listItem.dataset.index = index;
                 fileList.appendChild(listItem);
             });
 
-            // 增加拖曳功能
+            // 拖曳功能
+            let draggedItem = null;
+
             fileList.addEventListener("dragstart", (e) => {
-                e.dataTransfer.setData("text/plain", e.target.dataset.index);
+                draggedItem = e.target;
+                e.dataTransfer.effectAllowed = "move";
+                fileList.classList.add("dragging");
             });
 
             fileList.addEventListener("dragover", (e) => {
                 e.preventDefault(); // 允許拖曳
+                const target = e.target.closest("li");
+                if (target && target !== draggedItem) {
+                    target.classList.add("drag-hover");
+                }
+            });
+
+            fileList.addEventListener("dragleave", (e) => {
+                const target = e.target.closest("li");
+                if (target) {
+                    target.classList.remove("drag-hover");
+                }
             });
 
             fileList.addEventListener("drop", (e) => {
                 e.preventDefault();
-                const draggedIndex = e.dataTransfer.getData("text/plain");
-                const targetIndex = Array.from(fileList.children).indexOf(e.target);
-
-                // 調整順序
-                const draggedItem = fileList.children[draggedIndex];
-                const targetItem = fileList.children[targetIndex];
-                if (draggedItem && targetItem) {
-                    fileList.insertBefore(draggedItem, targetItem);
+                const target = e.target.closest("li");
+                if (target && target !== draggedItem) {
+                    fileList.insertBefore(draggedItem, target);
                 }
+                target.classList.remove("drag-hover");
             });
-        });
 
-        // 確保合併時依照排序順序處理檔案
-        document.getElementById("merge-form").addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            // 按照排序取得檔案
-            const sortedFiles = Array.from(fileList.children).map(
-                (item) => mergeFilesInput.files[item.dataset.index]
-            );
-
-            // 後續的合併邏輯與之前相同
+            fileList.addEventListener("dragend", () => {
+                fileList.classList.remove("dragging");
+                fileList.querySelectorAll("li").forEach((li) => li.classList.remove("drag-hover"));
+            });
         });
 
     </script>
