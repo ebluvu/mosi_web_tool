@@ -73,6 +73,7 @@
             <form id="merge-form">
                 <label for="merge-files">上傳多個房間數據 (.json): </label>
                 <input type="file" id="merge-files" name="merge-files" accept=".json" multiple required>
+                <ul id="file-list"></ul> <!-- 用來顯示檔案清單 -->
                 <button type="submit">合併房間數據</button>
             </form>
             <textarea id="merge-output" style="display: none;"></textarea>
@@ -88,6 +89,8 @@
         const preview = document.getElementById("preview");
         const output = document.getElementById("output");
         const downloadBtn = document.getElementById("download-btn");
+        const mergeFilesInput = document.getElementById("merge-files");
+        const fileList = document.getElementById("file-list");
 
         uploadForm.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -252,6 +255,51 @@
                 a.click();
                 URL.revokeObjectURL(url);
             });
+        });
+
+        mergeFilesInput.addEventListener("change", () => {
+            fileList.innerHTML = ""; // 清空之前的清單
+            Array.from(mergeFilesInput.files).forEach((file, index) => {
+                const listItem = document.createElement("li");
+                listItem.textContent = file.name;
+                listItem.draggable = true;
+                listItem.dataset.index = index;
+                fileList.appendChild(listItem);
+            });
+
+            // 增加拖曳功能
+            fileList.addEventListener("dragstart", (e) => {
+                e.dataTransfer.setData("text/plain", e.target.dataset.index);
+            });
+
+            fileList.addEventListener("dragover", (e) => {
+                e.preventDefault(); // 允許拖曳
+            });
+
+            fileList.addEventListener("drop", (e) => {
+                e.preventDefault();
+                const draggedIndex = e.dataTransfer.getData("text/plain");
+                const targetIndex = Array.from(fileList.children).indexOf(e.target);
+
+                // 調整順序
+                const draggedItem = fileList.children[draggedIndex];
+                const targetItem = fileList.children[targetIndex];
+                if (draggedItem && targetItem) {
+                    fileList.insertBefore(draggedItem, targetItem);
+                }
+            });
+        });
+
+        // 確保合併時依照排序順序處理檔案
+        document.getElementById("merge-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            // 按照排序取得檔案
+            const sortedFiles = Array.from(fileList.children).map(
+                (item) => mergeFilesInput.files[item.dataset.index]
+            );
+
+            // 後續的合併邏輯與之前相同
         });
 
     </script>
