@@ -158,11 +158,12 @@
         });
 
         downloadBtn.addEventListener("click", () => {
+            const roomName = document.getElementById("roomName").value || "room_data"; // 預設檔名
             const blob = new Blob([output.value], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = "room_data.json";
+            a.download = `${roomName}.json`; // 以房間名稱命名檔案
             a.click();
             URL.revokeObjectURL(url);
         });
