@@ -169,28 +169,30 @@
         });
 
         document.getElementById("clearButton").addEventListener("click", function () {
-            // 清空表單數據
-            const form = document.getElementById("generate-form");
-            form.reset();
-
-            // 清除圖片預覽
+            // 1. 清空已上傳圖片的預覽
+            const fileInput = document.getElementById("file");
             const preview = document.getElementById("preview");
-            preview.src = "static/rest.png"; // 恢復為預設圖片
+            fileInput.value = "";  // 清除文件輸入
+            preview.src = "static/rest.png";  // 重設為預設圖片
 
-            // 清空輸出的數據
+            // 2. 清空生成的數據輸出
             const output = document.getElementById("output");
-            output.value = "";
+            output.value = "";  // 清空數據輸出
 
-            // 通知後端清除暫存檔案
+            // 3. 隱藏下載按鈕
+            const downloadBtn = document.getElementById("download-btn");
+            downloadBtn.style.display = "none";
+
+            // 4. 通知後端清除暫存檔案
             fetch("/clear", { method: "POST" })
                 .then(response => {
                     if (response.ok) {
-                        alert("數據已清除！");
+                        alert("圖片與生成數據已清除！");
                     } else {
                         alert("清除失敗，請重試！");
                     }
                 })
-                .catch(error => console.error("清除數據時發生錯誤：", error));
+                .catch(error => console.error("清除時發生錯誤：", error));
         });
 
         document.getElementById("merge-form").addEventListener("submit", async (e) => {
