@@ -93,7 +93,7 @@ def generate():
                 if binary_tuple not in unique_sprites:
                     # 新的精靈，加入 sprite_data 並記錄
                     valid_sprite_count += 1
-                    sprite_name = f"{data['spriteName']}_{valid_sprite_count}"
+                    sprite_name = f"{data['spriteName']}_{valid_sprite_count:02}"
                     unique_sprites[binary_tuple] = sprite_name
 
                     sprite_data.append({
