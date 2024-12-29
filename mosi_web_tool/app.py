@@ -46,87 +46,101 @@ def generate():
             return jsonify({'error': 'No data received'}), 400
         data = json.loads(data)  # 解析為字典
 
-        # 從請求中獲取上傳的圖片
-        if 'image' not in request.files:
-            return jsonify({'error': 'No image file uploaded'}), 400
-        file = request.files['image']
-        if file.filename == '':
-            return jsonify({'error': 'No selected file'}), 400
-        if not allowed_file(file.filename):
-            return jsonify({'error': 'Invalid file type'}), 400
+        # 獲取所有上傳的圖片
+        if 'images' not in request.files:
+            return jsonify({'error': 'No image files uploaded'}), 400
 
-        # 保存圖片到本地
-        filename = secure_filename(file.filename)
-        image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(image_path)
-        
-        # 使用本地路徑處理圖片
-        image = Image.open(image_path).convert("1")  # 轉為二值圖像（黑白）
+        image_files = request.files.getlist('images')
+        if len(image_files) == 0:
+            return jsonify({'error': 'No selected files'}), 400
 
-        # 從請求資料獲取生成精靈的參數
+        for file in image_files:
+            if not allowed_file(file.filename):
+                return jsonify({'error': f'Invalid file type for {file.filename}'}), 400
+
+        # 依序保存圖片到本地
+        image_paths = []
+        for file in image_files:
+            filename = secure_filename(file.filename)
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(image_path)
+            image_paths.append(image_path)
+
+        # 確保有上傳至少一張圖片
+        if len(image_paths) == 0:
+            return jsonify({'error': 'No valid images uploaded'}), 400
+
+        # 生成動畫幀數據
         sprite_width = int(data["spriteWidth"])
         sprite_height = int(data["spriteHeight"])
         room_width = int(data["roomWidth"])
         room_height = int(data["roomHeight"])
-        sprites_per_row = image.width // sprite_width
 
         sprite_data = []
-        tile_list = []  # 新增的 tile_list
-        valid_sprite_count = 0  # 用來追蹤有效精靈的索引
-        unique_sprites = {}  # 用於檢測重複精靈，key 為 binary_data 的 tuple
+        tile_list = []
+        valid_sprite_count = 0
+        unique_sprites = {}
 
-        for sprite_index in range(room_width * room_height):
-            x = (sprite_index % sprites_per_row) * sprite_width
-            y = (sprite_index // sprites_per_row) * sprite_height
-            sprite_crop = image.crop((x, y, x + sprite_width, y + sprite_height))
+        for idx, image_path in enumerate(image_paths):
+            image = Image.open(image_path).convert("1")
+            sprites_per_row = image.width // sprite_width
 
-            binary_data = [
-                1 if sprite_crop.getpixel((px, py)) == 0 else 0
-                for py in range(sprite_crop.height)
-                for px in range(sprite_crop.width)
-            ]
+            for sprite_index in range(room_width * room_height):
+                x = (sprite_index % sprites_per_row) * sprite_width
+                y = (sprite_index // sprites_per_row) * sprite_height
+                sprite_crop = image.crop((x, y, x + sprite_width, y + sprite_height))
 
-            # 檢查是否為空白精靈（所有像素值均為 0）
-            if any(binary_data):
-                binary_tuple = tuple(binary_data)  # 將 binary_data 轉為 tuple 以便作為字典的 key
+                binary_data = [
+                    1 if sprite_crop.getpixel((px, py)) == 0 else 0
+                    for py in range(sprite_crop.height)
+                    for px in range(sprite_crop.width)
+                ]
 
-                if binary_tuple not in unique_sprites:
-                    # 新的精靈，加入 sprite_data 並記錄
-                    valid_sprite_count += 1
-                    sprite_name = f"{data['spriteName']}_{valid_sprite_count:02}"
-                    unique_sprites[binary_tuple] = sprite_name
+                if any(binary_data):
+                    binary_tuple = tuple(binary_data)
 
-                    sprite_data.append({
-                        "name": sprite_name,
-                        "isAvatar": data["isAvatar"],
-                        "isWall": data["isWall"],
-                        "isItem": data["isItem"],
-                        "isTransparent": data["isTransparent"],
-                        "colorIndex": int(data["colorIndex"]),
-                        "width": sprite_width,
-                        "height": sprite_height,
-                        "frameList": [binary_data]
+                    if binary_tuple not in unique_sprites:
+                        valid_sprite_count += 1
+                        sprite_name = f"{data['spriteName']}_{valid_sprite_count:02}"
+
+                        # 若第一幀，新增精靈
+                        if idx == 0:
+                            unique_sprites[binary_tuple] = {
+                                "name": sprite_name,
+                                "isAvatar": data["isAvatar"],
+                                "isWall": data["isWall"],
+                                "isItem": data["isItem"],
+                                "isTransparent": data["isTransparent"],
+                                "colorIndex": int(data["colorIndex"]),
+                                "width": sprite_width,
+                                "height": sprite_height,
+                                "frameList": [binary_data]
+                            }
+                            sprite_data.append(unique_sprites[binary_tuple])
+                        else:
+                            # 後續幀，追加至 frameList
+                            for sprite in sprite_data:
+                                if sprite["name"] == unique_sprites[binary_tuple]["name"]:
+                                    sprite["frameList"].append(binary_data)
+
+                    tile_list.append({
+                        "spriteName": unique_sprites[binary_tuple]["name"],
+                        "x": sprite_index % room_width,
+                        "y": sprite_index // room_width
                     })
-
-                # 使用已存在的精靈名稱生成對應的 tileList
-                tile_list.append({
-                    "spriteName": unique_sprites[binary_tuple],
-                    "x": sprite_index % room_width,
-                    "y": sprite_index // room_width
-                })
 
         # 生成房間數據
         room_data = {
             "name": data["roomName"],
             "paletteName": data["paletteName"],
             "musicName": data["musicName"],
-            "tileList": tile_list,  # 使用過濾後的 tile_list
+            "tileList": tile_list,
             "scriptList": {"on-enter": "", "on-exit": ""},
             "width": room_width,
             "height": room_height,
             "spriteWidth": sprite_width,
             "spriteHeight": sprite_height,
-            "spriteList": sprite_data  # 使用過濾後的 sprite_data
+            "spriteList": sprite_data
         }
 
         return jsonify(room_data)
