@@ -18,6 +18,7 @@
         <div class="section" id="upload-img" bis_skin_checked="1">
             <h2>圖片</h2>
             <img id="preview" alt="預覽" src="static/rest.png" style="max-width: 300px;">
+            <div id="image-list" style="display: none;"></div>
             <form id="upload-form">
                 <input type="file" id="file" name="file" accept="image/*" required>
                 <button type="submit">上傳</button>
@@ -83,7 +84,7 @@
     </div>
 
     <script>
-        const imageUploader = document.getElementById("imageUploader");
+        const imageUploader = document.getElementById("file");
         const uploadForm = document.getElementById("upload-form");
         const generateForm = document.getElementById("generate-form");
         const preview = document.getElementById("preview");
@@ -91,6 +92,9 @@
         const downloadBtn = document.getElementById("download-btn");
         const mergeFilesInput = document.getElementById("merge-files");
         const fileList = document.getElementById("file-list");
+        const imageList = document.getElementById("image-list");
+
+        let uploadedFiles = []; // 用來儲存上傳的圖片
 
         uploadForm.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -104,9 +108,26 @@
                 if (data.error) {
                     alert(data.error);
                 } else {
-                    // 顯示圖片預覽
-                    preview.src = data.filepath;  // 使用返回的圖片路徑
-                    preview.style.display = "block";
+                    if (data.filepaths.length === 1) {
+                        preview.src = data.filepaths[0];
+                        preview.style.display = "block";
+                        imageList.style.display = "none";
+                    } else {
+                        // 顯示可拖曳排列的圖片清單
+                        uploadedFiles = data.filepaths;
+                        imageList.innerHTML = "";  // 清空清單
+                        uploadedFiles.forEach((file, index) => {
+                            const imgElement = document.createElement("img");
+                            imgElement.src = file;
+                            imgElement.style.maxWidth = "100px";
+                            imgElement.draggable = true;
+                            imgElement.dataset.index = index;
+                            imgElement.classList.add("draggable");
+                            imageList.appendChild(imgElement);
+                        });
+                        imageList.style.display = "block";
+                        preview.style.display = "none";
+                    }
                     generateForm.style.display = "block";
                 }
             })
@@ -116,15 +137,52 @@
             });
         });
 
+        // 拖曳排序功能
+        let dragStartIndex;
+        imageList.addEventListener("dragstart", (e) => {
+            dragStartIndex = e.target.dataset.index;
+        });
+
+        imageList.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            const draggingElement = document.querySelector(".dragging");
+            const afterElement = getDragAfterElement(imageList, e.clientY);
+            if (afterElement == null) {
+                imageList.appendChild(draggingElement);
+            } else {
+                imageList.insertBefore(draggingElement, afterElement);
+            }
+        });
+
+        imageList.addEventListener("dragend", () => {
+            const images = [...imageList.querySelectorAll(".draggable")];
+            uploadedFiles = images.map(img => img.src);
+        });
+
+        function getDragAfterElement(imageList, y) {
+            const draggableElements = [...imageList.querySelectorAll(".draggable:not(.dragging)")];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, {}).element;
+        }
+
         generateForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-            
+
             const formData = new FormData();
-            
-            // 直接將圖片文件傳送給後端
-            const fileInput = document.getElementById('file');
-            formData.append('image', fileInput.files[0]);  // 這裡傳送的是圖片文件，不是 preview.src
-            
+
+            // 將圖片列表傳送給後端
+            uploadedFiles.forEach(file => {
+                const fileBlob = new Blob([file], { type: 'image/*' });
+                formData.append('files', fileBlob);
+            });
+
             // 其他資料作為 JSON 格式
             const data = {
                 spriteName: document.getElementById("spriteName").value,
