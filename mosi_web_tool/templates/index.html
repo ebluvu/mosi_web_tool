@@ -95,6 +95,71 @@
         const mergeFilesInput = document.getElementById("merge-files");
         const fileList = document.getElementById("file-list");
 
+        document.getElementById("upload-button").addEventListener("click", () => {
+            const fileInput = document.getElementById("image-upload");
+            const fileList = Array.from(fileInput.files);
+            const sortableList = document.getElementById("sortable-list");
+            const fileContainer = document.getElementById("file-sort-container");
+
+            // 清空清單
+            sortableList.innerHTML = "";
+
+            if (fileList.length > 1) {
+                fileContainer.style.display = "block";
+                fileList.forEach((file, index) => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = file.name;
+                    listItem.draggable = true;
+                    listItem.dataset.index = index;
+                    sortableList.appendChild(listItem);
+                });
+            } else {
+                fileContainer.style.display = "none";
+            }
+
+            // 拖曳邏輯
+            let draggingItem = null;
+
+            sortableList.addEventListener("dragstart", (e) => {
+                draggingItem = e.target;
+                e.target.classList.add("dragging");
+            });
+
+            sortableList.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                const afterElement = getDragAfterElement(sortableList, e.clientY);
+                if (afterElement == null) {
+                    sortableList.appendChild(draggingItem);
+                } else {
+                    sortableList.insertBefore(draggingItem, afterElement);
+                }
+            });
+
+            sortableList.addEventListener("dragend", (e) => {
+                e.target.classList.remove("dragging");
+                draggingItem = null;
+            });
+
+            function getDragAfterElement(container, y) {
+                const draggableElements = [
+                    ...container.querySelectorAll("li:not(.dragging)")
+                ];
+
+                return draggableElements.reduce(
+                    (closest, child) => {
+                        const box = child.getBoundingClientRect();
+                        const offset = y - box.top - box.height / 2;
+                        if (offset < 0 && offset > closest.offset) {
+                            return { offset: offset, element: child };
+                        } else {
+                            return closest;
+                        }
+                    },
+                    { offset: Number.NEGATIVE_INFINITY }
+                ).element;
+            }
+        });
+
         uploadForm.addEventListener("submit", async (e) => {
             e.preventDefault();
             const formData = new FormData(uploadForm);
