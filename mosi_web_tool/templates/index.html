@@ -98,12 +98,14 @@
         const mergeFilesInput = document.getElementById("merge-files");
         const fileList = document.getElementById("file-list");
 
-        document.getElementById('file').addEventListener('change', function() {
-            const fileCount = this.files.length;
-            if (fileCount < 1 || fileCount > 4) {
-                alert("請選擇至少一張圖片，最多四張圖片");
-                this.value = ''; // 清除選擇
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('file').addEventListener('change', function() {
+                const fileCount = this.files.length;
+                if (fileCount < 1 || fileCount > 4) {
+                    alert("請選擇至少一張圖片，最多四張圖片");
+                    this.value = ''; // 清除選擇
+                }
+            });
         });
 
         document.getElementById("submit").addEventListener("click", () => {
