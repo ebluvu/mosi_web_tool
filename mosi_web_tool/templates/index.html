@@ -19,7 +19,7 @@
             <h2>圖片</h2>
             <img id="preview" alt="預覽" src="static/rest.png" style="max-width: 300px;">
             <form id="upload-form">
-                <input type="file" id="file" name="file" accept="image/*" multiple>
+                <input type="file" id="file" name="file" accept="image/*" multiple required>
                 <button type="submit">上傳</button>
                 <div id="file-sort-container" style="display: none;">
                     <h4>拖曳調整圖片順序</h4>
@@ -106,7 +106,7 @@
             }
         });
 
-        document.getElementById("upload-button").addEventListener("click", () => {
+        document.getElementById("submit").addEventListener("click", () => {
             const fileInput = document.getElementById("image-upload");
             const fileList = Array.from(fileInput.files);
             const sortableList = document.getElementById("sortable-list");
