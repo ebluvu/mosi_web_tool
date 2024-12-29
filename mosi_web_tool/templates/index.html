@@ -19,7 +19,7 @@
             <h2>圖片</h2>
             <img id="preview" alt="預覽" src="static/rest.png" style="max-width: 300px;">
             <form id="upload-form">
-                <input type="file" id="file" name="file" accept="image/*" multiple required>
+                <input type="file" id="imageUploader" name="file" accept="image/*" multiple required>
                 <button type="submit">上傳</button>
                 <div id="file-sort-container" style="display: none;">
                     <h4>拖曳調整圖片順序</h4>
@@ -99,7 +99,7 @@
         const fileList = document.getElementById("file-list");
 
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('file').addEventListener('change', function() {
+            document.getElementById('imageUploader').addEventListener('change', function() {
                 const fileCount = this.files.length;
                 if (fileCount < 1 || fileCount > 4) {
                     alert("請選擇至少一張圖片，最多四張圖片");
