@@ -66,14 +66,14 @@
         <div class="section" id="data" bis_skin_checked="1">
             <h2>結果</h2>
             <textarea id="output"></textarea>
-            <button id="download-btn">下載.mosiroom文件</button>
+            <button id="download-btn">下載.JSON文件</button>
         </div>
 
         <div class="section" id="merge-rooms" bis_skin_checked="1">
             <h2>房間合併工具</h2>
             <form id="merge-form">
-                <label for="merge-files">上傳多個房間數據 (.mosiroom): </label>
-                <input type="file" id="merge-files" name="merge-files" accept=".json,.mosiroom" multiple required>
+                <label for="merge-files">上傳多個房間數據 (.json): </label>
+                <input type="file" id="merge-files" name="merge-files" accept=".json" multiple required>
                 <ul id="file-list"></ul> <!-- 用來顯示檔案清單 -->
                 <button type="submit">合併房間數據</button>
             </form>
@@ -164,7 +164,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `${roomName}.mosiroom`; // 以房間名稱命名檔案
+            a.download = `${roomName}.json`; // 以房間名稱命名檔案
             a.click();
             URL.revokeObjectURL(url);
         });
@@ -256,7 +256,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = `${roomName}.mosiroom`; // 以房間名稱命名檔案
+                a.download = `${roomName}.json`; // 以房間名稱命名檔案
                 a.click();
                 URL.revokeObjectURL(url);
             });
