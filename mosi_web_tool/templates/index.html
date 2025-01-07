@@ -164,7 +164,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `${roomName}.json`; // 以房間名稱命名檔案
+            a.download = `${roomName}.mosiroom`; // 以房間名稱命名檔案
             a.click();
             URL.revokeObjectURL(url);
         });
@@ -256,7 +256,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = `${roomName}.json`; // 以房間名稱命名檔案
+                a.download = `${roomName}.mosiroom`; // 以房間名稱命名檔案
                 a.click();
                 URL.revokeObjectURL(url);
             });
