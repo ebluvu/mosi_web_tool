@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mosi圖片轉房間數據產生器</title>
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+    <link rel="icon" href="static/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <header>
+        <h1>Mosi圖片轉房間數據產生器</h1>
+        <p>轉換任何圖片至<a href="https://ebluvu.itch.io/mosi-ch">Mosi中文版</a>的房間數據</p>
+        <p><a href="https://ebluvu.notion.site/M-si-5216b6a6c587449cb18c31ddd0dee61b">關於</a>｜有任何疑問歡迎聯繫我</p>
+    </header>
+
+    <div class="flex-container" bis_skin_checked="1">
+        
+        <div class="section" id="upload-img" bis_skin_checked="1">
+            <h2>圖片</h2>
+            <img id="preview" alt="預覽" src="static/rest.png" style="max-width: 300px;">
+            <form id="upload-form">
+                <input type="file" id="file" name="file" accept="image/*" required>
+                <button type="submit">上傳</button>
+            </form>
+        </div>
+
+        <form id="generate-form" bis_skin_checked="1">
+            <div class="settings-container">
+            <div class="section sprite-settings">
+                <h2>精靈設定</h2>
+                <label>精靈名稱: <input type="text" id="spriteName" value="sprite"></label><br>
+                <label>精靈寬度: <input type="number" id="spriteWidth" value="8"></label><br>
+                <label>精靈高度: <input type="number" id="spriteHeight" value="8"></label><br>
+                <label>是否為主角: <input type="checkbox" id="isAvatar"></label><br>
+                <label>是否為牆: <input type="checkbox" id="isWall"></label><br>
+                <label>是否為道具: <input type="checkbox" id="isItem"></label><br>
+                <label>是否為透明化: <input type="checkbox" id="isTransparent"></label><br>
+                <label>顏色索引:
+                    <select id="colorIndex">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                    </select>
+                </label><br>
+            </div>
+
+            <div class="section sprite-settings">
+                <h2>房間設定</h2>
+                <label>房間名稱: <input type="text" id="roomName" value="room-1"></label><br>
+                <label>調色盤名稱: <input type="text" id="paletteName" value="palette-1"></label><br>
+                <label>樂曲名稱: <input type="text" id="musicName" value="song-1"></label><br>
+                <label>房間寬度: <input type="number" id="roomWidth" value="8"></label><br>
+                <label>房間長度: <input type="number" id="roomHeight" value="8"></label><br>
+                <button type="submit">生成數據</button>
+                <button type="button" id="clearButton">重置數據</button>
+            </div>
+        </div>
+        </form>
+
+        <div class="section" id="data" bis_skin_checked="1">
+            <h2>結果</h2>
+            <textarea id="output"></textarea>
+            <button id="download-btn">下載.JSON文件</button>
+        </div>
+
+        <div class="section" id="merge-rooms" bis_skin_checked="1">
+            <h2>房間合併工具</h2>
+            <form id="merge-form">
+                <label for="merge-files">上傳多個房間數據 (.json): </label>
+                <input type="file" id="merge-files" name="merge-files" accept=".json" multiple required>
+                <ul id="file-list"></ul> <!-- 用來顯示檔案清單 -->
+                <button type="submit">合併房間數據</button>
+            </form>
+            <textarea id="merge-output" style="display: none;"></textarea>
+            <button id="merge-download-btn" style="display: none;">下載合併後數據</button>
+        </div>
+
+    </div>
+
+    <script>
+        const imageUploader = document.getElementById("imageUploader");
+        const uploadForm = document.getElementById("upload-form");
+        const generateForm = document.getElementById("generate-form");
+        const preview = document.getElementById("preview");
+        const output = document.getElementById("output");
+        const downloadBtn = document.getElementById("download-btn");
+        const mergeFilesInput = document.getElementById("merge-files");
+        const fileList = document.getElementById("file-list");
+
+        uploadForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = new FormData(uploadForm);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    // 顯示圖片預覽
+                    preview.src = data.filepath;  // 使用返回的圖片路徑
+                    preview.style.display = "block";
+                    generateForm.style.display = "block";
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                alert('Error uploading image');
+            });
+        });
+
+        generateForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            
+            // 直接將圖片文件傳送給後端
+            const fileInput = document.getElementById('file');
+            formData.append('image', fileInput.files[0]);  // 這裡傳送的是圖片文件，不是 preview.src
+            
+            // 其他資料作為 JSON 格式
+            const data = {
+                spriteName: document.getElementById("spriteName").value,
+                spriteWidth: document.getElementById("spriteWidth").value,
+                spriteHeight: document.getElementById("spriteHeight").value,
+                isAvatar: document.getElementById("isAvatar").checked,
+                isWall: document.getElementById("isWall").checked,
+                isItem: document.getElementById("isItem").checked,
+                isTransparent: document.getElementById("isTransparent").checked,
+                colorIndex: document.getElementById("colorIndex").value,
+                roomName: document.getElementById("roomName").value,
+                paletteName: document.getElementById("paletteName").value,
+                musicName: document.getElementById("musicName").value,
+                roomWidth: document.getElementById("roomWidth").value,
+                roomHeight: document.getElementById("roomHeight").value
+            };
+
+            // 將資料轉換為 JSON 字串並附加到 FormData
+            formData.append('data', JSON.stringify(data));
+
+            const response = await fetch("/generate", {
+                method: "POST",
+                body: formData,  // 使用 FormData 發送圖片及其他資料
+            });
+
+            // 處理回應
+            const jsonData = await response.json();
+            output.value = JSON.stringify(jsonData, null, 4);  // 顯示生成的數據
+            output.style.display = "block";
+            downloadBtn.style.display = "block";
+        });
+
+        downloadBtn.addEventListener("click", () => {
+            const roomName = document.getElementById("roomName").value || "room_data"; // 預設檔名
+            const blob = new Blob([output.value], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${roomName}.json`; // 以房間名稱命名檔案
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        document.getElementById("clearButton").addEventListener("click", function () {
+            // 1. 清空已上傳圖片的預覽
+            const fileInput = document.getElementById("file");
+            const preview = document.getElementById("preview");
+            fileInput.value = "";  // 清除文件輸入
+            preview.src = "static/rest.png";  // 重設為預設圖片
+
+            // 2. 清空生成的數據輸出
+            const output = document.getElementById("output");
+            output.value = "";  // 清空數據輸出
+
+            // 3. 隱藏下載按鈕
+            const downloadBtn = document.getElementById("download-btn");
+            downloadBtn.style.display = "none";
+
+            // 4. 通知後端清除暫存檔案
+            fetch("/clear", { method: "POST" })
+                .then(response => {
+                    if (response.ok) {
+                        alert("圖片與生成數據已清除！");
+                    } else {
+                        alert("清除失敗，請重試！");
+                    }
+                })
+                .catch(error => console.error("清除時發生錯誤：", error));
+        });
+
+        document.getElementById("merge-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const files = document.getElementById("merge-files").files;
+            if (files.length < 2) {
+                alert("請上傳至少兩個房間數據檔案！");
+                return;
+            }
+
+            let mergedData = null;
+
+            for (const file of files) {
+                const text = await file.text();
+                const jsonData = JSON.parse(text);
+
+                // 如果是第一個檔案，初始化合併數據
+                if (!mergedData) {
+                    mergedData = { ...jsonData }; // 深拷貝第一個房間數據
+                    mergedData.spriteList = [...jsonData.spriteList]; // 複製精靈數據
+                    mergedData.tileList = [...jsonData.tileList]; // 複製瓷磚數據
+                } else {
+                    // 檢查基礎設定是否一致
+                    if (
+                        jsonData.roomName !== mergedData.roomName ||
+                        jsonData.paletteName !== mergedData.paletteName ||
+                        jsonData.musicName !== mergedData.musicName ||
+                        jsonData.roomWidth !== mergedData.roomWidth ||
+                        jsonData.roomHeight !== mergedData.roomHeight
+                    ) {
+                        alert(`檔案 ${file.name} 的基礎設定與其他房間不一致，無法合併！`);
+                        return;
+                    }
+
+                    // 合併精靈數據 (檢查避免重複 ID)
+                    jsonData.spriteList.forEach(sprite => {
+                        if (!mergedData.spriteList.some(s => JSON.stringify(s) === JSON.stringify(sprite))) {
+                            mergedData.spriteList.push(sprite);
+                        }
+                    });
+
+                    // 合併瓷磚數據 (直接追加)
+                    mergedData.tileList.push(...jsonData.tileList);
+                }
+            }
+
+            // 顯示合併後數據
+            const mergeOutput = document.getElementById("merge-output");
+            mergeOutput.value = JSON.stringify(mergedData, null, 4);
+            mergeOutput.style.display = "block";
+
+            // 顯示下載按鈕
+            const mergeDownloadBtn = document.getElementById("merge-download-btn");
+            mergeDownloadBtn.style.display = "block";
+
+            mergeDownloadBtn.addEventListener("click", () => {
+                const roomName = document.getElementById("roomName").value || "room_data"; // 預設檔名
+                const blob = new Blob([mergeOutput.value], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `${roomName}.json`; // 以房間名稱命名檔案
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        });
+
+        mergeFilesInput.addEventListener("change", () => {
+            fileList.innerHTML = ""; // 清空之前的清單
+            Array.from(mergeFilesInput.files).forEach((file, index) => {
+                const listItem = document.createElement("li");
+                listItem.innerHTML = `
+                    <img src="static/file-icon.png" alt="File Icon"> ${file.name}
+                `;
+                listItem.draggable = true;
+                listItem.dataset.index = index;
+                fileList.appendChild(listItem);
+            });
+
+            // 拖曳功能
+            let draggedItem = null;
+
+            fileList.addEventListener("dragstart", (e) => {
+                draggedItem = e.target;
+                e.dataTransfer.effectAllowed = "move";
+                fileList.classList.add("dragging");
+            });
+
+            fileList.addEventListener("dragover", (e) => {
+                e.preventDefault(); // 允許拖曳
+                const target = e.target.closest("li");
+                if (target && target !== draggedItem) {
+                    target.classList.add("drag-hover");
+                }
+            });
+
+            fileList.addEventListener("dragleave", (e) => {
+                const target = e.target.closest("li");
+                if (target) {
+                    target.classList.remove("drag-hover");
+                }
+            });
+
+            fileList.addEventListener("drop", (e) => {
+                e.preventDefault();
+                const target = e.target.closest("li");
+                if (target && target !== draggedItem) {
+                    fileList.insertBefore(draggedItem, target);
+                }
+                target.classList.remove("drag-hover");
+            });
+
+            fileList.addEventListener("dragend", () => {
+                fileList.classList.remove("dragging");
+                fileList.querySelectorAll("li").forEach((li) => li.classList.remove("drag-hover"));
+            });
+        });
+
+    </script>
+</body>
+</html>

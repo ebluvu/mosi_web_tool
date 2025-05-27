@@ -1,0 +1,185 @@
+@font-face {
+  font-family: 'fakePearl';
+  src: url('FakePearl-SemiBold.ttf') format('woff2'), url('FakePearl-SemiBold.ttf') format('ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+* {
+  box-sizing: border-box;
+  font-family: "fakePearl", sans-serif;
+  text-align: center;
+}
+html,
+body {
+  background-color: #594a54;
+  color: #d3cbd0;
+}
+a {
+  color: #f69f8f;
+}
+canvas {
+  image-rendering: -moz-crisp-edges;
+  image-rendering: pixelated;
+}
+input[type="color"] {
+  width: 2em;
+  height: 2em;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+}
+input[type="color"][disabled] {
+  opacity: 0.5;
+}
+input[type="file"] {
+  padding: 1em 0;
+  width: 256px;
+}
+input[type="text"],
+button {
+  width: 14em;
+  margin: 1em;
+  padding: 0.25em;
+  font-size: 1em;
+}
+label {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+}
+table {
+  margin: 0 auto;
+}
+table td,
+table th {
+  width: 50%;
+}
+table td {
+  text-align: left;
+}
+table th {
+  text-align: right;
+}
+textarea {
+  height: 256px;
+  width: 256px;
+  font-family: monospace;
+}
+textarea, input {
+  text-align: left;
+  margin: 1em;
+  padding: 0.25em;
+  font-size: 1em;
+}
+.box256 {
+  height: 256px;
+  width: 256px;
+}
+.centre {
+  margin: 0 auto;
+}
+.croppie-container {
+  height: auto;
+}
+.flex-container {
+  background-color: #d3cbd0;
+  display: flex;
+  flex-flow: row wrap;
+}
+.section {
+  margin: 0 auto;
+  background-color: #d3cbd0;
+  color: #594a54;
+  width: 256px;
+  padding-bottom: 1em;
+  display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-content: space-between;
+}
+.settings-container {
+  display: flex;
+  justify-content: space-between;
+}
+.sprite-settings, .room-settings {
+  flex: 1;
+  box-sizing: border-box;
+}
+@media (max-width: 768px) {
+  .settings-container {
+    flex-direction: column; /* 小螢幕時改為上下排列 */
+    align-items: stretch;  /* 確保子元素撐滿寬度 */
+    gap: 10px; /* 增加上下區塊間距 */
+  }
+
+  .sprite-settings, .room-settings {
+    flex: none; /* 取消 flex: 1，讓每個區塊自動撐滿父容器 */
+    width: 100%; /* 設定寬度為 100% */
+  }
+}
+#brightness {
+  width: 256px;
+}
+#threshold {
+  width: 150px;
+}
+#brightness + label,
+#threshold + label {
+  margin: 0 auto;
+}
+#palettes {
+  height: 256px;
+  width: 256px;
+  overflow-y: scroll;
+}
+#preview,
+#room-output {
+  margin: 0 auto;
+  width: 256px;
+}
+#save {
+  margin-top: 0;
+}
+/* 文件列表區域 */
+#file-list {
+  list-style-type: none;
+  padding: 0;
+  border: 2px dashed #594A54;
+  border-radius: 8px;
+  margin-top: 10px;
+  max-width: 400px;
+  /* background-color: #f9f9f9; */
+}
+
+/* 每個檔案列表項目 */
+#file-list li {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  margin: 5px;
+  background-color: #D3CBD0;
+  border: 1px solid #594A54;
+  border-radius: 5px;
+  cursor: grab;
+  transition: background-color 0.3s;
+}
+
+#file-list li img {
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+/* 拖曳時的 hover 效果 */
+#file-list li.drag-hover {
+  background-color: #9c758f;
+  border-color: #594A54;
+}
+
+/* 拖曳時的區域效果 */
+#file-list.dragging {
+  border: 2px dashed #594A54;
+}
