@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mosi圖片轉房間數據產生器 (純前端版)</title>
+    <title>Mosi圖片轉房間數據產生器</title>
     <style>
         @font-face {
             font-family: 'fakePearl';
@@ -161,7 +161,8 @@
             </form>
             <div id="image-info" style="display: none;">
                 <p>圖片尺寸: <span id="image-size"></span></p>
-                <p>建議精靈尺寸: <span id="suggested-size"></span></p>
+                <p>建議組合:</p>
+                <div id="suggestions" style="text-align: left; margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 5px; max-height: 200px; overflow-y: auto;"></div>
             </div>
         </div>
 
@@ -170,8 +171,8 @@
                 <div class="section sprite-settings">
                     <h2>精靈設定</h2>
                     <label>精靈名稱: <input type="text" id="spriteName" value="sprite"></label><br>
-                    <label>精靈寬度: <input type="number" id="spriteWidth" value="8" min="1"></label><br>
-                    <label>精靈高度: <input type="number" id="spriteHeight" value="8" min="1"></label><br>
+                    <label>精靈寬度: <input type="number" id="spriteWidth" value="8" min="1" max="24"></label><br>
+                    <label>精靈高度: <input type="number" id="spriteHeight" value="8" min="1" max="24"></label><br>
                     <label>是否為主角: <input type="checkbox" id="isAvatar"></label><br>
                     <label>是否為牆: <input type="checkbox" id="isWall"></label><br>
                     <label>是否為道具: <input type="checkbox" id="isItem"></label><br>
@@ -188,6 +189,8 @@
                             <option value="8">8</option>
                         </select>
                     </label><br>
+                    <small style="color: #666;">※ 精靈尺寸最大為 24×24</small>
+                    <small style="color: #2196F3; display: block; margin-top: 5px;">💡 修改精靈尺寸會自動計算房間尺寸</small>
                 </div>
 
                 <div class="section sprite-settings">
@@ -195,10 +198,12 @@
                     <label>房間名稱: <input type="text" id="roomName" value="room-1"></label><br>
                     <label>調色盤名稱: <input type="text" id="paletteName" value="palette-1"></label><br>
                     <label>樂曲名稱: <input type="text" id="musicName" value="song-1"></label><br>
-                    <label>房間寬度: <input type="number" id="roomWidth" value="8" min="1"></label><br>
-                    <label>房間長度: <input type="number" id="roomHeight" value="8" min="1"></label><br>
+                    <label>房間寬度: <input type="number" id="roomWidth" value="8" min="1" max="24"></label><br>
+                    <label>房間長度: <input type="number" id="roomHeight" value="8" min="1" max="24"></label><br>
                     <button type="submit">生成數據</button>
                     <button type="button" id="clearButton">重置數據</button>
+                    <small style="color: #666;">※ 房間尺寸最大為 24×24</small>
+                    <small style="color: #2196F3; display: block; margin-top: 5px;">💡 修改房間尺寸會自動計算精靈尺寸</small>
                 </div>
             </div>
         </form>
@@ -237,7 +242,10 @@
         const fileList = document.getElementById("file-list");
         const imageInfo = document.getElementById("image-info");
         const imageSize = document.getElementById("image-size");
-        const suggestedSize = document.getElementById("suggested-size");
+        const suggestions = document.getElementById("suggestions");
+
+        // 初始化自動計算功能
+        setupAutoCalculation();
 
         // 圖片載入處理
         uploadForm.addEventListener("submit", async (e) => {
@@ -281,22 +289,19 @@
                     // 顯示圖片資訊
                     imageSize.textContent = `${img.width} x ${img.height}`;
                     
-                    // 計算建議的精靈尺寸
-                    const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
-                    const commonDivisor = gcd(img.width, img.height);
-                    const suggestedWidth = Math.min(commonDivisor, 16);
-                    const suggestedHeight = Math.min(commonDivisor, 16);
-                    
-                    suggestedSize.textContent = `${suggestedWidth} x ${suggestedHeight}`;
+                    // 計算建議的精靈和房間尺寸組合
+                    const suggestions = calculateSuggestions(img.width, img.height);
+                    displaySuggestions(suggestions);
                     imageInfo.style.display = "block";
                     
-                    // 自動設定精靈尺寸
-                    document.getElementById("spriteWidth").value = suggestedWidth;
-                    document.getElementById("spriteHeight").value = suggestedHeight;
-                    
-                    // 自動設定房間尺寸
-                    document.getElementById("roomWidth").value = Math.floor(img.width / suggestedWidth);
-                    document.getElementById("roomHeight").value = Math.floor(img.height / suggestedHeight);
+                    // 自動設定第一個建議
+                    if (suggestions.length > 0) {
+                        const firstSuggestion = suggestions[0];
+                        document.getElementById("spriteWidth").value = firstSuggestion.spriteWidth;
+                        document.getElementById("spriteHeight").value = firstSuggestion.spriteHeight;
+                        document.getElementById("roomWidth").value = firstSuggestion.roomWidth;
+                        document.getElementById("roomHeight").value = firstSuggestion.roomHeight;
+                    }
                     
                     showMessage('圖片載入成功！', 'success');
                 };
@@ -351,6 +356,17 @@
                     return;
                 }
 
+                // 檢查Mosi引擎限制
+                if (data.spriteWidth > 24 || data.spriteHeight > 24) {
+                    showMessage('精靈尺寸不能超過24（Mosi引擎限制）', 'error');
+                    return;
+                }
+                
+                if (data.roomWidth > 24 || data.roomHeight > 24) {
+                    showMessage('房間尺寸不能超過24（Mosi引擎限制）', 'error');
+                    return;
+                }
+
                 // 處理圖片並生成數據
                 const roomData = processImageToRoomData(currentImage, data);
                 
@@ -372,9 +388,35 @@
             const { width: imgWidth, height: imgHeight, context } = image;
             const { spriteWidth, spriteHeight, roomWidth, roomHeight } = data;
             
+            // 計算需要的圖片尺寸
+            const requiredWidth = roomWidth * spriteWidth;
+            const requiredHeight = roomHeight * spriteHeight;
+            
+            // 檢查是否需要縮放
+            let processedCanvas = imageCanvas;
+            let processedContext = imageContext;
+            let scale = 1;
+            
+            if (imgWidth !== requiredWidth || imgHeight !== requiredHeight) {
+                // 創建新的 Canvas 進行縮放
+                const scaledCanvas = document.createElement('canvas');
+                const scaledContext = scaledCanvas.getContext('2d');
+                
+                scaledCanvas.width = requiredWidth;
+                scaledCanvas.height = requiredHeight;
+                
+                // 使用 nearest-neighbor 縮放以保持像素風格
+                scaledContext.imageSmoothingEnabled = false;
+                scaledContext.drawImage(imageCanvas, 0, 0, requiredWidth, requiredHeight);
+                
+                processedCanvas = scaledCanvas;
+                processedContext = scaledContext;
+                scale = requiredWidth / imgWidth;
+            }
+            
             // 計算每行的精靈數量
-            const spritesPerRow = Math.floor(imgWidth / spriteWidth);
-            const totalSprites = spritesPerRow * Math.floor(imgHeight / spriteHeight);
+            const spritesPerRow = Math.floor(processedCanvas.width / spriteWidth);
+            const totalSprites = spritesPerRow * Math.floor(processedCanvas.height / spriteHeight);
             
             // 檢查房間尺寸是否合理
             if (roomWidth * roomHeight > totalSprites) {
@@ -392,7 +434,7 @@
                 const y = Math.floor(spriteIndex / spritesPerRow) * spriteHeight;
                 
                 // 獲取精靈區域的像素數據
-                const imageData = context.getImageData(x, y, spriteWidth, spriteHeight);
+                const imageData = processedContext.getImageData(x, y, spriteWidth, spriteHeight);
                 const pixels = imageData.data;
                 
                 // 轉換為二值數據
@@ -447,7 +489,12 @@
                 height: roomHeight,
                 spriteWidth: spriteWidth,
                 spriteHeight: spriteHeight,
-                spriteList: spriteData
+                spriteList: spriteData,
+                processingInfo: {
+                    originalSize: `${imgWidth}×${imgHeight}`,
+                    processedSize: `${processedCanvas.width}×${processedCanvas.height}`,
+                    scale: scale
+                }
             };
         }
 
@@ -639,6 +686,376 @@
             setTimeout(() => {
                 if (messageDiv.parentNode) {
                     messageDiv.remove();
+                }
+            }, 3000);
+        }
+
+        // 計算建議的精靈和房間尺寸組合
+        function calculateSuggestions(width, height) {
+            const suggestions = [];
+            
+            // 常見的精靈尺寸（限制在24以內）
+            const commonSpriteSizes = [4, 8, 12, 16, 20, 24];
+            
+            // 常見的房間尺寸（限制在24以內）
+            const commonRoomSizes = [5, 8, 10, 12, 15, 16, 20, 24];
+            
+            // 方法1：直接檢查精靈尺寸是否能整除圖片尺寸
+            for (const spriteSize of commonSpriteSizes) {
+                if (width % spriteSize === 0 && height % spriteSize === 0) {
+                    const roomWidth = width / spriteSize;
+                    const roomHeight = height / spriteSize;
+                    
+                    // 檢查房間尺寸是否在限制範圍內
+                    if (roomWidth <= 24 && roomHeight <= 24) {
+                        const score = calculateScore(roomWidth, roomHeight, spriteSize);
+                        suggestions.push({
+                            spriteWidth: spriteSize,
+                            spriteHeight: spriteSize,
+                            roomWidth: roomWidth,
+                            roomHeight: roomHeight,
+                            score: score,
+                            description: `${roomWidth}×${roomHeight} 房間 × ${spriteSize}×${spriteSize} 精靈`,
+                            scale: 1,
+                            originalSize: `${width}×${height}`
+                        });
+                    }
+                }
+            }
+            
+            // 方法2：如果沒有找到合適的組合，計算縮放比例
+            if (suggestions.length === 0) {
+                const scaledSuggestions = calculateScaledSuggestions(width, height);
+                suggestions.push(...scaledSuggestions);
+            }
+            
+            // 按評分排序，評分越高越優先
+            suggestions.sort((a, b) => b.score - a.score);
+            
+            // 限制顯示數量
+            return suggestions.slice(0, 10);
+        }
+        
+        // 計算縮放後的建議組合
+        function calculateScaledSuggestions(width, height) {
+            const suggestions = [];
+            const commonSpriteSizes = [4, 8, 12, 16, 20, 24];
+            const commonRoomSizes = [5, 8, 10, 12, 15, 16, 20, 24];
+            
+            // 嘗試不同的縮放比例
+            for (const roomWidth of commonRoomSizes) {
+                for (const roomHeight of commonRoomSizes) {
+                    for (const spriteSize of commonSpriteSizes) {
+                        // 計算需要的圖片尺寸
+                        const requiredWidth = roomWidth * spriteSize;
+                        const requiredHeight = roomHeight * spriteSize;
+                        
+                        // 計算縮放比例
+                        const scaleX = width / requiredWidth;
+                        const scaleY = height / requiredHeight;
+                        
+                        // 檢查縮放比例是否合理（0.1 到 10 之間）
+                        if (scaleX >= 0.1 && scaleX <= 10 && scaleY >= 0.1 && scaleY <= 10) {
+                            // 使用較小的縮放比例（更保守）
+                            const scale = Math.min(scaleX, scaleY);
+                            
+                            const score = calculateScore(roomWidth, roomHeight, spriteSize);
+                            
+                            // 調整評分：縮放比例越接近1越好
+                            const scaleBonus = Math.max(0, 10 - Math.abs(scale - 1) * 5);
+                            const finalScore = score + scaleBonus;
+                            
+                            suggestions.push({
+                                spriteWidth: spriteSize,
+                                spriteHeight: spriteSize,
+                                roomWidth: roomWidth,
+                                roomHeight: roomHeight,
+                                score: finalScore,
+                                description: `${roomWidth}×${roomHeight} 房間 × ${spriteSize}×${spriteSize} 精靈 (縮放 ${scale.toFixed(2)}x)`,
+                                scale: scale,
+                                originalSize: `${width}×${height}`,
+                                scaledSize: `${Math.round(requiredWidth * scale)}×${Math.round(requiredHeight * scale)}`
+                            });
+                        }
+                    }
+                }
+            }
+            
+            return suggestions;
+        }
+        
+        // 計算建議的評分
+        function calculateScore(roomWidth, roomHeight, spriteSize) {
+            let score = 0;
+            
+            // 偏好適中的房間尺寸（8-20之間，但最大24）
+            if (roomWidth >= 8 && roomWidth <= 20) score += 10;
+            if (roomHeight >= 8 && roomHeight <= 20) score += 10;
+            
+            // 偏好適中的精靈尺寸（8-24之間）
+            if (spriteSize >= 8 && spriteSize <= 24) score += 15;
+            
+            // 偏好正方形房間
+            if (roomWidth === roomHeight) score += 5;
+            
+            // 偏好較小的精靈尺寸（更精細，但不要太小）
+            if (spriteSize >= 8 && spriteSize <= 16) score += 10;
+            
+            // 偏好較小的房間尺寸（更實用，但不要太小）
+            if (roomWidth >= 8 && roomWidth <= 16) score += 5;
+            if (roomHeight >= 8 && roomHeight <= 16) score += 5;
+            
+            // 避免極端值
+            if (roomWidth < 5 || roomHeight < 5) score -= 10;
+            if (spriteSize < 4) score -= 10;
+            
+            return score;
+        }
+        
+        // 顯示建議列表
+        function displaySuggestions(suggestions) {
+            const suggestionsDiv = document.getElementById("suggestions");
+            
+            if (suggestions.length === 0) {
+                suggestionsDiv.innerHTML = '<p style="color: #666;">無法找到合適的組合，請手動調整尺寸</p>';
+                return;
+            }
+            
+            let html = '<div style="margin-bottom: 10px;"><strong>點擊選擇：</strong></div>';
+            
+            suggestions.forEach((suggestion, index) => {
+                const isRecommended = index === 0;
+                const style = isRecommended ? 
+                    'background: #e8f5e8; border: 2px solid #4CAF50;' : 
+                    'background: #f9f9f9; border: 1px solid #ddd;';
+                
+                // 添加縮放信息
+                let scaleInfo = '';
+                if (suggestion.scale !== 1) {
+                    scaleInfo = `<div style="font-size: 0.8em; color: #ff6b35;">
+                        📏 原圖: ${suggestion.originalSize} → 縮放: ${suggestion.scale.toFixed(2)}x
+                    </div>`;
+                }
+                
+                html += `
+                    <div class="suggestion-item" 
+                         style="${style} padding: 8px; margin: 5px 0; border-radius: 4px; cursor: pointer;"
+                         onclick="selectSuggestion(${suggestion.spriteWidth}, ${suggestion.spriteHeight}, ${suggestion.roomWidth}, ${suggestion.roomHeight})">
+                        <div style="font-weight: bold; color: #333;">
+                            ${isRecommended ? '⭐ ' : ''}${suggestion.description}
+                        </div>
+                        <div style="font-size: 0.9em; color: #666;">
+                            評分: ${suggestion.score} | 總精靈數: ${suggestion.roomWidth * suggestion.roomHeight}
+                        </div>
+                        ${scaleInfo}
+                    </div>
+                `;
+            });
+            
+            suggestionsDiv.innerHTML = html;
+        }
+        
+        // 選擇建議
+        function selectSuggestion(spriteWidth, spriteHeight, roomWidth, roomHeight) {
+            document.getElementById("spriteWidth").value = spriteWidth;
+            document.getElementById("spriteHeight").value = spriteHeight;
+            document.getElementById("roomWidth").value = roomWidth;
+            document.getElementById("roomHeight").value = roomHeight;
+            
+            showMessage(`已選擇: ${roomWidth}×${roomHeight} 房間 × ${spriteWidth}×${spriteHeight} 精靈`, 'success');
+        }
+
+        // 自動計算功能
+        function setupAutoCalculation() {
+            const spriteWidthInput = document.getElementById("spriteWidth");
+            const spriteHeightInput = document.getElementById("spriteHeight");
+            const roomWidthInput = document.getElementById("roomWidth");
+            const roomHeightInput = document.getElementById("roomHeight");
+
+            // 添加防抖功能
+            let spriteTimeout, roomTimeout;
+
+            // 精靈尺寸變更時，自動計算房間尺寸
+            spriteWidthInput.addEventListener("input", () => {
+                clearTimeout(spriteTimeout);
+                spriteTimeout = setTimeout(autoCalculateRoomSize, 300);
+            });
+            spriteHeightInput.addEventListener("input", () => {
+                clearTimeout(spriteTimeout);
+                spriteTimeout = setTimeout(autoCalculateRoomSize, 300);
+            });
+
+            // 房間尺寸變更時，自動計算精靈尺寸
+            roomWidthInput.addEventListener("input", () => {
+                clearTimeout(roomTimeout);
+                roomTimeout = setTimeout(autoCalculateSpriteSize, 300);
+            });
+            roomHeightInput.addEventListener("input", () => {
+                clearTimeout(roomTimeout);
+                roomTimeout = setTimeout(autoCalculateSpriteSize, 300);
+            });
+        }
+
+        // 自動計算房間尺寸
+        function autoCalculateRoomSize() {
+            if (!currentImage) return;
+
+            const spriteWidth = parseInt(document.getElementById("spriteWidth").value) || 0;
+            const spriteHeight = parseInt(document.getElementById("spriteHeight").value) || 0;
+
+            if (spriteWidth > 0 && spriteHeight > 0) {
+                // 計算房間尺寸
+                const roomWidth = Math.floor(currentImage.width / spriteWidth);
+                const roomHeight = Math.floor(currentImage.height / spriteHeight);
+
+                // 檢查是否在限制範圍內
+                if (roomWidth <= 24 && roomHeight <= 24 && roomWidth > 0 && roomHeight > 0) {
+                    // 暫時移除事件監聽器避免循環
+                    const roomWidthInput = document.getElementById("roomWidth");
+                    const roomHeightInput = document.getElementById("roomHeight");
+                    
+                    roomWidthInput.removeEventListener("input", autoCalculateSpriteSize);
+                    roomHeightInput.removeEventListener("input", autoCalculateSpriteSize);
+                    
+                    roomWidthInput.value = roomWidth;
+                    roomHeightInput.value = roomHeight;
+                    
+                    // 重新添加事件監聽器
+                    setTimeout(() => {
+                        roomWidthInput.addEventListener("input", autoCalculateSpriteSize);
+                        roomHeightInput.addEventListener("input", autoCalculateSpriteSize);
+                    }, 100);
+                    
+                    // 顯示計算信息
+                    showCalculationInfo(`自動計算: ${roomWidth}×${roomHeight} 房間`);
+                } else {
+                    // 如果超出限制，顯示警告
+                    const maxRoomWidth = Math.min(24, Math.floor(currentImage.width / spriteWidth));
+                    const maxRoomHeight = Math.min(24, Math.floor(currentImage.height / spriteHeight));
+                    
+                    if (maxRoomWidth > 0 && maxRoomHeight > 0) {
+                        const roomWidthInput = document.getElementById("roomWidth");
+                        const roomHeightInput = document.getElementById("roomHeight");
+                        
+                        roomWidthInput.removeEventListener("input", autoCalculateSpriteSize);
+                        roomHeightInput.removeEventListener("input", autoCalculateSpriteSize);
+                        
+                        roomWidthInput.value = maxRoomWidth;
+                        roomHeightInput.value = maxRoomHeight;
+                        
+                        setTimeout(() => {
+                            roomWidthInput.addEventListener("input", autoCalculateSpriteSize);
+                            roomHeightInput.addEventListener("input", autoCalculateSpriteSize);
+                        }, 100);
+                        
+                        showCalculationInfo(`已調整至最大可用尺寸: ${maxRoomWidth}×${maxRoomHeight} 房間`);
+                    } else {
+                        showCalculationInfo(`精靈尺寸過大，無法計算合適的房間尺寸`, 'warning');
+                    }
+                }
+            }
+        }
+
+        // 自動計算精靈尺寸
+        function autoCalculateSpriteSize() {
+            if (!currentImage) return;
+
+            const roomWidth = parseInt(document.getElementById("roomWidth").value) || 0;
+            const roomHeight = parseInt(document.getElementById("roomHeight").value) || 0;
+
+            if (roomWidth > 0 && roomHeight > 0) {
+                // 計算精靈尺寸
+                const spriteWidth = Math.floor(currentImage.width / roomWidth);
+                const spriteHeight = Math.floor(currentImage.height / roomHeight);
+
+                // 檢查是否在限制範圍內
+                if (spriteWidth <= 24 && spriteHeight <= 24 && spriteWidth > 0 && spriteHeight > 0) {
+                    // 暫時移除事件監聽器避免循環
+                    const spriteWidthInput = document.getElementById("spriteWidth");
+                    const spriteHeightInput = document.getElementById("spriteHeight");
+                    
+                    spriteWidthInput.removeEventListener("input", autoCalculateRoomSize);
+                    spriteHeightInput.removeEventListener("input", autoCalculateRoomSize);
+                    
+                    spriteWidthInput.value = spriteWidth;
+                    spriteHeightInput.value = spriteHeight;
+                    
+                    // 重新添加事件監聽器
+                    setTimeout(() => {
+                        spriteWidthInput.addEventListener("input", autoCalculateRoomSize);
+                        spriteHeightInput.addEventListener("input", autoCalculateRoomSize);
+                    }, 100);
+                    
+                    // 顯示計算信息
+                    showCalculationInfo(`自動計算: ${spriteWidth}×${spriteHeight} 精靈`);
+                } else {
+                    // 如果超出限制，顯示警告
+                    const maxSpriteWidth = Math.min(24, Math.floor(currentImage.width / roomWidth));
+                    const maxSpriteHeight = Math.min(24, Math.floor(currentImage.height / roomHeight));
+                    
+                    if (maxSpriteWidth > 0 && maxSpriteHeight > 0) {
+                        const spriteWidthInput = document.getElementById("spriteWidth");
+                        const spriteHeightInput = document.getElementById("spriteHeight");
+                        
+                        spriteWidthInput.removeEventListener("input", autoCalculateRoomSize);
+                        spriteHeightInput.removeEventListener("input", autoCalculateRoomSize);
+                        
+                        spriteWidthInput.value = maxSpriteWidth;
+                        spriteHeightInput.value = maxSpriteHeight;
+                        
+                        setTimeout(() => {
+                            spriteWidthInput.addEventListener("input", autoCalculateRoomSize);
+                            spriteHeightInput.addEventListener("input", autoCalculateRoomSize);
+                        }, 100);
+                        
+                        showCalculationInfo(`已調整至最大可用尺寸: ${maxSpriteWidth}×${maxSpriteHeight} 精靈`);
+                    } else {
+                        showCalculationInfo(`房間尺寸過大，無法計算合適的精靈尺寸`, 'warning');
+                    }
+                }
+            }
+        }
+
+        // 顯示計算信息
+        function showCalculationInfo(message, type = 'info') {
+            // 移除舊的計算信息
+            const existingInfo = document.querySelector('.calculation-info');
+            if (existingInfo) {
+                existingInfo.remove();
+            }
+            
+            // 創建新的計算信息
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'calculation-info';
+            infoDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 10px 15px;
+                border-radius: 5px;
+                color: white;
+                font-size: 14px;
+                z-index: 1000;
+                max-width: 300px;
+                word-wrap: break-word;
+            `;
+            
+            // 根據類型設定顏色
+            if (type === 'warning') {
+                infoDiv.style.backgroundColor = '#ff9800';
+            } else {
+                infoDiv.style.backgroundColor = '#2196F3';
+            }
+            
+            infoDiv.textContent = message;
+            
+            // 插入到頁面
+            document.body.appendChild(infoDiv);
+            
+            // 3秒後自動移除
+            setTimeout(() => {
+                if (infoDiv.parentNode) {
+                    infoDiv.remove();
                 }
             }, 3000);
         }
