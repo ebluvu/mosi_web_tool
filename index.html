@@ -139,20 +139,189 @@
             border-radius: 5px;
             margin: 10px 0;
         }
+        #mergeSpriteFileList {
+        list-style-type: none;
+        padding: 0;
+        border: 2px dashed #594A54;
+        border-radius: 8px;
+        margin-top: 10px;
+        max-width: 400px;
+        }
+        #mergeSpriteFileList li {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        margin: 5px;
+        background-color: #D3CBD0;
+        border: 1px solid #594A54;
+        border-radius: 5px;
+        cursor: grab;
+        transition: background-color 0.3s;
+        }
+        #mergeSpriteFileList li img {
+        width: 24px;
+        height: 24px;
+        margin-right: 10px;
+        }
+        #mergeSpriteFileList li.drag-hover {
+        background-color: #9c758f;
+        border-color: #594A54;
+        }
+        #mergeSpriteFileList.dragging {
+        border: 2px dashed #594A54;
+        }
+        /* Tab 樣式 */
+        .tab-layout {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            min-height: 600px;
+        }
+        .tab-bar, #tab-select {
+            margin-right: 0;
+        }
+        .tab-bar {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            min-width: 160px;
+            background: #d3cbd0;
+            border-radius: 10px 0 0 10px;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+            height: 600px;
+            gap: 0.2em;
+        }
+        .tab-btn {
+            background: #d3cbd0;
+            color: #594a54;
+            border: none;
+            border-left: 5px solid transparent;
+            border-radius: 0 10px 10px 0;
+            cursor: pointer;
+            font-size: 1em;
+            outline: none;
+            text-align: left;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .tab-btn.active {
+            background: #594a54;
+            color: #d3cbd0;
+            border-left: 5px solid #f69f8f;
+            font-weight: bold;
+        }
+        .tab-content {
+            flex: 1;
+            min-width: 0;
+            max-width: 600px;
+            width: 100%;
+            height: 600px;
+            overflow-y: auto;
+            background: #d3cbd0;
+            border-radius: 0 10px 10px 0;
+            box-sizing: border-box;
+        }
+        .tab-section { display: none; }
+        .tab-section.active { display: block; }
+        /* 響應式：手機版用下拉選單 */
+        @media (max-width: 900px) {
+            .tab-layout { flex-direction: column; min-height: 0; }
+            .tab-bar { display: none !important; }
+            #tab-select {
+                display: block !important;
+                margin: 1em auto 0.5em auto;
+                width: 90%;
+                max-width: 400px;
+                font-size: 1.1em;
+                background: #d3cbd0;
+                color: #594a54;
+                border: 1px solid #594a54;
+                border-radius: 8px;
+                padding: 0.7em 1em;
+                box-shadow: 1px 1px 6px rgba(0,0,0,0.04);
+            }
+            .tab-content {
+                max-width: 100%;
+                height: auto;
+                border-radius: 10px;
+            }
+        }
+        #tab-select { display: none; }
+        .header-toggle-btn {
+            position: absolute;
+            top: 18px;
+            right: 24px;
+            background: #d3cbd0;
+            color: #594a54;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: 1px 1px 6px rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, color 0.2s, transform 0.2s;
+            z-index: 10;
+        }
+        .header-toggle-btn:hover {
+            background: #f69f8f;
+            color: #fff;
+        }
+        .header-collapsed {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.3s, opacity 0.3s;
+            padding-bottom: 0 !important;
+        }
+        .header-content {
+            transition: max-height 0.3s, opacity 0.3s;
+        }
+        .header-toggle-btn.rotate {
+            transform: rotate(180deg);
+        }
+        header { position: relative; }
     </style>
     <link rel="icon" href="static/favicon.ico" type="image/x-icon">
 </head>
 <body>
     <header>
-        <h1>Mosi圖片轉房間數據產生器</h1>
-        <p>轉換任何圖片至<a href="https://ebluvu.itch.io/mosi-ch">Mosi中文版</a>的房間數據</p>
-        <p><a href="https://ebluvu.notion.site/M-si-5216b6a6c587449cb18c31ddd0dee61b">關於</a>｜有任何疑問歡迎聯繫我</p>
-        <p style="color: #f69f8f; font-weight: bold;">✨ 純前端版本 - 無需伺服器，可直接在瀏覽器中運行 ✨</p>
+        <button class="header-toggle-btn" id="headerToggleBtn" title="開合說明">▼</button>
+        <div class="header-content" id="headerContent">
+            <h1>Mosi圖片轉房間數據產生器</h1>
+            <p>轉換任何圖片至<a href="https://ebluvu.itch.io/mosi-ch">Mosi中文版</a>的房間數據</p>
+            <p><a href="https://ebluvu.notion.site/M-si-5216b6a6c587449cb18c31ddd0dee61b">關於</a>｜有任何疑問歡迎聯繫我</p>
+            <p style="color: #f69f8f; font-weight: bold;">✨ 純前端版本 - 無需伺服器，可直接在瀏覽器中運行 ✨</p>
+        </div>
     </header>
 
-    <div class="flex-container">
-        
-        <div class="section" id="upload-img">
+    <div class="tab-layout">
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="upload-img">圖片上傳</button>
+        <button class="tab-btn" data-tab="sprite-settings">精靈設定</button>
+        <button class="tab-btn" data-tab="room-settings">房間設定</button>
+        <button class="tab-btn" data-tab="data">生成結果</button>
+        <button class="tab-btn" data-tab="merge-rooms">房間合併工具</button>
+        <button class="tab-btn" data-tab="merge-sprite-section">合併精靈工具</button>
+        <button class="tab-btn" data-tab="merge-room-section">合併房間單色精靈工具</button>
+      </div>
+      <select id="tab-select">
+        <option value="upload-img">圖片上傳</option>
+        <option value="sprite-settings">精靈設定</option>
+        <option value="room-settings">房間設定</option>
+        <option value="data">生成結果</option>
+        <option value="merge-rooms">房間合併工具</option>
+        <option value="merge-sprite-section">合併精靈工具</option>
+        <option value="merge-room-section">合併房間單色精靈工具</option>
+      </select>
+      <div class="tab-content">
+        <div class="flex-container">
+          <div class="section tab-section active" id="upload-img">
             <h2>圖片</h2>
             <img id="preview" alt="預覽" src="static/rest.png" style="max-width: 300px;">
             <form id="upload-form">
@@ -165,10 +334,9 @@
                 <div id="suggestions" style="text-align: left; margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 5px; max-height: 200px; overflow-y: auto;"></div>
             </div>
         </div>
-
-        <form id="generate-form">
+          <form id="generate-form" style="width:100%;">
             <div class="settings-container">
-                <div class="section sprite-settings">
+              <div class="section tab-section" id="sprite-settings">
                     <h2>精靈設定</h2>
                     <label>精靈名稱: <input type="text" id="spriteName" value="sprite"></label><br>
                     <label>精靈寬度: <input type="number" id="spriteWidth" value="8" min="1" max="24"></label><br>
@@ -192,8 +360,7 @@
                     <small style="color: #666;">※ 精靈尺寸最大為 24×24</small>
                     <small style="color: #2196F3; display: block; margin-top: 5px;">💡 修改精靈尺寸會自動計算房間尺寸</small>
                 </div>
-
-                <div class="section sprite-settings">
+                <div class="section tab-section" id="room-settings">
                     <h2>房間設定</h2>
                     <label>房間名稱: <input type="text" id="roomName" value="room-1"></label><br>
                     <label>調色盤名稱: <input type="text" id="paletteName" value="palette-1"></label><br>
@@ -207,14 +374,12 @@
                 </div>
             </div>
         </form>
-
-        <div class="section" id="data">
+          <div class="section tab-section" id="data">
             <h2>結果</h2>
             <textarea id="output" readonly></textarea>
             <button id="download-btn" style="display: none;">下載.JSON文件</button>
         </div>
-
-        <div class="section" id="merge-rooms">
+          <div class="section tab-section" id="merge-rooms">
             <h2>房間合併工具</h2>
             <form id="merge-form">
                 <label for="merge-files">上傳多個房間數據 (.json): </label>
@@ -225,9 +390,23 @@
             <textarea id="merge-output" style="display: none;" readonly></textarea>
             <button id="merge-download-btn" style="display: none;">下載合併後數據</button>
         </div>
-
+          <div class="section tab-section" id="merge-sprite-section">
+            <h2>合併精靈工具</h2>
+            <input type="file" id="mergeSpriteInput" accept=".mosisprite" multiple style="margin-bottom:10px;">
+            <ul id="mergeSpriteFileList"></ul>
+            <div id="mergeSpriteAttrSelect" style="display:none; margin:10px 0;"></div>
+            <div id="mergeSpriteError" class="error" style="display:none;"></div>
+            <button id="mergeSpriteBtn" style="margin-top:10px; display:none;">合併並下載多色精靈</button>
+        </div>
+          <div class="section tab-section" id="merge-room-section">
+            <h2>合併房間單色精靈工具</h2>
+            <input type="file" id="mergeRoomInput" accept=".mosiroom" style="margin-bottom:10px;">
+            <div id="mergeRoomError" class="error" style="display:none;"></div>
+            <button id="mergeRoomBtn" style="margin-top:10px; display:none;">合併並下載新房間檔案</button>
+        </div>
+        </div>
+      </div>
     </div>
-
     <script>
         let currentImage = null;
         let imageCanvas = null;
@@ -1059,6 +1238,337 @@
                 }
             }, 3000);
         }
+
+        // ====== 全域動畫幀補齊函數 ======
+        function padFrames(frames, maxLen) {
+            if (frames.length === maxLen) return frames.slice();
+            if (maxLen === 2) {
+                return [frames[0], frames[0]];
+            }
+            if (maxLen === 3) {
+                if (frames.length === 1) return [frames[0], frames[0], frames[0]];
+                if (frames.length === 2) return [frames[0], frames[1], frames[0]];
+            }
+            if (maxLen === 4) {
+                if (frames.length === 1) return [frames[0], frames[0], frames[0], frames[0]];
+                if (frames.length === 2) return [frames[0], frames[1], frames[0], frames[1]];
+                if (frames.length === 3) return [frames[0], frames[1], frames[1], frames[2]];
+            }
+            const arr = frames.slice();
+            while (arr.length < maxLen) arr.push(JSON.parse(JSON.stringify(arr[arr.length - 1])));
+            return arr;
+        }
+
+        // ===== 合併精靈工具 =====
+        (function(){
+            const input = document.getElementById('mergeSpriteInput');
+            const fileList = document.getElementById('mergeSpriteFileList');
+            const attrSelect = document.getElementById('mergeSpriteAttrSelect');
+            const errorDiv = document.getElementById('mergeSpriteError');
+            const mergeBtn = document.getElementById('mergeSpriteBtn');
+            let sprites = [];
+            let attrSourceIdx = 0;
+
+            // 拖曳排序
+            let dragIdx = null;
+            fileList.addEventListener('dragstart', e => {
+                dragIdx = Number(e.target.dataset.idx);
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            fileList.addEventListener('dragover', e => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            });
+            fileList.addEventListener('drop', e => {
+                e.preventDefault();
+                const targetIdx = Number(e.target.closest('li').dataset.idx);
+                if (dragIdx !== null && targetIdx !== dragIdx) {
+                    const moved = sprites.splice(dragIdx, 1)[0];
+                    sprites.splice(targetIdx, 0, moved);
+                    renderFileList();
+                    renderAttrSelect();
+                }
+                dragIdx = null;
+            });
+
+            input.addEventListener('change', async e => {
+                sprites = [];
+                errorDiv.style.display = 'none';
+                attrSelect.style.display = 'none';
+                mergeBtn.style.display = 'none';
+                fileList.innerHTML = '';
+                const files = Array.from(input.files);
+                for (const file of files) {
+                    try {
+                        const text = await file.text();
+                        const data = JSON.parse(text);
+                        sprites.push({file, data});
+                    } catch {
+                        errorDiv.textContent = `檔案 ${file.name} 解析失敗`;
+                        errorDiv.style.display = '';
+                        return;
+                    }
+                }
+                if (sprites.length < 2) {
+                    errorDiv.textContent = '請選擇至少兩個單色精靈檔案';
+                    errorDiv.style.display = '';
+                    return;
+                }
+                // 檢查長寬一致
+                const w = sprites[0].data.width, h = sprites[0].data.height;
+                if (!sprites.every(s => s.data.width === w && s.data.height === h)) {
+                    errorDiv.textContent = '所有精靈的寬高必須一致！';
+                    errorDiv.style.display = '';
+                    return;
+                }
+                renderFileList();
+                renderAttrSelect();
+                mergeBtn.style.display = '';
+            });
+
+            function renderFileList() {
+                fileList.innerHTML = '';
+                sprites.forEach((s, i) => {
+                    const li = document.createElement('li');
+                    li.textContent = `${s.file.name} (${s.data.name || ''})`;
+                    li.draggable = true;
+                    li.dataset.idx = i;
+                    fileList.appendChild(li);
+                });
+            }
+            function renderAttrSelect() {
+                attrSelect.style.display = '';
+                attrSelect.innerHTML = '選擇要保留屬性的精靈：';
+                const select = document.createElement('select');
+                sprites.forEach((s, i) => {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.textContent = `${s.file.name} (${s.data.name || ''})`;
+                    select.appendChild(opt);
+                });
+                select.value = attrSourceIdx;
+                select.onchange = e => { attrSourceIdx = Number(e.target.value); };
+                attrSelect.appendChild(select);
+            }
+
+            mergeBtn.onclick = function() {
+                errorDiv.style.display = 'none';
+                if (sprites.length < 2) {
+                    errorDiv.textContent = '請選擇至少兩個單色精靈檔案';
+                    errorDiv.style.display = '';
+                    return;
+                }
+                // 先將所有單色精靈 frameList 轉為多色（1->colorIndex, 0->0）
+                const colorFrameLists = sprites.map(s => {
+                    const color = s.data.colorIndex;
+                    return s.data.frameList.map(frame => frame.map(px => px === 1 ? color : 0));
+                });
+                // ====== 新增：動畫幀補齊 ======
+                const maxFrameLen = Math.max(...colorFrameLists.map(frames => frames.length));
+                const paddedColorFrameLists = colorFrameLists.map(frames => padFrames(frames, maxFrameLen));
+                // ====== 合併時 colorFrameLists 換成 paddedColorFrameLists ======
+                const w = sprites[0].data.width, h = sprites[0].data.height;
+                const mergedFrameList = [];
+                for (let f = 0; f < maxFrameLen; f++) {
+                    const mergedFrame = [];
+                    for (let i = 0; i < w * h; i++) {
+                        let val = 0;
+                        for (let sIdx = 0; sIdx < paddedColorFrameLists.length; sIdx++) {
+                            const frameArr = paddedColorFrameLists[sIdx][f] || paddedColorFrameLists[sIdx][0];
+                            if (frameArr[i] !== 0) val = frameArr[i];
+                        }
+                        mergedFrame.push(val);
+                    }
+                    mergedFrameList.push(mergedFrame);
+                }
+                // 直接從下拉選單 DOM 取值，確保正確
+                const select = attrSelect.querySelector('select');
+                const idx = select ? Number(select.value) : attrSourceIdx;
+                const src = sprites[idx].data;
+                const merged = {
+                    name: src.name,
+                    isAvatar: src.isAvatar,
+                    isWall: src.isWall,
+                    isItem: src.isItem,
+                    isTransparent: src.isTransparent,
+                    width: src.width,
+                    height: src.height,
+                    frameList: mergedFrameList,
+                    scriptList: JSON.parse(JSON.stringify(src.scriptList || {}))
+                };
+                delete merged.colorIndex;
+                const fileName = sprites[idx].file.name;
+                const blob = new Blob([JSON.stringify(merged, null, 2)], {type:'application/json'});
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = fileName;
+                a.click();
+            };
+        })();
+
+        // ===== 合併房間單色精靈工具 =====
+        (function(){
+            const input = document.getElementById('mergeRoomInput');
+            const errorDiv = document.getElementById('mergeRoomError');
+            const mergeBtn = document.getElementById('mergeRoomBtn');
+            let roomData = null, fileName = '';
+            input.onchange = async function(e) {
+                errorDiv.style.display = 'none';
+                mergeBtn.style.display = 'none';
+                if (!input.files[0]) return;
+                fileName = input.files[0].name;
+                try {
+                    const text = await input.files[0].text();
+                    roomData = JSON.parse(text);
+                    mergeBtn.style.display = '';
+                } catch {
+                    errorDiv.textContent = '檔案格式錯誤，請上傳正確的 .mosiroom 檔案';
+                    errorDiv.style.display = '';
+                    roomData = null;
+                }
+            };
+            mergeBtn.onclick = function() {
+                errorDiv.style.display = 'none';
+                if (!roomData) return;
+                try {
+                    const room = JSON.parse(JSON.stringify(roomData));
+                    const spriteMap = {};
+                    room.spriteList.forEach(s => spriteMap[s.name] = s);
+                    // ====== 預處理：每個重複放置的 sprite 都分配一個獨立複製（名稱加編號） ======
+                    // （已不需要，直接跳過，保留原始 tileList 與 spriteList）
+                    // 依座標分組
+                    const posMap = {};
+                    room.tileList.forEach((t, idx) => {
+                        const key = t.x + ',' + t.y;
+                        if (!posMap[key]) posMap[key] = [];
+                        posMap[key].push(idx);
+                    });
+                    let mergedCount = 0;
+                    Object.entries(posMap).forEach(([key, idxArr]) => {
+                        // 每一格都產生一個獨立的合併精靈
+                        const [x, y] = key.split(',').map(Number);
+                        const sprites = idxArr.map(idx => spriteMap[room.tileList[idx].spriteName]);
+                        // ====== 新增：動畫幀補齊 ======
+                        // 1. 單色精靈 frameList 轉多色
+                        const colorFrameLists = sprites.map(s => {
+                            const color = s.colorIndex;
+                            return s.frameList.map(frame => frame.map(px => px === 1 ? color : 0));
+                        });
+                        // 2. 取得最大動畫幀數
+                        const maxFrameLen = Math.max(...colorFrameLists.map(frames => frames.length));
+                        // 3. 幀數不足補齊
+                        const paddedColorFrameLists = colorFrameLists.map(frames => padFrames(frames, maxFrameLen));
+                        // ====== 合併時 colorFrameLists 換成 paddedColorFrameLists ======
+                        const w = sprites[0].width, h = sprites[0].height;
+                        const mergedFrameList = [];
+                        for (let f = 0; f < maxFrameLen; f++) {
+                            const mergedFrame = [];
+                            for (let i = 0; i < w * h; i++) {
+                                let color = 0;
+                                for (let sIdx = 0; sIdx < paddedColorFrameLists.length; sIdx++) {
+                                    const val = paddedColorFrameLists[sIdx][f][i];
+                                    if (val && val !== 0) color = val;
+                                }
+                                mergedFrame.push(color);
+                            }
+                            mergedFrameList.push(mergedFrame);
+                        }
+                        // 先宣告 topSprite
+                        const topSprite = sprites[sprites.length - 1];
+                        // 決定合併精靈名稱：只有多色才加 -合併(x,y)，單色維持原名
+                        let mergedName = topSprite.name;
+                        if (sprites.length > 1) {
+                            mergedName = `${topSprite.name}-合併(${x},${y})`;
+                        }
+                        const mergedSprite = {
+                            name: mergedName,
+                            isAvatar: false,
+                            isWall: false,
+                            isItem: false,
+                            isTransparent: true,
+                            width: w,
+                            height: h,
+                            frameList: mergedFrameList,
+                            scriptList: {}
+                        };
+                        // 屬性來源：取最上層精靈（可調整）
+                        mergedSprite.isAvatar = topSprite.isAvatar;
+                        mergedSprite.isWall = topSprite.isWall;
+                        mergedSprite.isItem = topSprite.isItem;
+                        mergedSprite.isTransparent = topSprite.isTransparent;
+                        mergedSprite.scriptList = JSON.parse(JSON.stringify(topSprite.scriptList || {}));
+                        room.spriteList.push(mergedSprite);
+                        // 只 log 除 frameList 以外的屬性
+                        const { frameList, ...spriteInfo } = mergedSprite;
+                        // tileList 保留所有原 tile，全部指向新合併精靈
+                        idxArr.forEach(idx => {
+                            room.tileList[idx] = {
+                                spriteName: mergedSprite.name,
+                                x: room.tileList[idx].x,
+                                y: room.tileList[idx].y
+                            };
+                        });
+                        mergedCount++;
+                    });
+                    // 移除被合併的 tile
+                    room.tileList = room.tileList.filter(t => t);
+                    if (mergedCount === 0) {
+                        errorDiv.textContent = '沒有需要合併的同格單色精靈';
+                        errorDiv.style.display = '';
+                        return;
+                    }
+                    // 下載
+                    const blob = new Blob([JSON.stringify(room, null, 2)], {type:'application/json'});
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = fileName;
+                    a.click();
+                } catch (e) {
+                    errorDiv.textContent = '合併失敗：' + e.message;
+                    errorDiv.style.display = '';
+                    console.error('合併房間單色精靈錯誤', e);
+                }
+            };
+        })();
+
+        // Tab 切換邏輯
+        function setTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
+            const btn = document.querySelector('.tab-btn[data-tab="' + tabId + '"]');
+            if (btn) btn.classList.add('active');
+            const sec = document.getElementById(tabId);
+            if (sec) sec.classList.add('active');
+            // 手機下拉同步
+            const select = document.getElementById('tab-select');
+            if (select && select.value !== tabId) select.value = tabId;
+        }
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.onclick = function() {
+                setTab(btn.dataset.tab);
+            };
+        });
+        // 響應式下拉選單切換
+        document.getElementById('tab-select').addEventListener('change', function() {
+            setTab(this.value);
+        });
+        // 預設顯示第一個 tab
+        setTab('upload-img');
+
+        // Header 開合邏輯
+        const headerBtn = document.getElementById('headerToggleBtn');
+        const headerContent = document.getElementById('headerContent');
+        let headerOpen = true;
+        headerBtn.onclick = function() {
+            headerOpen = !headerOpen;
+            if (headerOpen) {
+                headerContent.classList.remove('header-collapsed');
+                headerBtn.classList.remove('rotate');
+            } else {
+                headerContent.classList.add('header-collapsed');
+                headerBtn.classList.add('rotate');
+            }
+        };
     </script>
 </body>
 </html> 
