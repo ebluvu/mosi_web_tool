@@ -627,10 +627,13 @@
                 // 轉換為二值數據
                 const binaryData = [];
                 for (let i = 0; i < pixels.length; i += 4) {
-                    // 計算灰度值
-                    const gray = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
-                    // 轉換為二值（0為黑色/透明，1為白色/不透明）
-                    binaryData.push(gray < 128 ? 1 : 0);
+                    const alpha = pixels[i + 3];
+                    if (alpha < 128) {
+                        binaryData.push(0); // 透明直接當 0
+                    } else {
+                        const gray = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+                        binaryData.push(gray < 128 ? 1 : 0);
+                    }
                 }
                 
                 // 檢查是否為空白精靈
