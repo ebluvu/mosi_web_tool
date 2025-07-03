@@ -309,6 +309,7 @@
         <button class="tab-btn" data-tab="merge-rooms">房間合併工具</button>
         <button class="tab-btn" data-tab="merge-sprite-section">合併精靈工具</button>
         <button class="tab-btn" data-tab="merge-room-section">合併房間單色精靈工具</button>
+        <button class="tab-btn" data-tab="merge-world-section">世界級合併工具</button>
       </div>
       <select id="tab-select">
         <option value="upload-img">圖片上傳</option>
@@ -318,6 +319,7 @@
         <option value="merge-rooms">房間合併工具</option>
         <option value="merge-sprite-section">合併精靈工具</option>
         <option value="merge-room-section">合併房間單色精靈工具</option>
+        <option value="merge-world-section">世界級合併工具</option>
       </select>
       <div class="tab-content">
         <div class="flex-container">
@@ -403,6 +405,12 @@
             <input type="file" id="mergeRoomInput" accept=".mosiroom" style="margin-bottom:10px;">
             <div id="mergeRoomError" class="error" style="display:none;"></div>
             <button id="mergeRoomBtn" style="margin-top:10px; display:none;">合併並下載新房間檔案</button>
+        </div>
+        <div class="section tab-section" id="merge-world-section">
+          <h2>世界級合併工具</h2>
+          <input type="file" id="mergeWorldInput" accept=".mosi" style="margin-bottom:10px;">
+          <div id="mergeWorldError" class="error" style="display:none;"></div>
+          <button id="mergeWorldBtn" style="margin-top:10px; display:none;">合併並下載新世界檔案</button>
         </div>
         </div>
       </div>
@@ -1480,6 +1488,17 @@
                         if (sprites.length > 1) {
                             mergedName = `${topSprite.name}-合併(${x},${y})`;
                         }
+                        // ===== scriptList 新邏輯 =====
+                        let mergedScriptList = {};
+                        let scriptLog = [];
+                        for (let i = sprites.length - 1; i >= 0; i--) {
+                            scriptLog.push({name: sprites[i].name, scriptList: sprites[i].scriptList});
+                            if (isScriptListValid(sprites[i].scriptList)) {
+                                mergedScriptList = JSON.parse(JSON.stringify(sprites[i].scriptList));
+                                break;
+                            }
+                        }
+                        console.log(`[合併房間單色精靈] (${x},${y}) sprites:`, scriptLog, '→ 採用 scriptList:', mergedScriptList);
                         const mergedSprite = {
                             name: mergedName,
                             isAvatar: false,
@@ -1489,14 +1508,15 @@
                             width: w,
                             height: h,
                             frameList: mergedFrameList,
-                            scriptList: {}
+                            scriptList: mergedScriptList
                         };
                         // 屬性來源：取最上層精靈（可調整）
                         mergedSprite.isAvatar = topSprite.isAvatar;
                         mergedSprite.isWall = topSprite.isWall;
                         mergedSprite.isItem = topSprite.isItem;
                         mergedSprite.isTransparent = topSprite.isTransparent;
-                        mergedSprite.scriptList = JSON.parse(JSON.stringify(topSprite.scriptList || {}));
+                        mergedSprite.scriptList = mergedScriptList;
+                        console.log('[合併房間單色精靈] mergedSprite(屬性設定後):', JSON.parse(JSON.stringify(mergedSprite)));
                         room.spriteList.push(mergedSprite);
                         // 只 log 除 frameList 以外的屬性
                         const { frameList, ...spriteInfo } = mergedSprite;
@@ -1517,6 +1537,36 @@
                         errorDiv.style.display = '';
                         return;
                     }
+                    // ====== 新增：合併精靈內容去重 ======
+                    if (room.spriteList && room.spriteList.length > 0) {
+                        const spriteContentMap = {};
+                        const nameMap = {};
+                        room.spriteList.forEach(s => {
+                            const hash = JSON.stringify({
+                                isAvatar: s.isAvatar,
+                                isWall: s.isWall,
+                                isItem: s.isItem,
+                                isTransparent: s.isTransparent,
+                                width: s.width,
+                                height: s.height,
+                                frameList: s.frameList,
+                                scriptList: s.scriptList
+                            });
+                            if (!spriteContentMap[hash]) {
+                                spriteContentMap[hash] = s;
+                                nameMap[s.name] = s.name;
+                            } else {
+                                nameMap[s.name] = spriteContentMap[hash].name;
+                            }
+                        });
+                        room.spriteList = Object.values(spriteContentMap);
+                        // 修正 tileList 指向唯一精靈名稱
+                        room.tileList.forEach(tile => {
+                            if (nameMap[tile.spriteName]) {
+                                tile.spriteName = nameMap[tile.spriteName];
+                            }
+                        });
+                    }
                     // 下載
                     const blob = new Blob([JSON.stringify(room, null, 2)], {type:'application/json'});
                     const a = document.createElement('a');
@@ -1527,6 +1577,174 @@
                     errorDiv.textContent = '合併失敗：' + e.message;
                     errorDiv.style.display = '';
                     console.error('合併房間單色精靈錯誤', e);
+                }
+            };
+        })();
+
+        // ===== 世界級合併工具 =====
+        (function(){
+            const input = document.getElementById('mergeWorldInput');
+            const errorDiv = document.getElementById('mergeWorldError');
+            const mergeBtn = document.getElementById('mergeWorldBtn');
+            let worldData = null, fileName = '';
+            input.onchange = async function(e) {
+                errorDiv.style.display = 'none';
+                mergeBtn.style.display = 'none';
+                if (!input.files[0]) return;
+                fileName = input.files[0].name;
+                try {
+                    const text = await input.files[0].text();
+                    worldData = JSON.parse(text);
+                    mergeBtn.style.display = '';
+                } catch {
+                    errorDiv.textContent = '檔案格式錯誤，請上傳正確的 .mosi 世界檔案';
+                    errorDiv.style.display = '';
+                    worldData = null;
+                }
+            };
+            mergeBtn.onclick = function() {
+                errorDiv.style.display = 'none';
+                if (!worldData) return;
+                try {
+                    // 深拷貝世界數據，完整保留所有屬性
+                    const world = JSON.parse(JSON.stringify(worldData));
+                    if (!Array.isArray(world.roomList) || !Array.isArray(world.spriteList)) {
+                        errorDiv.textContent = '世界數據格式錯誤，缺少 roomList 或 spriteList';
+                        errorDiv.style.display = '';
+                        return;
+                    }
+                    // 建立 spriteName->sprite 映射
+                    const globalSpriteMap = {};
+                    world.spriteList.forEach(s => globalSpriteMap[s.name] = s);
+                    // 用來記錄所有合併後新精靈名稱
+                    const mergedSpriteNames = new Set();
+                    // 用來記錄所有被合併的原始精靈名稱
+                    const mergedSourceNames = new Set();
+                    // 處理每個房間
+                    world.roomList.forEach(room => {
+                        // 建立本房間 spriteName->sprite
+                        const roomSpriteMap = {};
+                        (room.spriteList||[]).forEach(s => roomSpriteMap[s.name] = s);
+                        // 合併 tileList
+                        const posMap = {};
+                        (room.tileList||[]).forEach((t, idx) => {
+                            const key = t.x + ',' + t.y;
+                            if (!posMap[key]) posMap[key] = [];
+                            posMap[key].push(idx);
+                        });
+                        Object.entries(posMap).forEach(([key, idxArr]) => {
+                            // 每格都產生一個合併精靈
+                            const [x, y] = key.split(',').map(Number);
+                            // 支援房間自帶 spriteList，否則用世界 spriteList
+                            const sprites = idxArr.map(idx => {
+                                const sn = room.tileList[idx].spriteName;
+                                return roomSpriteMap[sn] || globalSpriteMap[sn];
+                            });
+                            // 記錄所有被合併的原始精靈名稱
+                            sprites.forEach(s => mergedSourceNames.add(s.name));
+                            // 單色精靈 frameList 轉多色
+                            const colorFrameLists = sprites.map(s => {
+                                const color = s.colorIndex;
+                                return s.frameList.map(frame => frame.map(px => px === 1 ? color : 0));
+                            });
+                            // 幀補齊
+                            const maxFrameLen = Math.max(...colorFrameLists.map(frames => frames.length));
+                            const paddedColorFrameLists = colorFrameLists.map(frames => padFrames(frames, maxFrameLen));
+                            const w = sprites[0].width, h = sprites[0].height;
+                            const mergedFrameList = [];
+                            for (let f = 0; f < maxFrameLen; f++) {
+                                const mergedFrame = [];
+                                for (let i = 0; i < w * h; i++) {
+                                    let color = 0;
+                                    for (let sIdx = 0; sIdx < paddedColorFrameLists.length; sIdx++) {
+                                        const val = paddedColorFrameLists[sIdx][f][i];
+                                        if (val && val !== 0) color = val;
+                                    }
+                                    mergedFrame.push(color);
+                                }
+                                mergedFrameList.push(mergedFrame);
+                            }
+                            // 取最上層精靈
+                            const topSprite = sprites[sprites.length - 1];
+                            let mergedName = topSprite.name;
+                            if (sprites.length > 1) {
+                                mergedName = `${topSprite.name}-合併(${x},${y})`;
+                            }
+                            const mergedSprite = {
+                                name: mergedName,
+                                isAvatar: topSprite.isAvatar,
+                                isWall: topSprite.isWall,
+                                isItem: topSprite.isItem,
+                                isTransparent: topSprite.isTransparent,
+                                width: w,
+                                height: h,
+                                frameList: mergedFrameList,
+                                scriptList: JSON.parse(JSON.stringify(topSprite.scriptList || {}))
+                            };
+                            // 新增到世界 spriteList
+                            world.spriteList.push(mergedSprite);
+                            mergedSpriteNames.add(mergedName);
+                            // tileList 指向新合併精靈
+                            idxArr.forEach(idx => {
+                                room.tileList[idx] = {
+                                    spriteName: mergedSprite.name,
+                                    x: room.tileList[idx].x,
+                                    y: room.tileList[idx].y
+                                };
+                            });
+                        });
+                    });
+                    // 合併後清理 spriteList：
+                    // 1. 只保留合併後的新精靈（mergedSpriteNames）
+                    // 2. 移除所有合併前的精靈（mergedSourceNames）
+                    // 3. 移除重複精靈（同名只留一個）
+                    const uniqueSpriteMap = {};
+                    world.spriteList.forEach(s => {
+                        if (mergedSpriteNames.has(s.name)) {
+                            uniqueSpriteMap[s.name] = s;
+                        }
+                    });
+                    world.spriteList = Object.values(uniqueSpriteMap);
+                    // ====== 新增：合併精靈內容去重 ======
+                    const spriteContentMap = {};
+                    const nameMap = {};
+                    world.spriteList.forEach(s => {
+                        const hash = JSON.stringify({
+                            isAvatar: s.isAvatar,
+                            isWall: s.isWall,
+                            isItem: s.isItem,
+                            isTransparent: s.isTransparent,
+                            width: s.width,
+                            height: s.height,
+                            frameList: s.frameList,
+                            scriptList: s.scriptList
+                        });
+                        if (!spriteContentMap[hash]) {
+                            spriteContentMap[hash] = s;
+                            nameMap[s.name] = s.name;
+                        } else {
+                            nameMap[s.name] = spriteContentMap[hash].name;
+                        }
+                    });
+                    world.spriteList = Object.values(spriteContentMap);
+                    // 修正所有房間 tileList 指向唯一精靈名稱
+                    world.roomList.forEach(room => {
+                        room.tileList.forEach(tile => {
+                            if (nameMap[tile.spriteName]) {
+                                tile.spriteName = nameMap[tile.spriteName];
+                            }
+                        });
+                    });
+                    // 下載
+                    const blob = new Blob([JSON.stringify(world, null, 2)], {type:'application/json'});
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = fileName;
+                    a.click();
+                } catch (e) {
+                    errorDiv.textContent = '合併失敗：' + e.message;
+                    errorDiv.style.display = '';
+                    console.error('世界級合併錯誤', e);
                 }
             };
         })();
@@ -1569,6 +1787,12 @@
                 headerBtn.classList.add('rotate');
             }
         };
+
+        // ===== scriptList 有效性判斷 =====
+        function isScriptListValid(scriptList) {
+            if (!scriptList || typeof scriptList !== 'object') return false;
+            return Object.values(scriptList).some(v => typeof v === 'string' && v.trim() !== '');
+        }
     </script>
 </body>
 </html> 
