@@ -1321,7 +1321,7 @@
                     }
                 }
                 if (sprites.length < 2) {
-                    errorDiv.textContent = '請選擇至少兩個單色精靈檔案';
+                    errorDiv.textContent = '請選擇至少兩個精靈檔案';
                     errorDiv.style.display = '';
                     return;
                 }
@@ -1365,14 +1365,21 @@
             mergeBtn.onclick = function() {
                 errorDiv.style.display = 'none';
                 if (sprites.length < 2) {
-                    errorDiv.textContent = '請選擇至少兩個單色精靈檔案';
+                    errorDiv.textContent = '請選擇至少兩個精靈檔案';
                     errorDiv.style.display = '';
                     return;
                 }
-                // 先將所有單色精靈 frameList 轉為多色（1->colorIndex, 0->0）
+                // 處理單色和多色精靈的 frameList
                 const colorFrameLists = sprites.map(s => {
-                    const color = s.data.colorIndex;
-                    return s.data.frameList.map(frame => frame.map(px => px === 1 ? color : 0));
+                    // 檢查是否為單色精靈（有 colorIndex）
+                    if (s.data.colorIndex !== undefined) {
+                        // 單色精靈：將 1 轉換為 colorIndex，0 保持為 0
+                        const color = s.data.colorIndex;
+                        return s.data.frameList.map(frame => frame.map(px => px === 1 ? color : 0));
+                    } else {
+                        // 多色精靈：直接使用原始 frameList（已經是顏色值）
+                        return s.data.frameList.map(frame => [...frame]);
+                    }
                 });
                 // ====== 新增：動畫幀補齊 ======
                 const maxFrameLen = Math.max(...colorFrameLists.map(frames => frames.length));
@@ -1460,10 +1467,17 @@
                         const [x, y] = key.split(',').map(Number);
                         const sprites = idxArr.map(idx => spriteMap[room.tileList[idx].spriteName]);
                         // ====== 新增：動畫幀補齊 ======
-                        // 1. 單色精靈 frameList 轉多色
+                        // 1. 處理單色和多色精靈的 frameList
                         const colorFrameLists = sprites.map(s => {
-                            const color = s.colorIndex;
-                            return s.frameList.map(frame => frame.map(px => px === 1 ? color : 0));
+                            // 檢查是否為單色精靈（有 colorIndex）
+                            if (s.colorIndex !== undefined) {
+                                // 單色精靈：將 1 轉換為 colorIndex，0 保持為 0
+                                const color = s.colorIndex;
+                                return s.frameList.map(frame => frame.map(px => px === 1 ? color : 0));
+                            } else {
+                                // 多色精靈：直接使用原始 frameList（已經是顏色值）
+                                return s.frameList.map(frame => [...frame]);
+                            }
                         });
                         // 2. 取得最大動畫幀數
                         const maxFrameLen = Math.max(...colorFrameLists.map(frames => frames.length));
@@ -1645,10 +1659,17 @@
                             });
                             // 記錄所有被合併的原始精靈名稱
                             sprites.forEach(s => mergedSourceNames.add(s.name));
-                            // 單色精靈 frameList 轉多色
+                            // 處理單色和多色精靈的 frameList
                             const colorFrameLists = sprites.map(s => {
-                                const color = s.colorIndex;
-                                return s.frameList.map(frame => frame.map(px => px === 1 ? color : 0));
+                                // 檢查是否為單色精靈（有 colorIndex）
+                                if (s.colorIndex !== undefined) {
+                                    // 單色精靈：將 1 轉換為 colorIndex，0 保持為 0
+                                    const color = s.colorIndex;
+                                    return s.frameList.map(frame => frame.map(px => px === 1 ? color : 0));
+                                } else {
+                                    // 多色精靈：直接使用原始 frameList（已經是顏色值）
+                                    return s.frameList.map(frame => [...frame]);
+                                }
                             });
                             // 幀補齊
                             const maxFrameLen = Math.max(...colorFrameLists.map(frames => frames.length));
@@ -1673,6 +1694,17 @@
                             if (sprites.length > 1) {
                                 mergedName = `${topSprite.name}-合併(${x},${y})`;
                             }
+                            // ===== scriptList 新邏輯 =====
+                            let mergedScriptList = {};
+                            let scriptLog = [];
+                            for (let i = sprites.length - 1; i >= 0; i--) {
+                                scriptLog.push({name: sprites[i].name, scriptList: sprites[i].scriptList});
+                                if (isScriptListValid(sprites[i].scriptList)) {
+                                    mergedScriptList = JSON.parse(JSON.stringify(sprites[i].scriptList));
+                                    break;
+                                }
+                            }
+                            console.log(`[世界級合併] (${x},${y}) sprites:`, scriptLog, '→ 採用 scriptList:', mergedScriptList);
                             const mergedSprite = {
                                 name: mergedName,
                                 isAvatar: topSprite.isAvatar,
@@ -1682,7 +1714,7 @@
                                 width: w,
                                 height: h,
                                 frameList: mergedFrameList,
-                                scriptList: JSON.parse(JSON.stringify(topSprite.scriptList || {}))
+                                scriptList: mergedScriptList
                             };
                             // 新增到世界 spriteList
                             world.spriteList.push(mergedSprite);
@@ -1698,14 +1730,21 @@
                         });
                     });
                     // 合併後清理 spriteList：
-                    // 1. 只保留合併後的新精靈（mergedSpriteNames）
-                    // 2. 移除所有合併前的精靈（mergedSourceNames）
-                    // 3. 移除重複精靈（同名只留一個）
+                    // 1. 保留合併後的新精靈（mergedSpriteNames）
+                    // 2. 移除被合併的原始精靈（mergedSourceNames）
+                    // 3. 保留未參與合併的精靈（既不在 mergedSpriteNames 也不在 mergedSourceNames）
+                    // 4. 移除重複精靈（同名只留一個）
                     const uniqueSpriteMap = {};
                     world.spriteList.forEach(s => {
+                        // 保留合併後的新精靈
                         if (mergedSpriteNames.has(s.name)) {
                             uniqueSpriteMap[s.name] = s;
                         }
+                        // 保留未參與合併的精靈（既不是合併後的新精靈，也不是被合併的原始精靈）
+                        else if (!mergedSourceNames.has(s.name)) {
+                            uniqueSpriteMap[s.name] = s;
+                        }
+                        // 被合併的原始精靈會被移除（不加入 uniqueSpriteMap）
                     });
                     world.spriteList = Object.values(uniqueSpriteMap);
                     // ====== 新增：合併精靈內容去重 ======
