@@ -618,11 +618,17 @@
                         return;
                     }
                     batchResults.forEach((r, idx) => {
-                        const blob = new Blob([JSON.stringify(r.data, null, 4)], { type: "application/json" });
+                        let ext = ".json";
+                        let minified = false;
+                        if (r.data && r.data.frameList) { ext = ".mosisprite"; minified = true; }
+                        else if (r.data && (r.data.roomName || r.data.name) && r.data.tileList) { ext = ".mosiroom"; minified = true; }
+                        else if (r.data && r.data.roomList) { ext = ".mosi"; minified = true; }
+                        let content = minified ? JSON.stringify(r.data) : JSON.stringify(r.data, null, 4);
+                        const blob = new Blob([content], { type: "application/json" });
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement("a");
                         a.href = url;
-                        a.download = `${r.fileName}.mosiroom`;
+                        a.download = `${r.fileName}${ext}`;
                         a.click();
                         URL.revokeObjectURL(url);
                     });
@@ -653,7 +659,10 @@
                     roomHeight: parseInt(document.getElementById("roomHeight").value)
                 };
                 const roomData = processImageToRoomData(currentImages[0], data);
-                output.value = JSON.stringify(roomData, null, 4);
+                // 單張顯示結果
+                output.value = (roomData && (roomData.frameList || roomData.tileList || roomData.roomList))
+                    ? JSON.stringify(roomData)
+                    : JSON.stringify(roomData, null, 4);
                 output.style.display = "block";
                 downloadBtn.style.display = "block";
                 
@@ -787,13 +796,18 @@
         downloadBtn.addEventListener("click", () => {
             const roomName = document.getElementById("roomName").value || "room_data";
             let ext = ".json";
+            let minified = false;
+            let obj = null;
             try {
-                const data = JSON.parse(output.value);
-                if (data && data.frameList) ext = ".mosisprite";
-                else if (data && (data.roomName || data.name) && data.tileList) ext = ".mosiroom";
-                else if (data && data.roomList) ext = ".mosi";
+                obj = JSON.parse(output.value);
+                if (obj && obj.frameList) { ext = ".mosisprite"; minified = true; }
+                else if (obj && (obj.roomName || obj.name) && obj.tileList) { ext = ".mosiroom"; minified = true; }
+                else if (obj && obj.roomList) { ext = ".mosi"; minified = true; }
             } catch {}
-            const blob = new Blob([output.value], { type: "application/json" });
+            let content = "";
+            if (minified && obj) content = JSON.stringify(obj);
+            else content = output.value;
+            const blob = new Blob([content], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
@@ -881,7 +895,9 @@
 
                 // 顯示合併後數據
                 const mergeOutput = document.getElementById("merge-output");
-                mergeOutput.value = JSON.stringify(mergedData, null, 4);
+                mergeOutput.value = (mergedData && (mergedData.frameList || mergedData.tileList || mergedData.roomList))
+                    ? JSON.stringify(mergedData)
+                    : JSON.stringify(mergedData, null, 4);
                 mergeOutput.style.display = "block";
 
                 // 顯示下載按鈕
@@ -900,7 +916,16 @@
         document.getElementById("merge-download-btn").addEventListener("click", () => {
             const roomName = document.getElementById("roomName").value || "merged_room_data";
             const mergeOutput = document.getElementById("merge-output");
-            const blob = new Blob([mergeOutput.value], { type: "application/json" });
+            let obj = null;
+            let minified = false;
+            try {
+                obj = JSON.parse(mergeOutput.value);
+                if (obj && obj.frameList) minified = true;
+                else if (obj && (obj.roomName || obj.name) && obj.tileList) minified = true;
+                else if (obj && obj.roomList) minified = true;
+            } catch {}
+            let content = (minified && obj) ? JSON.stringify(obj) : mergeOutput.value;
+            const blob = new Blob([content], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
@@ -1497,7 +1522,9 @@
                 };
                 delete merged.colorIndex;
                 const fileName = sprites[idx].file.name.replace(/\.(json|mosisprite)?$/, "") + ".mosisprite";
-                const blob = new Blob([JSON.stringify(merged, null, 2)], {type:'application/json'});
+                // 壓成一行
+                const content = JSON.stringify(merged);
+                const blob = new Blob([content], {type:'application/json'});
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
                 a.download = fileName;
@@ -1668,7 +1695,9 @@
                     // ===== 合併房間單色精靈工具下載檔名修正 =====
                     let downloadName = (fileName || "merged_room")
                       .replace(/\.(json|mosiroom)?$/, "") + ".mosiroom";
-                    const blob = new Blob([JSON.stringify(room, null, 2)], {type:'application/json'});
+                    // 壓成一行
+                    const content = JSON.stringify(room);
+                    const blob = new Blob([content], {type:'application/json'});
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);
                     a.download = downloadName;
@@ -1863,7 +1892,9 @@
                     // ===== 世界級合併工具下載檔名修正 =====
                     let downloadName = (fileName || "merged_world")
                       .replace(/\.(json|mosi)?$/, "") + ".mosi";
-                    const blob = new Blob([JSON.stringify(world, null, 2)], {type:'application/json'});
+                    // 壓成一行
+                    const content = JSON.stringify(world);
+                    const blob = new Blob([content], {type:'application/json'});
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);
                     a.download = downloadName;
