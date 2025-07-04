@@ -327,7 +327,7 @@
             <h2>圖片</h2>
             <img id="preview" alt="預覽" src="static/rest.png" style="max-width: 300px;">
             <form id="upload-form">
-                <input type="file" id="file" name="file" accept="image/*" required>
+                <input type="file" id="file" name="file" accept="image/*" required multiple>
                 <button type="submit">載入圖片</button>
             </form>
             <div id="image-info" style="display: none;">
@@ -359,6 +359,7 @@
                             <option value="8">8</option>
                         </select>
                     </label><br>
+                    <div id="batch-sprite-settings" style="display:none;"></div>
                     <small style="color: #666;">※ 精靈尺寸最大為 24×24</small>
                     <small style="color: #2196F3; display: block; margin-top: 5px;">💡 修改精靈尺寸會自動計算房間尺寸</small>
                 </div>
@@ -379,13 +380,13 @@
           <div class="section tab-section" id="data">
             <h2>結果</h2>
             <textarea id="output" readonly></textarea>
-            <button id="download-btn" style="display: none;">下載.JSON文件</button>
+            <button id="download-btn" style="display: none;">下載檔案</button>
         </div>
           <div class="section tab-section" id="merge-rooms">
             <h2>房間合併工具</h2>
             <form id="merge-form">
-                <label for="merge-files">上傳多個房間數據 (.json): </label>
-                <input type="file" id="merge-files" name="merge-files" accept=".json" multiple required>
+                <label for="merge-files">上傳多個房間數據: </label>
+                <input type="file" id="merge-files" name="merge-files" accept=".json,.mosiroom" multiple required>
                 <ul id="file-list"></ul>
                 <button type="submit">合併房間數據</button>
             </form>
@@ -394,7 +395,7 @@
         </div>
           <div class="section tab-section" id="merge-sprite-section">
             <h2>合併精靈工具</h2>
-            <input type="file" id="mergeSpriteInput" accept=".mosisprite" multiple style="margin-bottom:10px;">
+            <input type="file" id="mergeSpriteInput" accept=".mosisprite,.json" multiple style="margin-bottom:10px;">
             <ul id="mergeSpriteFileList"></ul>
             <div id="mergeSpriteAttrSelect" style="display:none; margin:10px 0;"></div>
             <div id="mergeSpriteError" class="error" style="display:none;"></div>
@@ -402,13 +403,13 @@
         </div>
           <div class="section tab-section" id="merge-room-section">
             <h2>合併房間單色精靈工具</h2>
-            <input type="file" id="mergeRoomInput" accept=".mosiroom" style="margin-bottom:10px;">
+            <input type="file" id="mergeRoomInput" accept=".mosiroom,.json" style="margin-bottom:10px;">
             <div id="mergeRoomError" class="error" style="display:none;"></div>
             <button id="mergeRoomBtn" style="margin-top:10px; display:none;">合併並下載新房間檔案</button>
         </div>
         <div class="section tab-section" id="merge-world-section">
           <h2>世界級合併工具</h2>
-          <input type="file" id="mergeWorldInput" accept=".mosi" style="margin-bottom:10px;">
+          <input type="file" id="mergeWorldInput" accept=".mosi,.json" style="margin-bottom:10px;">
           <div id="mergeWorldError" class="error" style="display:none;"></div>
           <button id="mergeWorldBtn" style="margin-top:10px; display:none;">合併並下載新世界檔案</button>
         </div>
@@ -416,9 +417,10 @@
       </div>
     </div>
     <script>
-        let currentImage = null;
-        let imageCanvas = null;
-        let imageContext = null;
+        let currentImages = []; // 支援多圖
+        let batchMode = false;
+        let allImagesLoaded = false;
+        let batchResults = [];
 
         const uploadForm = document.getElementById("upload-form");
         const generateForm = document.getElementById("generate-form");
@@ -438,78 +440,197 @@
         uploadForm.addEventListener("submit", async (e) => {
             e.preventDefault();
             const fileInput = document.getElementById('file');
-            const file = fileInput.files[0];
-            
-            if (!file) {
+            const files = Array.from(fileInput.files);
+            if (!files.length) {
                 showMessage('請選擇圖片檔案', 'error');
                 return;
             }
-
-            try {
-                // 創建圖片對象
+            currentImages = [];
+            batchMode = files.length > 1;
+            allImagesLoaded = false;
+            // 禁用生成按鈕直到全部載入
+            generateForm.querySelector('button[type="submit"]').disabled = true;
+            // 預覽第一張
+            const firstFile = files[0];
+            const img = new Image();
+            img.onload = function() {
+                preview.src = URL.createObjectURL(firstFile);
+                preview.style.display = "block";
+                generateForm.style.display = "block";
+                imageSize.textContent = `${img.width} x ${img.height}`;
+                const suggestions = calculateSuggestions(img.width, img.height);
+                displaySuggestions(suggestions);
+                imageInfo.style.display = "block";
+                if (suggestions.length > 0) {
+                    const firstSuggestion = suggestions[0];
+                    document.getElementById("spriteWidth").value = firstSuggestion.spriteWidth;
+                    document.getElementById("spriteHeight").value = firstSuggestion.spriteHeight;
+                    document.getElementById("roomWidth").value = firstSuggestion.roomWidth;
+                    document.getElementById("roomHeight").value = firstSuggestion.roomHeight;
+                }
+                showMessage('圖片載入成功！', 'success');
+            };
+            img.onerror = function() {
+                showMessage('圖片載入失敗，請檢查檔案格式', 'error');
+            };
+            img.src = URL.createObjectURL(firstFile);
+            // 批量模式下預先載入所有圖片
+            if (batchMode) {
+                let loaded = 0;
+                currentImages = new Array(files.length);
+                files.forEach((file, idx) => {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+                        currentImages[idx] = {
+                            width: img.width,
+                            height: img.height,
+                            canvas: canvas,
+                            context: ctx,
+                            fileName: file.name,
+                            spriteName: `sprite${idx+1}`,
+                            colorIndex: 1
+                        };
+                        loaded++;
+                        if (loaded === files.length) {
+                            allImagesLoaded = true;
+                            generateForm.querySelector('button[type="submit"]').disabled = false;
+                            showMessage('所有圖片已載入完成，可生成數據', 'success');
+                            renderBatchSpriteSettings();
+                        }
+                    };
+                    img.onerror = function() {
+                        showMessage(`第${idx+1}張圖片載入失敗`, 'error');
+                    };
+                    img.src = URL.createObjectURL(file);
+                });
+            } else {
+                // 單圖模式
                 const img = new Image();
                 img.onload = function() {
-                    // 創建 Canvas 來處理圖片
-                    imageCanvas = document.createElement('canvas');
-                    imageContext = imageCanvas.getContext('2d');
-                    
-                    // 設定 Canvas 尺寸
-                    imageCanvas.width = img.width;
-                    imageCanvas.height = img.height;
-                    
-                    // 繪製圖片到 Canvas
-                    imageContext.drawImage(img, 0, 0);
-                    
-                    // 儲存圖片數據
-                    currentImage = {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    currentImages = [{
                         width: img.width,
                         height: img.height,
-                        canvas: imageCanvas,
-                        context: imageContext
-                    };
-                    
-                    // 顯示預覽
-                    preview.src = URL.createObjectURL(file);
-                    preview.style.display = "block";
-                    generateForm.style.display = "block";
-                    
-                    // 顯示圖片資訊
-                    imageSize.textContent = `${img.width} x ${img.height}`;
-                    
-                    // 計算建議的精靈和房間尺寸組合
-                    const suggestions = calculateSuggestions(img.width, img.height);
-                    displaySuggestions(suggestions);
-                    imageInfo.style.display = "block";
-                    
-                    // 自動設定第一個建議
-                    if (suggestions.length > 0) {
-                        const firstSuggestion = suggestions[0];
-                        document.getElementById("spriteWidth").value = firstSuggestion.spriteWidth;
-                        document.getElementById("spriteHeight").value = firstSuggestion.spriteHeight;
-                        document.getElementById("roomWidth").value = firstSuggestion.roomWidth;
-                        document.getElementById("roomHeight").value = firstSuggestion.roomHeight;
-                    }
-                    
-                    showMessage('圖片載入成功！', 'success');
+                        canvas: canvas,
+                        context: ctx,
+                        fileName: firstFile.name
+                    }];
+                    allImagesLoaded = true;
+                    generateForm.querySelector('button[type="submit"]').disabled = false;
+                    renderBatchSpriteSettings();
                 };
-                
-                img.onerror = function() {
-                    showMessage('圖片載入失敗，請檢查檔案格式', 'error');
-                };
-                
-                img.src = URL.createObjectURL(file);
-                
-            } catch (error) {
-                console.error('圖片處理錯誤:', error);
-                showMessage('圖片處理時發生錯誤', 'error');
+                img.src = URL.createObjectURL(firstFile);
             }
         });
 
         // 生成數據處理
         generateForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-            
-            if (!currentImage) {
+            if (batchMode) {
+                if (!currentImages.length || !allImagesLoaded) {
+                    showMessage('請先載入所有圖片', 'error');
+                    return;
+                }
+                // 取得設定
+                const data = {
+                    spriteName: document.getElementById("spriteName").value,
+                    spriteWidth: parseInt(document.getElementById("spriteWidth").value),
+                    spriteHeight: parseInt(document.getElementById("spriteHeight").value),
+                    isAvatar: document.getElementById("isAvatar").checked,
+                    isWall: document.getElementById("isWall").checked,
+                    isItem: document.getElementById("isItem").checked,
+                    isTransparent: document.getElementById("isTransparent").checked,
+                    colorIndex: parseInt(document.getElementById("colorIndex").value),
+                    roomName: document.getElementById("roomName").value,
+                    paletteName: document.getElementById("paletteName").value,
+                    musicName: document.getElementById("musicName").value,
+                    roomWidth: parseInt(document.getElementById("roomWidth").value),
+                    roomHeight: parseInt(document.getElementById("roomHeight").value)
+                };
+                // 驗證
+                if (data.spriteWidth <= 0 || data.spriteHeight <= 0) {
+                    showMessage('精靈尺寸必須大於0', 'error');
+                    return;
+                }
+                if (data.roomWidth <= 0 || data.roomHeight <= 0) {
+                    showMessage('房間尺寸必須大於0', 'error');
+                    return;
+                }
+                if (data.spriteWidth > 24 || data.spriteHeight > 24) {
+                    showMessage('精靈尺寸不能超過24（Mosi引擎限制）', 'error');
+                    return;
+                }
+                if (data.roomWidth > 24 || data.roomHeight > 24) {
+                    showMessage('房間尺寸不能超過24（Mosi引擎限制）', 'error');
+                    return;
+                }
+                batchResults = [];
+                let failCount = 0;
+                for (let i = 0; i < currentImages.length; i++) {
+                    try {
+                        console.log('處理第', i, '張圖', currentImages[i]);
+                        // 取得每張圖的 spriteName/colorIndex
+                        const dataPerImg = {
+                            ...data,
+                            spriteName: currentImages[i].spriteName || data.spriteName,
+                            colorIndex: currentImages[i].colorIndex || data.colorIndex
+                        };
+                        const roomData = processImageToRoomData(currentImages[i], dataPerImg);
+                        console.log('產生結果', roomData);
+                        batchResults.push({
+                            data: roomData,
+                            fileName: dataPerImg.spriteName || data.roomName // 以精靈名為檔名
+                        });
+                    } catch (error) {
+                        showMessage(`第${i+1}張圖片處理失敗: ${error.message}`, 'error');
+                        failCount++;
+                    }
+                }
+                if (batchResults.length === 0) {
+                    showMessage('所有圖片處理都失敗，無可下載數據', 'error');
+                    return;
+                }
+                // 隱藏文字框，顯示一鍵下載
+                output.style.display = "none";
+                downloadBtn.style.display = "none";
+                // 先移除舊的 batch-download-btn
+                let oldBatchBtn = document.getElementById('batch-download-btn');
+                if (oldBatchBtn) oldBatchBtn.remove();
+                // 新建一個按鈕
+                let batchBtn = document.createElement('button');
+                batchBtn.id = 'batch-download-btn';
+                batchBtn.textContent = '一鍵下載所有檔案';
+                batchBtn.style.margin = '1em';
+                downloadBtn.parentNode.insertBefore(batchBtn, downloadBtn.nextSibling);
+                batchBtn.onclick = function() {
+                    console.log('batchResults:', batchResults);
+                    if (!batchResults.length) {
+                        showMessage('沒有可下載的數據', 'error');
+                        return;
+                    }
+                    batchResults.forEach((r, idx) => {
+                        const blob = new Blob([JSON.stringify(r.data, null, 4)], { type: "application/json" });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `${r.fileName}.mosiroom`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                    });
+                };
+                showMessage('批量數據生成成功！', 'success');
+                return;
+            }
+            if (!currentImages.length || !allImagesLoaded) {
                 showMessage('請先載入圖片', 'error');
                 return;
             }
@@ -531,33 +652,7 @@
                     roomWidth: parseInt(document.getElementById("roomWidth").value),
                     roomHeight: parseInt(document.getElementById("roomHeight").value)
                 };
-
-                // 驗證輸入
-                if (data.spriteWidth <= 0 || data.spriteHeight <= 0) {
-                    showMessage('精靈尺寸必須大於0', 'error');
-                    return;
-                }
-                
-                if (data.roomWidth <= 0 || data.roomHeight <= 0) {
-                    showMessage('房間尺寸必須大於0', 'error');
-                    return;
-                }
-
-                // 檢查Mosi引擎限制
-                if (data.spriteWidth > 24 || data.spriteHeight > 24) {
-                    showMessage('精靈尺寸不能超過24（Mosi引擎限制）', 'error');
-                    return;
-                }
-                
-                if (data.roomWidth > 24 || data.roomHeight > 24) {
-                    showMessage('房間尺寸不能超過24（Mosi引擎限制）', 'error');
-                    return;
-                }
-
-                // 處理圖片並生成數據
-                const roomData = processImageToRoomData(currentImage, data);
-                
-                // 顯示結果
+                const roomData = processImageToRoomData(currentImages[0], data);
                 output.value = JSON.stringify(roomData, null, 4);
                 output.style.display = "block";
                 downloadBtn.style.display = "block";
@@ -580,8 +675,8 @@
             const requiredHeight = roomHeight * spriteHeight;
             
             // 檢查是否需要縮放
-            let processedCanvas = imageCanvas;
-            let processedContext = imageContext;
+            let processedCanvas = image.canvas;
+            let processedContext = image.context;
             let scale = 1;
             
             if (imgWidth !== requiredWidth || imgHeight !== requiredHeight) {
@@ -594,7 +689,7 @@
                 
                 // 使用 nearest-neighbor 縮放以保持像素風格
                 scaledContext.imageSmoothingEnabled = false;
-                scaledContext.drawImage(imageCanvas, 0, 0, requiredWidth, requiredHeight);
+                scaledContext.drawImage(image.canvas, 0, 0, requiredWidth, requiredHeight);
                 
                 processedCanvas = scaledCanvas;
                 processedContext = scaledContext;
@@ -691,11 +786,18 @@
         // 下載按鈕處理
         downloadBtn.addEventListener("click", () => {
             const roomName = document.getElementById("roomName").value || "room_data";
+            let ext = ".json";
+            try {
+                const data = JSON.parse(output.value);
+                if (data && data.frameList) ext = ".mosisprite";
+                else if (data && (data.roomName || data.name) && data.tileList) ext = ".mosiroom";
+                else if (data && data.roomList) ext = ".mosi";
+            } catch {}
             const blob = new Blob([output.value], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `${roomName}.json`;
+            a.download = `${roomName}${ext}`;
             a.click();
             URL.revokeObjectURL(url);
         });
@@ -721,11 +823,14 @@
             imageInfo.style.display = "none";
             
             // 重置圖片數據
-            currentImage = null;
-            imageCanvas = null;
-            imageContext = null;
+            currentImages = [];
+            batchMode = false;
+            allImagesLoaded = false;
+            const batchBtn = document.getElementById('batch-download-btn');
+            if (batchBtn) batchBtn.style.display = 'none';
             
             showMessage('數據已清除！', 'success');
+            batchResults = [];
         });
 
         // 房間合併功能
@@ -799,7 +904,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `${roomName}.json`;
+            a.download = `${roomName}.mosiroom`;
             a.click();
             URL.revokeObjectURL(url);
         });
@@ -1088,56 +1193,44 @@
 
         // 自動計算房間尺寸
         function autoCalculateRoomSize() {
-            if (!currentImage) return;
-
+            if (!currentImages.length || !currentImages[0]) return;
             const spriteWidth = parseInt(document.getElementById("spriteWidth").value) || 0;
             const spriteHeight = parseInt(document.getElementById("spriteHeight").value) || 0;
-
             if (spriteWidth > 0 && spriteHeight > 0) {
                 // 計算房間尺寸
-                const roomWidth = Math.floor(currentImage.width / spriteWidth);
-                const roomHeight = Math.floor(currentImage.height / spriteHeight);
-
+                const roomWidth = Math.floor(currentImages[0].width / spriteWidth);
+                const roomHeight = Math.floor(currentImages[0].height / spriteHeight);
                 // 檢查是否在限制範圍內
                 if (roomWidth <= 24 && roomHeight <= 24 && roomWidth > 0 && roomHeight > 0) {
                     // 暫時移除事件監聽器避免循環
                     const roomWidthInput = document.getElementById("roomWidth");
                     const roomHeightInput = document.getElementById("roomHeight");
-                    
                     roomWidthInput.removeEventListener("input", autoCalculateSpriteSize);
                     roomHeightInput.removeEventListener("input", autoCalculateSpriteSize);
-                    
                     roomWidthInput.value = roomWidth;
                     roomHeightInput.value = roomHeight;
-                    
                     // 重新添加事件監聽器
                     setTimeout(() => {
                         roomWidthInput.addEventListener("input", autoCalculateSpriteSize);
                         roomHeightInput.addEventListener("input", autoCalculateSpriteSize);
                     }, 100);
-                    
                     // 顯示計算信息
                     showCalculationInfo(`自動計算: ${roomWidth}×${roomHeight} 房間`);
                 } else {
                     // 如果超出限制，顯示警告
-                    const maxRoomWidth = Math.min(24, Math.floor(currentImage.width / spriteWidth));
-                    const maxRoomHeight = Math.min(24, Math.floor(currentImage.height / spriteHeight));
-                    
+                    const maxRoomWidth = Math.min(24, Math.floor(currentImages[0].width / spriteWidth));
+                    const maxRoomHeight = Math.min(24, Math.floor(currentImages[0].height / spriteHeight));
                     if (maxRoomWidth > 0 && maxRoomHeight > 0) {
                         const roomWidthInput = document.getElementById("roomWidth");
                         const roomHeightInput = document.getElementById("roomHeight");
-                        
                         roomWidthInput.removeEventListener("input", autoCalculateSpriteSize);
                         roomHeightInput.removeEventListener("input", autoCalculateSpriteSize);
-                        
                         roomWidthInput.value = maxRoomWidth;
                         roomHeightInput.value = maxRoomHeight;
-                        
                         setTimeout(() => {
                             roomWidthInput.addEventListener("input", autoCalculateSpriteSize);
                             roomHeightInput.addEventListener("input", autoCalculateSpriteSize);
                         }, 100);
-                        
                         showCalculationInfo(`已調整至最大可用尺寸: ${maxRoomWidth}×${maxRoomHeight} 房間`);
                     } else {
                         showCalculationInfo(`精靈尺寸過大，無法計算合適的房間尺寸`, 'warning');
@@ -1148,56 +1241,44 @@
 
         // 自動計算精靈尺寸
         function autoCalculateSpriteSize() {
-            if (!currentImage) return;
-
+            if (!currentImages.length || !currentImages[0]) return;
             const roomWidth = parseInt(document.getElementById("roomWidth").value) || 0;
             const roomHeight = parseInt(document.getElementById("roomHeight").value) || 0;
-
             if (roomWidth > 0 && roomHeight > 0) {
                 // 計算精靈尺寸
-                const spriteWidth = Math.floor(currentImage.width / roomWidth);
-                const spriteHeight = Math.floor(currentImage.height / roomHeight);
-
+                const spriteWidth = Math.floor(currentImages[0].width / roomWidth);
+                const spriteHeight = Math.floor(currentImages[0].height / roomHeight);
                 // 檢查是否在限制範圍內
                 if (spriteWidth <= 24 && spriteHeight <= 24 && spriteWidth > 0 && spriteHeight > 0) {
                     // 暫時移除事件監聽器避免循環
                     const spriteWidthInput = document.getElementById("spriteWidth");
                     const spriteHeightInput = document.getElementById("spriteHeight");
-                    
                     spriteWidthInput.removeEventListener("input", autoCalculateRoomSize);
                     spriteHeightInput.removeEventListener("input", autoCalculateRoomSize);
-                    
                     spriteWidthInput.value = spriteWidth;
                     spriteHeightInput.value = spriteHeight;
-                    
                     // 重新添加事件監聽器
                     setTimeout(() => {
                         spriteWidthInput.addEventListener("input", autoCalculateRoomSize);
                         spriteHeightInput.addEventListener("input", autoCalculateRoomSize);
                     }, 100);
-                    
                     // 顯示計算信息
                     showCalculationInfo(`自動計算: ${spriteWidth}×${spriteHeight} 精靈`);
                 } else {
                     // 如果超出限制，顯示警告
-                    const maxSpriteWidth = Math.min(24, Math.floor(currentImage.width / roomWidth));
-                    const maxSpriteHeight = Math.min(24, Math.floor(currentImage.height / roomHeight));
-                    
+                    const maxSpriteWidth = Math.min(24, Math.floor(currentImages[0].width / roomWidth));
+                    const maxSpriteHeight = Math.min(24, Math.floor(currentImages[0].height / roomHeight));
                     if (maxSpriteWidth > 0 && maxSpriteHeight > 0) {
                         const spriteWidthInput = document.getElementById("spriteWidth");
                         const spriteHeightInput = document.getElementById("spriteHeight");
-                        
                         spriteWidthInput.removeEventListener("input", autoCalculateRoomSize);
                         spriteHeightInput.removeEventListener("input", autoCalculateRoomSize);
-                        
                         spriteWidthInput.value = maxSpriteWidth;
                         spriteHeightInput.value = maxSpriteHeight;
-                        
                         setTimeout(() => {
                             spriteWidthInput.addEventListener("input", autoCalculateRoomSize);
                             spriteHeightInput.addEventListener("input", autoCalculateRoomSize);
                         }, 100);
-                        
                         showCalculationInfo(`已調整至最大可用尺寸: ${maxSpriteWidth}×${maxSpriteHeight} 精靈`);
                     } else {
                         showCalculationInfo(`房間尺寸過大，無法計算合適的精靈尺寸`, 'warning');
@@ -1415,7 +1496,7 @@
                     scriptList: JSON.parse(JSON.stringify(src.scriptList || {}))
                 };
                 delete merged.colorIndex;
-                const fileName = sprites[idx].file.name;
+                const fileName = sprites[idx].file.name.replace(/\.(json|mosisprite)?$/, "") + ".mosisprite";
                 const blob = new Blob([JSON.stringify(merged, null, 2)], {type:'application/json'});
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
@@ -1584,11 +1665,13 @@
                             }
                         });
                     }
-                    // 下載
+                    // ===== 合併房間單色精靈工具下載檔名修正 =====
+                    let downloadName = (fileName || "merged_room")
+                      .replace(/\.(json|mosiroom)?$/, "") + ".mosiroom";
                     const blob = new Blob([JSON.stringify(room, null, 2)], {type:'application/json'});
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);
-                    a.download = fileName;
+                    a.download = downloadName;
                     a.click();
                 } catch (e) {
                     errorDiv.textContent = '合併失敗：' + e.message;
@@ -1777,11 +1860,13 @@
                             }
                         });
                     });
-                    // 下載
+                    // ===== 世界級合併工具下載檔名修正 =====
+                    let downloadName = (fileName || "merged_world")
+                      .replace(/\.(json|mosi)?$/, "") + ".mosi";
                     const blob = new Blob([JSON.stringify(world, null, 2)], {type:'application/json'});
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);
-                    a.download = fileName;
+                    a.download = downloadName;
                     a.click();
                 } catch (e) {
                     errorDiv.textContent = '合併失敗：' + e.message;
@@ -1834,6 +1919,67 @@
         function isScriptListValid(scriptList) {
             if (!scriptList || typeof scriptList !== 'object') return false;
             return Object.values(scriptList).some(v => typeof v === 'string' && v.trim() !== '');
+        }
+
+        // 新增：批量精靈設定區
+        function renderBatchSpriteSettings() {
+            const batchDiv = document.getElementById('batch-sprite-settings');
+            if (!batchMode || !currentImages.length) {
+                batchDiv.style.display = 'none';
+                batchDiv.innerHTML = '';
+                document.getElementById('spriteName').style.display = '';
+                document.getElementById('colorIndex').parentNode.style.display = '';
+                return;
+            }
+            batchDiv.style.display = '';
+            batchDiv.innerHTML = '<b>批量精靈設定：</b>';
+            document.getElementById('spriteName').style.display = 'none';
+            document.getElementById('colorIndex').parentNode.style.display = 'none';
+            // 建立每張圖的設定欄
+            currentImages.forEach((img, idx) => {
+                // 預設名稱與色碼
+                if (!img.spriteName) img.spriteName = `sprite${idx+1}`;
+                if (!img.colorIndex) img.colorIndex = 1;
+                const row = document.createElement('div');
+                row.style.display = 'flex';
+                row.style.alignItems = 'center';
+                row.style.margin = '6px 0';
+                // 圖片預覽
+                const thumb = document.createElement('img');
+                thumb.src = img.canvas.toDataURL();
+                thumb.style.width = '32px';
+                thumb.style.height = '32px';
+                thumb.style.marginRight = '8px';
+                // 名稱輸入
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.value = img.spriteName;
+                nameInput.style.width = '6em';
+                nameInput.oninput = e => { img.spriteName = e.target.value; };
+                // colorIndex 選擇
+                const colorSel = document.createElement('select');
+                for (let i=1; i<=8; i++) {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.textContent = i;
+                    if (i == img.colorIndex) opt.selected = true;
+                    colorSel.appendChild(opt);
+                }
+                colorSel.onchange = e => { img.colorIndex = parseInt(e.target.value); };
+                // 標籤
+                const label1 = document.createElement('span');
+                label1.textContent = '名稱:';
+                label1.style.margin = '0 4px';
+                const label2 = document.createElement('span');
+                label2.textContent = '顏色:';
+                label2.style.margin = '0 4px';
+                row.appendChild(thumb);
+                row.appendChild(label1);
+                row.appendChild(nameInput);
+                row.appendChild(label2);
+                row.appendChild(colorSel);
+                batchDiv.appendChild(row);
+            });
         }
     </script>
 </body>
