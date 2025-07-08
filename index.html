@@ -170,6 +170,39 @@
         #mergeSpriteFileList.dragging {
         border: 2px dashed #594A54;
         }
+
+        
+        #mergePictureFileList {
+        list-style-type: none;
+        padding: 0;
+        border: 2px dashed #594A54;
+        border-radius: 8px;
+        margin-top: 10px;
+        max-width: 400px;
+        }
+        #mergePictureFileList li {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        margin: 5px;
+        background-color: #D3CBD0;
+        border: 1px solid #594A54;
+        border-radius: 5px;
+        cursor: grab;
+        transition: background-color 0.3s;
+        }
+        #mergePictureFileList li img {
+        width: 24px;
+        height: 24px;
+        margin-right: 10px;
+        }
+        #mergePictureFileList li.drag-hover {
+        background-color: #9c758f;
+        border-color: #594A54;
+        }
+        #mergePictureFileList.dragging {
+        border: 2px dashed #594A54;
+        }
         /* Tab 樣式 */
         .tab-layout {
             display: flex;
@@ -192,7 +225,6 @@
             border-radius: 10px 0 0 10px;
             box-shadow: 2px 0 8px rgba(0,0,0,0.04);
             height: 600px;
-            gap: 0.2em;
         }
         .tab-btn {
             background: #d3cbd0;
@@ -310,6 +342,8 @@
         <button class="tab-btn" data-tab="merge-sprite-section">合併精靈工具</button>
         <button class="tab-btn" data-tab="merge-room-section">合併房間單色精靈工具</button>
         <button class="tab-btn" data-tab="merge-world-section">世界級合併工具</button>
+        <button class="tab-btn" data-tab="merge-picture-section">插圖合併工具</button>
+        <button class="tab-btn" data-tab="room-to-picture-section">房間轉插圖工具</button>
       </div>
       <select id="tab-select">
         <option value="upload-img">圖片上傳</option>
@@ -320,6 +354,8 @@
         <option value="merge-sprite-section">合併精靈工具</option>
         <option value="merge-room-section">合併房間單色精靈工具</option>
         <option value="merge-world-section">世界級合併工具</option>
+        <option value="merge-picture-section">插圖合併工具</option>
+        <option value="room-to-picture-section">房間轉插圖工具</option>
       </select>
       <div class="tab-content">
         <div class="flex-container">
@@ -370,7 +406,8 @@
                     <label>樂曲名稱: <input type="text" id="musicName" value="song-1"></label><br>
                     <label>房間寬度: <input type="number" id="roomWidth" value="8" min="1" max="24"></label><br>
                     <label>房間長度: <input type="number" id="roomHeight" value="8" min="1" max="24"></label><br>
-                    <button type="submit">生成數據</button>
+                    <button type="button" id="generate-room-btn">生成房間數據</button>
+                    <button type="button" id="generate-picture-btn">生成插圖數據</button>
                     <button type="button" id="clearButton">重置數據</button>
                     <small style="color: #666;">※ 房間尺寸最大為 24×24</small>
                     <small style="color: #2196F3; display: block; margin-top: 5px;">💡 修改房間尺寸會自動計算精靈尺寸</small>
@@ -379,6 +416,9 @@
         </form>
           <div class="section tab-section" id="data">
             <h2>結果</h2>
+            <div style="margin-bottom: 1em;">
+              <label style="font-weight:bold;">輸出格式：</label>
+            </div>
             <textarea id="output" readonly></textarea>
             <button id="download-btn" style="display: none;">下載檔案</button>
         </div>
@@ -412,6 +452,20 @@
           <input type="file" id="mergeWorldInput" accept=".mosi,.json" style="margin-bottom:10px;">
           <div id="mergeWorldError" class="error" style="display:none;"></div>
           <button id="mergeWorldBtn" style="margin-top:10px; display:none;">合併並下載新世界檔案</button>
+        </div>
+        <div class="section tab-section" id="merge-picture-section">
+          <h2>插圖合併工具</h2>
+          <input type="file" id="mergePictureInput" accept=".mosigraphic,.json" multiple style="margin-bottom:10px;">
+          <ul id="mergePictureFileList"></ul>
+          <div id="mergePictureAttrSelect" style="display:none; margin:10px 0;"></div>
+          <div id="mergePictureError" class="error" style="display:none;"></div>
+          <button id="mergePictureBtn" style="margin-top:10px; display:none;">合併並下載多色插圖</button>
+        </div>
+        <div class="section tab-section" id="room-to-picture-section">
+          <h2>房間轉插圖工具</h2>
+          <input type="file" id="roomToPictureInput" accept=".mosiroom,.json" style="margin-bottom:10px;">
+          <div id="roomToPictureError" class="error" style="display:none;"></div>
+          <button id="roomToPicturePictureBtn" style="margin-top:10px; display:none;">下載插圖（mosigraphic）</button>
         </div>
         </div>
       </div>
@@ -449,7 +503,7 @@
             batchMode = files.length > 1;
             allImagesLoaded = false;
             // 禁用生成按鈕直到全部載入
-            generateForm.querySelector('button[type="submit"]').disabled = true;
+            disableGenerateButtons();
             // 預覽第一張
             const firstFile = files[0];
             const img = new Image();
@@ -498,7 +552,7 @@
                         loaded++;
                         if (loaded === files.length) {
                             allImagesLoaded = true;
-                            generateForm.querySelector('button[type="submit"]').disabled = false;
+                            enableGenerateButtons();
                             showMessage('所有圖片已載入完成，可生成數據', 'success');
                             renderBatchSpriteSettings();
                         }
@@ -525,7 +579,7 @@
                         fileName: firstFile.name
                     }];
                     allImagesLoaded = true;
-                    generateForm.querySelector('button[type="submit"]').disabled = false;
+                    enableGenerateButtons();
                     renderBatchSpriteSettings();
                 };
                 img.src = URL.createObjectURL(firstFile);
@@ -533,8 +587,19 @@
         });
 
         // 生成數據處理
-        generateForm.addEventListener("submit", async (e) => {
+        const generateRoomBtn = document.getElementById("generate-room-btn");
+        const generatePictureBtn = document.getElementById("generate-picture-btn");
+
+        generateRoomBtn.onclick = function(e) {
             e.preventDefault();
+            generateMainData('room');
+        };
+        generatePictureBtn.onclick = function(e) {
+            e.preventDefault();
+            generateMainData('picture');
+        };
+
+        function generateMainData(type) {
             if (batchMode) {
                 if (!currentImages.length || !allImagesLoaded) {
                     showMessage('請先載入所有圖片', 'error');
@@ -584,11 +649,15 @@
                             spriteName: currentImages[i].spriteName || data.spriteName,
                             colorIndex: currentImages[i].colorIndex || data.colorIndex
                         };
-                        const roomData = processImageToRoomData(currentImages[i], dataPerImg);
-                        console.log('產生結果', roomData);
+                        let resultData;
+                        if (type === 'picture') {
+                            resultData = processImageToPictureData(currentImages[i], dataPerImg);
+                        } else {
+                            resultData = processImageToRoomData(currentImages[i], dataPerImg);
+                        }
                         batchResults.push({
-                            data: roomData,
-                            fileName: dataPerImg.spriteName || data.roomName // 以精靈名為檔名
+                            data: resultData,
+                            fileName: dataPerImg.spriteName || data.roomName
                         });
                     } catch (error) {
                         showMessage(`第${i+1}張圖片處理失敗: ${error.message}`, 'error');
@@ -620,7 +689,8 @@
                     batchResults.forEach((r, idx) => {
                         let ext = ".json";
                         let minified = false;
-                        if (r.data && r.data.frameList) { ext = ".mosisprite"; minified = true; }
+                        if (r.data && r.data.type === "picture") { ext = ".mosigraphic"; minified = true; }
+                        else if (r.data && r.data.frameList) { ext = ".mosisprite"; minified = true; }
                         else if (r.data && (r.data.roomName || r.data.name) && r.data.tileList) { ext = ".mosiroom"; minified = true; }
                         else if (r.data && r.data.roomList) { ext = ".mosi"; minified = true; }
                         let content = minified ? JSON.stringify(r.data) : JSON.stringify(r.data, null, 4);
@@ -658,11 +728,15 @@
                     roomWidth: parseInt(document.getElementById("roomWidth").value),
                     roomHeight: parseInt(document.getElementById("roomHeight").value)
                 };
-                const roomData = processImageToRoomData(currentImages[0], data);
-                // 單張顯示結果
-                output.value = (roomData && (roomData.frameList || roomData.tileList || roomData.roomList))
-                    ? JSON.stringify(roomData)
-                    : JSON.stringify(roomData, null, 4);
+                let resultData;
+                if (type === 'picture') {
+                    resultData = processImageToPictureData(currentImages[0], data);
+                } else {
+                    resultData = processImageToRoomData(currentImages[0], data);
+                }
+                output.value = (resultData && (resultData.frameList || resultData.tileList || resultData.roomList))
+                    ? JSON.stringify(resultData)
+                    : JSON.stringify(resultData, null, 4);
                 output.style.display = "block";
                 downloadBtn.style.display = "block";
                 
@@ -672,7 +746,7 @@
                 console.error('數據生成錯誤:', error);
                 showMessage('數據生成時發生錯誤: ' + error.message, 'error');
             }
-        });
+        }
 
         // 圖片處理函數
         function processImageToRoomData(image, data) {
@@ -800,7 +874,8 @@
             let obj = null;
             try {
                 obj = JSON.parse(output.value);
-                if (obj && obj.frameList) { ext = ".mosisprite"; minified = true; }
+                if (obj && obj.type === "picture") { ext = ".mosigraphic"; minified = true; }
+                else if (obj && obj.frameList) { ext = ".mosisprite"; minified = true; }
                 else if (obj && (obj.roomName || obj.name) && obj.tileList) { ext = ".mosiroom"; minified = true; }
                 else if (obj && obj.roomList) { ext = ".mosi"; minified = true; }
             } catch {}
@@ -1907,6 +1982,191 @@
             };
         })();
 
+        // ===== 插圖合併工具 =====
+        (function(){
+            const input = document.getElementById('mergePictureInput');
+            const fileList = document.getElementById('mergePictureFileList');
+            const attrSelect = document.getElementById('mergePictureAttrSelect');
+            const errorDiv = document.getElementById('mergePictureError');
+            const mergeBtn = document.getElementById('mergePictureBtn');
+            let sprites = [];
+            let attrSourceIdx = 0;
+
+            // 拖曳排序
+            let dragIdx = null;
+            fileList.addEventListener('dragstart', e => {
+                dragIdx = Number(e.target.dataset.idx);
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            fileList.addEventListener('dragover', e => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            });
+            fileList.addEventListener('drop', e => {
+                e.preventDefault();
+                const targetIdx = Number(e.target.closest('li').dataset.idx);
+                if (dragIdx !== null && targetIdx !== dragIdx) {
+                    const moved = sprites.splice(dragIdx, 1)[0];
+                    sprites.splice(targetIdx, 0, moved);
+                    renderFileList();
+                    renderAttrSelect();
+                }
+                dragIdx = null;
+            });
+
+            input.addEventListener('change', async e => {
+                sprites = [];
+                errorDiv.style.display = 'none';
+                attrSelect.style.display = 'none';
+                mergeBtn.style.display = 'none';
+                fileList.innerHTML = '';
+                const files = Array.from(input.files);
+                for (const file of files) {
+                    try {
+                        const text = await file.text();
+                        const data = JSON.parse(text);
+                        sprites.push({file, data});
+                    } catch {
+                        errorDiv.textContent = `檔案 ${file.name} 解析失敗`;
+                        errorDiv.style.display = '';
+                        return;
+                    }
+                }
+                if (sprites.length < 2) {
+                    errorDiv.textContent = '請選擇至少兩個插圖檔案';
+                    errorDiv.style.display = '';
+                    return;
+                }
+                // 檢查長寬一致
+                const w = sprites[0].data.width, h = sprites[0].data.height;
+                if (!sprites.every(s => s.data.width === w && s.data.height === h)) {
+                    errorDiv.textContent = '所有插圖的寬高必須一致！';
+                    errorDiv.style.display = '';
+                    return;
+                }
+                renderFileList();
+                renderAttrSelect();
+                mergeBtn.style.display = '';
+            });
+
+            function renderFileList() {
+                fileList.innerHTML = '';
+                sprites.forEach((s, i) => {
+                    const li = document.createElement('li');
+                    li.textContent = `${s.file.name} (${s.data.name || ''})`;
+                    li.draggable = true;
+                    li.dataset.idx = i;
+                    fileList.appendChild(li);
+                });
+            }
+            function renderAttrSelect() {
+                attrSelect.style.display = '';
+                attrSelect.innerHTML = '選擇要保留屬性的插圖：';
+                const select = document.createElement('select');
+                sprites.forEach((s, i) => {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.textContent = `${s.file.name} (${s.data.name || ''})`;
+                    select.appendChild(opt);
+                });
+                select.value = attrSourceIdx;
+                select.onchange = e => { attrSourceIdx = Number(e.target.value); };
+                attrSelect.appendChild(select);
+            }
+
+            mergeBtn.onclick = function() {
+                errorDiv.style.display = 'none';
+                if (sprites.length < 2) {
+                    errorDiv.textContent = '請選擇至少兩個插圖檔案';
+                    errorDiv.style.display = '';
+                    return;
+                }
+                // 處理單色和多色插圖的 frameList
+                const colorFrameLists = sprites.map(s => {
+                    // 檢查是否為單色插圖（有 colorIndex）
+                    if (s.data.colorIndex !== undefined) {
+                        // 單色插圖：將 1 轉換為 colorIndex，0 保持為 0
+                        const color = s.data.colorIndex;
+                        return s.data.frameList.map(frame => frame.map(px => px === 1 ? color : 0));
+                    } else {
+                        // 多色插圖：直接使用原始 frameList（已經是顏色值）
+                        return s.data.frameList.map(frame => [...frame]);
+                    }
+                });
+                // ====== 新增：動畫幀補齊 ======
+                const maxFrameLen = Math.max(...colorFrameLists.map(frames => frames.length));
+                const paddedColorFrameLists = colorFrameLists.map(frames => padFrames(frames, maxFrameLen));
+                // ====== 合併時 colorFrameLists 換成 paddedColorFrameLists ======
+                const w = sprites[0].data.width, h = sprites[0].data.height;
+                const mergedFrameList = [];
+                for (let f = 0; f < maxFrameLen; f++) {
+                    const mergedFrame = [];
+                    for (let i = 0; i < w * h; i++) {
+                        let val = 0;
+                        for (let sIdx = 0; sIdx < paddedColorFrameLists.length; sIdx++) {
+                            const frameArr = paddedColorFrameLists[sIdx][f] || paddedColorFrameLists[sIdx][0];
+                            if (frameArr[i] !== 0) val = frameArr[i];
+                        }
+                        mergedFrame.push(val);
+                    }
+                    mergedFrameList.push(mergedFrame);
+                }
+                // 直接從下拉選單 DOM 取值，確保正確
+                const select = attrSelect.querySelector('select');
+                const idx = select ? Number(select.value) : attrSourceIdx;
+                const src = sprites[idx].data;
+                // 合併 picture 物件，所有欄位都複製來源，只覆蓋 frameList
+                const merged = Object.assign({}, src, { frameList: mergedFrameList });
+                const fileName = (src.name || 'merged_picture').replace(/\.(json|mosigraphic)?$/, "") + ".mosigraphic";
+                // 壓成一行
+                const content = JSON.stringify(merged);
+                const blob = new Blob([content], {type:'application/json'});
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = fileName;
+                a.click();
+            };
+        })();
+
+        // ===== 房間轉插圖工具 =====
+        (function(){
+            const input = document.getElementById('roomToPictureInput');
+            const errorDiv = document.getElementById('roomToPictureError');
+            const pictureBtn = document.getElementById('roomToPicturePictureBtn');
+            let roomData = null;
+            input.onchange = async function(e) {
+                errorDiv.style.display = 'none';
+                pictureBtn.style.display = 'none';
+                if (!input.files[0]) return;
+                try {
+                    const text = await input.files[0].text();
+                    roomData = JSON.parse(text);
+                    pictureBtn.style.display = '';
+                } catch {
+                    errorDiv.textContent = '檔案格式錯誤，請上傳正確的 .mosiroom 檔案';
+                    errorDiv.style.display = '';
+                    roomData = null;
+                }
+            };
+            pictureBtn.onclick = function() {
+                errorDiv.style.display = 'none';
+                if (!roomData) return;
+                try {
+                    const picture = roomToPictureData(roomData);
+                    const fileName = (picture.name || 'picture').replace(/\.(json|mosigraphic)?$/, "") + ".mosigraphic";
+                    const content = JSON.stringify(picture);
+                    const blob = new Blob([content], {type:'application/json'});
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = fileName;
+                    a.click();
+                } catch (e) {
+                    errorDiv.textContent = '轉換失敗：' + e.message;
+                    errorDiv.style.display = '';
+                }
+            };
+        })();
+
         // Tab 切換邏輯
         function setTab(tabId) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -2011,6 +2271,176 @@
                 row.appendChild(colorSel);
                 batchDiv.appendChild(row);
             });
+        }
+
+        // 新增 processImageToPictureData 函數
+        function processImageToPictureData(image, data) {
+            const { width: imgWidth, height: imgHeight, context } = image;
+            const { spriteWidth, spriteHeight, roomWidth, roomHeight } = data;
+            const requiredWidth = roomWidth * spriteWidth;
+            const requiredHeight = roomHeight * spriteHeight;
+            let processedCanvas = image.canvas;
+            let processedContext = image.context;
+            let scale = 1;
+            if (imgWidth !== requiredWidth || imgHeight !== requiredHeight) {
+                const scaledCanvas = document.createElement('canvas');
+                const scaledContext = scaledCanvas.getContext('2d');
+                scaledCanvas.width = requiredWidth;
+                scaledCanvas.height = requiredHeight;
+                scaledContext.imageSmoothingEnabled = false;
+                scaledContext.drawImage(image.canvas, 0, 0, requiredWidth, requiredHeight);
+                processedCanvas = scaledCanvas;
+                processedContext = scaledContext;
+                scale = requiredWidth / imgWidth;
+            }
+            // 單色插圖 frameList 只用 0/色碼
+            const pixels = processedContext.getImageData(0, 0, requiredWidth, requiredHeight).data;
+            const frame = [];
+            const colorIndex = data.colorIndex || 1;
+            for (let i = 0; i < pixels.length; i += 4) {
+                const alpha = pixels[i + 3];
+                if (alpha < 128) {
+                    frame.push(0);
+                } else {
+                    const gray = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+                    frame.push(gray < 128 ? colorIndex : 0);
+                }
+            }
+            return {
+                name: data.spriteName,
+                type: 'picture',
+                paletteName: data.paletteName,
+                musicName: data.musicName,
+                roomWidth: data.roomWidth,
+                roomHeight: data.roomHeight,
+                spriteWidth: data.spriteWidth,
+                spriteHeight: data.spriteHeight,
+                width: requiredWidth,
+                height: requiredHeight,
+                frameList: [frame],
+                scriptList: {"on-show": "", "on-hide": ""}
+            };
+        }
+
+        // 禁用生成按鈕
+        function disableGenerateButtons() {
+            document.getElementById('generate-room-btn').disabled = true;
+            document.getElementById('generate-picture-btn').disabled = true;
+        }
+        // 啟用生成按鈕
+        function enableGenerateButtons() {
+            document.getElementById('generate-room-btn').disabled = false;
+            document.getElementById('generate-picture-btn').disabled = false;
+        }
+
+        // ===== 房間轉插圖主邏輯 =====
+        function roomToPictureData(room) {
+            // 取得房間基本資訊
+            const roomWidth = room.width || room.roomWidth;
+            const roomHeight = room.height || room.roomHeight;
+            const spriteWidth = room.spriteWidth;
+            const spriteHeight = room.spriteHeight;
+            const width = roomWidth * spriteWidth;
+            const height = roomHeight * spriteHeight;
+            // 建立 spriteName->sprite 映射，並預處理 colorFrameList
+            const spriteMap = {};
+            const colorFrameMap = {};
+            (room.spriteList||[]).forEach(s => {
+                spriteMap[s.name] = s;
+                // 預處理：單色精靈 frameList 轉 colorIndex，多色直接複製
+                if (s.colorIndex !== undefined) {
+                    const color = s.colorIndex;
+                    colorFrameMap[s.name] = s.frameList.map(frame => frame.map(px => px === 1 ? color : 0));
+                } else {
+                    colorFrameMap[s.name] = s.frameList.map(frame => [...frame]);
+                }
+            });
+            // 取得最大動畫幀數
+            let maxFrameLen = 1;
+            Object.values(colorFrameMap).forEach(frames => {
+                if (Array.isArray(frames)) maxFrameLen = Math.max(maxFrameLen, frames.length);
+            });
+            // 幀補齊：合併工具 padFrames 特殊規則
+            function padFrames(frames, maxLen) {
+                if (frames.length === maxLen) return frames.slice();
+                if (maxLen === 2) {
+                    return [frames[0], frames[0]];
+                }
+                if (maxLen === 3) {
+                    if (frames.length === 1) return [frames[0], frames[0], frames[0]];
+                    if (frames.length === 2) return [frames[0], frames[1], frames[0]];
+                }
+                if (maxLen === 4) {
+                    if (frames.length === 1) return [frames[0], frames[0], frames[0], frames[0]];
+                    if (frames.length === 2) return [frames[0], frames[1], frames[0], frames[1]];
+                    if (frames.length === 3) return [frames[0], frames[1], frames[1], frames[2]];
+                }
+                const arr = frames.slice();
+                while (arr.length < maxLen) arr.push(JSON.parse(JSON.stringify(arr[arr.length - 1])));
+                return arr;
+            }
+            const paddedColorFrameMap = {};
+            Object.entries(colorFrameMap).forEach(([name, frames]) => {
+                paddedColorFrameMap[name] = padFrames(frames, maxFrameLen);
+            });
+            // 對每個 tile，記錄其 sprite 及座標
+            const tileGrid = Array.from({length: roomHeight}, () => Array(roomWidth).fill(null));
+            (room.tileList||[]).forEach(tile => {
+                if (tile.x >= 0 && tile.x < roomWidth && tile.y >= 0 && tile.y < roomHeight) {
+                    if (!tileGrid[tile.y][tile.x]) tileGrid[tile.y][tile.x] = [];
+                    tileGrid[tile.y][tile.x].push(tile.spriteName);
+                }
+            });
+            // 產生每一幀的大圖
+            const frameList = [];
+            for (let f = 0; f < maxFrameLen; f++) {
+                const frame = new Array(width * height).fill(0);
+                for (let y = 0; y < roomHeight; y++) {
+                    for (let x = 0; x < roomWidth; x++) {
+                        const spriteNames = tileGrid[y][x] || [];
+                        // 疊加所有 sprite，後者覆蓋前者
+                        for (let sIdx = 0; sIdx < spriteNames.length; sIdx++) {
+                            const sprite = spriteMap[spriteNames[sIdx]];
+                            if (!sprite) continue;
+                            const paddedColorFrames = paddedColorFrameMap[spriteNames[sIdx]];
+                            const spriteFrame = paddedColorFrames[f];
+                            for (let sy = 0; sy < spriteHeight; sy++) {
+                                for (let sx = 0; sx < spriteWidth; sx++) {
+                                    const px = x * spriteWidth + sx;
+                                    const py = y * spriteHeight + sy;
+                                    const idx = py * width + px;
+                                    const val = spriteFrame[sy * spriteWidth + sx];
+                                    if (val !== 0) frame[idx] = val;
+                                }
+                            }
+                        }
+                    }
+                }
+                frameList.push(frame);
+            }
+            // scriptList 轉換
+            let scriptList = {};
+            if (room.scriptList) {
+                scriptList["on-show"] = room.scriptList["on-enter"] ?? "";
+                scriptList["on-hide"] = room.scriptList["on-exit"] ?? "";
+            } else {
+                scriptList["on-show"] = "";
+                scriptList["on-hide"] = "";
+            }
+            return {
+                name: room.name || room.roomName || "picture",
+                type: "picture",
+                paletteName: room.paletteName || "palette-1",
+                musicName: room.musicName || "song-1",
+                roomWidth,
+                roomHeight,
+                spriteWidth,
+                spriteHeight,
+                width,
+                height,
+                frameList,
+                scriptList
+            };
         }
     </script>
 </body>
