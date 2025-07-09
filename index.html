@@ -211,7 +211,7 @@
             width: 100%;
             max-width: 900px;
             margin: 0 auto;
-            min-height: 600px;
+            /* min-height: 600px; */ /* 移除固定高度 */
         }
         .tab-bar, #tab-select {
             margin-right: 0;
@@ -220,29 +220,72 @@
             display: flex;
             flex-direction: column;
             align-items: stretch;
-            min-width: 160px;
+            min-width: 140px;
+            max-width: 200px;
             background: #d3cbd0;
             border-radius: 10px 0 0 10px;
             box-shadow: 2px 0 8px rgba(0,0,0,0.04);
             height: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-sizing: border-box;
         }
-        .tab-btn {
-            background: #d3cbd0;
-            color: #594a54;
+        .accordion-group {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .tab-bar button,
+        .tab-bar .tab-btn,
+        .tab-bar .accordion-btn {
+            width: 100% !important;
+            min-width: 0;
+            max-width: 100%;
+            display: block;
+            box-sizing: border-box;
+            margin: 0 !important;
+        }
+        .accordion-btn, .tab-bar button, .tab-bar .tab-btn {
+            box-sizing: border-box;
             border: none;
-            border-left: 5px solid transparent;
-            border-radius: 0 10px 10px 0;
-            cursor: pointer;
-            font-size: 1em;
             outline: none;
+            background: #bbaec0;
+            color: #594a54;
+            font-size: 1.1em;
+            text-align: left;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            border-radius: 0;
+            margin: 0;
+        }
+        .accordion-btn.active, .accordion-btn:hover {
+            background: #594a54;
+            color: #fff;
+        }
+        .accordion-panel {
+            display: none;
+            flex-direction: column;
+            align-items: stretch;
+            padding: 0;
+            background: #e7e0e7;
+            margin-bottom: 8px;
+            width: 100%;
+        }
+        .accordion-panel .tab-btn {
+            border-left: 5px solid transparent;
+            border-radius: 0;
+            padding: 10px 16px;
+            background: none;
+            color: #594a54;
+            font-size: 1em;
             text-align: left;
             transition: background 0.2s, color 0.2s, border-color 0.2s;
         }
-        .tab-btn.active {
+        .accordion-panel .tab-btn.active {
             background: #594a54;
             color: #d3cbd0;
             border-left: 5px solid #f69f8f;
-            font-weight: bold;
         }
         .tab-content {
             flex: 1;
@@ -334,16 +377,32 @@
 
     <div class="tab-layout">
       <div class="tab-bar">
-        <button class="tab-btn active" data-tab="upload-img">圖片上傳</button>
-        <button class="tab-btn" data-tab="sprite-settings">精靈設定</button>
-        <button class="tab-btn" data-tab="room-settings">房間設定</button>
-        <button class="tab-btn" data-tab="data">生成結果</button>
-        <button class="tab-btn" data-tab="merge-rooms">房間合併工具</button>
-        <button class="tab-btn" data-tab="merge-sprite-section">合併精靈工具</button>
-        <button class="tab-btn" data-tab="merge-room-section">合併房間單色精靈工具</button>
-        <button class="tab-btn" data-tab="merge-world-section">世界級合併工具</button>
-        <button class="tab-btn" data-tab="merge-picture-section">插圖合併工具</button>
-        <button class="tab-btn" data-tab="room-to-picture-section">房間轉插圖工具</button>
+        <div class="accordion-group">
+          <button class="accordion-btn" type="button">圖片工具</button>
+          <div class="accordion-panel">
+            <button class="tab-btn" data-tab="upload-img">圖片上傳</button>
+            <button class="tab-btn" data-tab="sprite-settings">精靈設定</button>
+            <button class="tab-btn" data-tab="room-settings">房間設定</button>
+            <button class="tab-btn" data-tab="data">生成結果</button>
+          </div>
+        </div>
+        <div class="accordion-group">
+          <button class="accordion-btn" type="button">合併工具</button>
+          <div class="accordion-panel">
+            <button class="tab-btn" data-tab="merge-rooms">房間合併工具</button>
+            <button class="tab-btn" data-tab="merge-sprite-section">合併精靈工具</button>
+            <button class="tab-btn" data-tab="merge-room-section">合併房間單色精靈工具</button>
+            <button class="tab-btn" data-tab="merge-world-section">世界級合併工具</button>
+            <button class="tab-btn" data-tab="merge-picture-section">插圖合併工具</button>
+          </div>
+        </div>
+        <div class="accordion-group">
+          <button class="accordion-btn" type="button">轉換工具</button>
+          <div class="accordion-panel">
+            <button class="tab-btn" data-tab="room-to-picture-section">房間轉插圖工具</button>
+            <button class="tab-btn" data-tab="textbox-skin-section">對話框皮膚轉換工具</button>
+          </div>
+        </div>
       </div>
       <select id="tab-select">
         <option value="upload-img">圖片上傳</option>
@@ -356,6 +415,7 @@
         <option value="merge-world-section">世界級合併工具</option>
         <option value="merge-picture-section">插圖合併工具</option>
         <option value="room-to-picture-section">房間轉插圖工具</option>
+        <option value="textbox-skin-section">對話框皮膚轉換工具</option>
       </select>
       <div class="tab-content">
         <div class="flex-container">
@@ -467,14 +527,24 @@
           <div id="roomToPictureError" class="error" style="display:none;"></div>
           <button id="roomToPicturePictureBtn" style="margin-top:10px; display:none;">下載插圖（mosigraphic）</button>
         </div>
+        <div class="section tab-section" id="textbox-skin-section">
+          <h2>對話框皮膚轉換工具</h2>
+          <p style="margin-bottom:1em; color:#594a54;">根據 3x3 房間與精靈數據，自動產生對話框皮膚檔案</p>
+          <label style="display:block; margin-bottom:0.5em;">選擇 .mosiroom 檔案：<input type="file" id="roomFile" accept=".mosiroom,application/json"></label>
+          <label style="display:block; margin-bottom:0.5em;">選擇 .mosisprite 檔案：<input type="file" id="spriteFile" accept=".mosisprite,application/json"></label>
+          <button id="convertTextboxSkinBtn" style="margin-bottom:1em;">下載對話框皮膚</button>
+          <div id="textboxSkinResult"></div>
+        </div>
         </div>
       </div>
     </div>
+
     <script>
         let currentImages = []; // 支援多圖
         let batchMode = false;
         let allImagesLoaded = false;
         let batchResults = [];
+        let userHasManualInput = false; // <--- 新增：用戶是否手動輸入過尺寸
 
         const uploadForm = document.getElementById("upload-form");
         const generateForm = document.getElementById("generate-form");
@@ -502,6 +572,7 @@
             currentImages = [];
             batchMode = files.length > 1;
             allImagesLoaded = false;
+            userHasManualInput = false; // <--- 新增：重新上傳圖片時重設
             // 禁用生成按鈕直到全部載入
             disableGenerateButtons();
             // 預覽第一張
@@ -1272,20 +1343,24 @@
 
             // 精靈尺寸變更時，自動計算房間尺寸
             spriteWidthInput.addEventListener("input", () => {
+                userHasManualInput = true; // <--- 新增：偵測手動輸入
                 clearTimeout(spriteTimeout);
                 spriteTimeout = setTimeout(autoCalculateRoomSize, 300);
             });
             spriteHeightInput.addEventListener("input", () => {
+                userHasManualInput = true;
                 clearTimeout(spriteTimeout);
                 spriteTimeout = setTimeout(autoCalculateRoomSize, 300);
             });
 
             // 房間尺寸變更時，自動計算精靈尺寸
             roomWidthInput.addEventListener("input", () => {
+                userHasManualInput = true;
                 clearTimeout(roomTimeout);
                 roomTimeout = setTimeout(autoCalculateSpriteSize, 300);
             });
             roomHeightInput.addEventListener("input", () => {
+                userHasManualInput = true;
                 clearTimeout(roomTimeout);
                 roomTimeout = setTimeout(autoCalculateSpriteSize, 300);
             });
@@ -1293,6 +1368,7 @@
 
         // 自動計算房間尺寸
         function autoCalculateRoomSize() {
+            if (userHasManualInput) return; // <--- 新增：用戶手動輸入後不再自動聯動
             if (!currentImages.length || !currentImages[0]) return;
             const spriteWidth = parseInt(document.getElementById("spriteWidth").value) || 0;
             const spriteHeight = parseInt(document.getElementById("spriteHeight").value) || 0;
@@ -1341,6 +1417,7 @@
 
         // 自動計算精靈尺寸
         function autoCalculateSpriteSize() {
+            if (userHasManualInput) return; // <--- 新增：用戶手動輸入後不再自動聯動
             if (!currentImages.length || !currentImages[0]) return;
             const roomWidth = parseInt(document.getElementById("roomWidth").value) || 0;
             const roomHeight = parseInt(document.getElementById("roomHeight").value) || 0;
@@ -2442,6 +2519,148 @@
                 scriptList
             };
         }
+
+        // 對話框皮膚轉換工具 JS
+        function readJsonFile(file) {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = e => {
+              try {
+                resolve(JSON.parse(e.target.result));
+              } catch (err) {
+                reject('JSON 解析失敗: ' + err);
+              }
+            };
+            reader.onerror = () => reject('檔案讀取失敗');
+            reader.readAsText(file);
+          });
+        }
+
+        function generateTextboxSkin(room, sprite) {
+          // 驗證房間尺寸
+          if (room.width !== 3 || room.height !== 3) {
+            throw new Error('房間尺寸必須為 3x3');
+          }
+          // 取得精靈尺寸
+          const fontWidth = sprite.width;
+          const fontHeight = sprite.height;
+
+          // 處理 indicatorList（直接用 sprite 檔案的 frameList，補齊動畫幀數）
+          let indicatorList = [];
+          if (sprite.colorIndex !== undefined) {
+            // 單色精靈：將 1 轉 colorIndex，0 保持 0
+            const color = sprite.colorIndex;
+            indicatorList = padFrames(sprite.frameList.map(frame => frame.map(px => px === 1 ? color : 0)), sprite.frameList.length);
+          } else {
+            // 多色精靈：直接複製
+            indicatorList = padFrames(sprite.frameList.map(frame => [...frame]), sprite.frameList.length);
+          }
+
+          // 處理 fillList（九宮格，依 tileList 位置順序，內容為該格精靈的 frameList 經 padFrames 後合併成一維陣列）
+          // 九宮格順序：0,0→0 1,0→1 2,0→2 0,1→3 1,1→4 2,1→5 0,2→6 1,2→7 2,2→8
+          const fillList = [];
+          for (let y = 0; y < 3; y++) {
+            for (let x = 0; x < 3; x++) {
+              // 找到 tileList 中對應 (x, y) 的精靈 index
+              let spriteIdx = null;
+              if (Array.isArray(room.tileList)) {
+                // 支援二維陣列或物件陣列
+                if (Array.isArray(room.tileList[0])) {
+                  spriteIdx = room.tileList[y][x];
+                } else {
+                  // 物件陣列格式
+                  const tile = room.tileList.find(t => t.x === x && t.y === y);
+                  spriteIdx = tile ? tile.spriteIndex || tile.sprite || tile.spriteName || 0 : 0;
+                }
+              }
+              // 取得對應精靈
+              let spr = null;
+              if (Array.isArray(room.spriteList)) {
+                if (typeof spriteIdx === 'number') {
+                  spr = room.spriteList[spriteIdx];
+                } else if (typeof spriteIdx === 'string') {
+                  spr = room.spriteList.find(s => s.name === spriteIdx);
+                }
+              }
+              if (!spr) {
+                fillList.push([]);
+                continue;
+              }
+              // 處理單色/多色精靈
+              let frames;
+              if (spr.colorIndex !== undefined) {
+                const color = spr.colorIndex;
+                frames = padFrames(spr.frameList.map(frame => frame.map(px => px === 1 ? color : 0)), spr.frameList.length);
+              } else {
+                frames = padFrames(spr.frameList.map(frame => [...frame]), spr.frameList.length);
+              }
+              // 合併所有幀成一維陣列
+              fillList.push([].concat(...frames));
+            }
+          }
+
+          // name: 房間名稱
+          const name = room.name || room.roomName || '新對話框皮膚';
+          return {
+            name,
+            fontWidth,
+            fontHeight,
+            fillList,
+            indicatorList
+          };
+        }
+
+        // 修正下載時壓成一行
+        const oldTextboxSkinBtn = document.getElementById('convertTextboxSkinBtn').onclick;
+        document.getElementById('convertTextboxSkinBtn').onclick = async function() {
+          const roomFile = document.getElementById('roomFile').files[0];
+          const spriteFile = document.getElementById('spriteFile').files[0];
+          const resultDiv = document.getElementById('textboxSkinResult');
+          resultDiv.innerHTML = '';
+          if (!roomFile || !spriteFile) {
+            resultDiv.innerHTML = '<div class="error">請選擇 .mosiroom 與 .mosisprite 檔案</div>';
+            return;
+          }
+          try {
+            const [room, sprite] = await Promise.all([
+              readJsonFile(roomFile),
+              readJsonFile(spriteFile)
+            ]);
+            const skin = generateTextboxSkin(room, sprite);
+            const blob = new Blob([JSON.stringify(skin)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${skin.name}.mositextbox`;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            }, 100);
+          } catch (err) {
+            resultDiv.innerHTML = `<div class=\"error\">${err}</div>`;
+          }
+        };
+
+        // Accordion 手風琴展開/收合邏輯
+        document.querySelectorAll('.accordion-btn').forEach((btn, idx) => {
+            btn.onclick = function() {
+                const panel = btn.nextElementSibling;
+                const isOpen = btn.classList.contains('active');
+                // 關閉所有
+                document.querySelectorAll('.accordion-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.accordion-panel').forEach(p => p.style.display = 'none');
+                // 如果原本沒開，則打開
+                if (!isOpen) {
+                    btn.classList.add('active');
+                    panel.style.display = 'block'; // 這裡由 flex 改為 block
+                }
+            };
+        });
+        // 預設展開第一個分類
+        document.querySelectorAll('.accordion-btn')[0].classList.add('active');
+        document.querySelectorAll('.accordion-panel')[0].style.display = 'block';
     </script>
 </body>
 </html> 
