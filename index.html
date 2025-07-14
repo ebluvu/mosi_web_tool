@@ -2545,6 +2545,19 @@
           const fontWidth = sprite.width;
           const fontHeight = sprite.height;
 
+          // ===== 新增：檢查房間所有精靈的 isTransparent 屬性是否一致 =====
+          let transparentSet = new Set();
+          if (Array.isArray(room.spriteList)) {
+            room.spriteList.forEach(spr => {
+              if (typeof spr.isTransparent !== 'undefined') transparentSet.add(spr.isTransparent);
+            });
+          }
+          if (transparentSet.size > 1) {
+            throw new Error('房間內所有精靈的透明化屬性（isTransparent）必須一致！');
+          }
+          // 取得統一的 isTransparent 屬性（若無則預設 false）
+          let isTransparent = transparentSet.size === 1 ? [...transparentSet][0] : false;
+
           // 處理 indicatorList（直接用 sprite 檔案的 frameList，補齊動畫幀數）
           let indicatorList = [];
           if (sprite.colorIndex !== undefined) {
@@ -2603,6 +2616,7 @@
           const name = room.name || room.roomName || '新對話框皮膚';
           return {
             name,
+            isTransparent,
             fontWidth,
             fontHeight,
             fillList,
@@ -2627,6 +2641,11 @@
               readJsonFile(spriteFile)
             ]);
             const skin = generateTextboxSkin(room, sprite);
+            // 新增：顯示 isTransparent 屬性
+            let info = '';
+            if (typeof skin.isTransparent !== 'undefined') {
+              info = `<div style="color:#2196F3;">isTransparent: <b>${skin.isTransparent}</b></div>`;
+            }
             const blob = new Blob([JSON.stringify(skin)], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -2638,6 +2657,7 @@
               document.body.removeChild(a);
               URL.revokeObjectURL(url);
             }, 100);
+            resultDiv.innerHTML = `<div class='success'>下載完成！${info}</div>`;
           } catch (err) {
             resultDiv.innerHTML = `<div class=\"error\">${err}</div>`;
           }
