@@ -2541,11 +2541,24 @@
           if (room.width !== 3 || room.height !== 3) {
             throw new Error('房間尺寸必須為 3x3');
           }
+          // 驗證房間精靈數量必須為 9
+          if (!Array.isArray(room.spriteList) || room.spriteList.length !== 9) {
+            throw new Error('房間必須剛好有 9 個精靈（九宮格）');
+          }
           // 取得精靈尺寸
           const fontWidth = sprite.width;
           const fontHeight = sprite.height;
 
-          // ===== 新增：檢查房間所有精靈的 isTransparent 屬性是否一致 =====
+          // === 驗證機制補充 ===
+          // 2. 房間內所有精靈 frameList 長度必須為 1
+          if (Array.isArray(room.spriteList)) {
+            for (const spr of room.spriteList) {
+              if (!Array.isArray(spr.frameList) || spr.frameList.length !== 1) {
+                throw new Error(`房間內精靈「${spr.name || ''}」有動畫幀，請確保所有房間精靈僅有一幀（frameList 長度為 1）`);
+              }
+            }
+          }
+          // 3. 房間內所有精靈 isTransparent 必須一致
           let transparentSet = new Set();
           if (Array.isArray(room.spriteList)) {
             room.spriteList.forEach(spr => {
@@ -2556,7 +2569,24 @@
             throw new Error('房間內所有精靈的透明化屬性（isTransparent）必須一致！');
           }
           // 取得統一的 isTransparent 屬性（若無則預設 false）
-          let isTransparent = transparentSet.size === 1 ? [...transparentSet][0] : false;
+          let isTransparent = transparentSet.size === 1 ? [...transparentSet][0] : 
+          false;
+          // 4. 房間內所有精靈尺寸必須一致
+          let roomSpriteWidth = null, roomSpriteHeight = null;
+          if (Array.isArray(room.spriteList) && room.spriteList.length > 0) {
+            roomSpriteWidth = room.spriteList[0].width;
+            roomSpriteHeight = room.spriteList[0].height;
+            for (const spr of room.spriteList) {
+              if (spr.width !== roomSpriteWidth || spr.height !== roomSpriteHeight) {
+                throw new Error(`房間內精靈尺寸不一致，請確保所有房間精靈尺寸相同（${roomSpriteWidth}x${roomSpriteHeight}）`);
+              }
+            }
+          }
+          // 5. sprite（箭頭精靈）尺寸必須與房間精靈尺寸一致
+          if (sprite.width !== roomSpriteWidth || sprite.height !== roomSpriteHeight) {
+            throw new Error(`箭頭精靈尺寸（${sprite.width}x${sprite.height}）必須與房間精靈尺寸（${roomSpriteWidth}x${roomSpriteHeight}）一致！`);
+          }
+          // === 驗證機制補充結束 ===
 
           // 處理 indicatorList（直接用 sprite 檔案的 frameList，補齊動畫幀數）
           let indicatorList = [];
