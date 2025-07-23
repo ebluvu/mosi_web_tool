@@ -5,6 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mosi圖片轉房間數據產生器</title>
     <style>
+        :root {
+            /* 主色調 */
+            --primary-color: #594a54;
+            --secondary-color: #d3cbd0;
+            --accent-color: #f69f8f;
+            
+            /* 背景色 */
+            --bg-primary: #594a54;
+            --bg-secondary: #d3cbd0;
+            --bg-light: #f5f5f5;
+            --bg-lighter: #f0f0f0;
+            --bg-accent: #bbaec0;
+            --bg-hover: #9c758f;
+            --bg-info: #e7e0e7;
+            
+            /* 文字色 */
+            --text-primary: #d3cbd0;
+            --text-secondary: #594a54;
+            --text-light: #666;
+            --text-white: #fff;
+            --text-accent: #f69f8f;
+            --text-info: #2196F3;
+            
+            /* 邊框色 */
+            --border-primary: #594a54;
+            --border-light: #ddd;
+            
+            /* 狀態色 */
+            --success-color: #51cf66;
+            --success-bg: #ebfbee;
+            --error-color: #ff6b6b;
+            --error-bg: #ffe6e6;
+            --warning-color: #ff9800;
+            --info-color: #2196F3;
+            
+            /* 特殊色 */
+            --transparent-black: #000000;
+            --transparent-white: #ffffff;
+        }
+        
         @font-face {
             font-family: 'fakePearl';
             src: url('static/FakePearl-SemiBold.ttf') format('woff2'), url('static/FakePearl-SemiBold.ttf') format('ttf');
@@ -17,25 +57,143 @@
             text-align: center;
         }
         html, body {
-            background-color: #594a54;
-            color: #d3cbd0;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
         }
         a {
-            color: #f69f8f;
+            color: var(--text-accent);
         }
         canvas {
             image-rendering: -moz-crisp-edges;
             image-rendering: pixelated;
         }
-        input[type="file"] {
-            padding: 1em 0;
-            width: 256px;
+        input[type="text"], input[type=number] {
+            border: 2px solid var(--border-primary);
+            color: var(--text-secondary);
+            margin: 1em;
+            padding: 0.5em;
+            font-size: 1em;
+            border-radius: 10px;
         }
-        input[type="text"], button {
+        
+        /* Checkbox 特殊樣式 */
+        input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 20px;
+            height: 20px;
+            margin: 1em;
+            border: 2px solid var(--border-primary);
+            border-radius: 10px;
+            background: var(--transparent-white);
+            cursor: pointer;
+            position: relative;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        
+        input[type="checkbox"]:checked {
+            background: var(--primary-color);
+            border-color: var(--border-primary);
+        }
+        
+        input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-white);
+            font-size: 14px;
+            font-weight: bold;
+        }
+        button, select{
+            border: none;
+            background: var(--primary-color);
+            color: var(--text-white);
             width: 14em;
             margin: 1em;
-            padding: 0.25em;
+            padding: 12px 16px;
             font-size: 1em;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            border-radius: 10px;
+        }
+        
+        /* File input 自定義樣式 */
+        input[type="file"] {
+            position: relative;
+            overflow: hidden;
+            width: 14em;
+            height: 45px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin: 1em;
+            z-index: 2;
+            font-size: 1em;
+        }
+        
+        /* 隱藏原生按鈕文字 */
+        input[type="file"]::-webkit-file-upload-button {
+            visibility: hidden;
+            width: 0;
+            height: 0;
+        }
+        
+        input[type="file"]::file-selector-button {
+            visibility: hidden;
+            width: 0;
+            height: 0;
+        }
+        
+        /* 創建自定義按鈕 */
+        input[type="file"]::before {
+            content: attr(data-original-text);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-color);
+            color: var(--text-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            border-radius: 10px;
+            z-index: 1;
+            font-size: 1em;
+            padding: 12px 16px;
+            border: none;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-weight: inherit;
+        }
+        
+        input[type="file"]:hover::before {
+            background: var(--bg-accent);
+            color: var(--text-secondary);
+        }
+        button:hover, select:hover {
+            background: var(--bg-accent);
+            color: var(--text-secondary);
+        }
+        
+        /* Select 選項樣式 - 使用更強制的方法 */
+        select option {
+            background: var(--bg-accent);
+            color: var(--text-secondary);
+            padding: 8px;
+            font-size: 1em;
+        }
+        
+        select:focus {
+            outline: none;
+            background: var(--bg-accent);
+            color: var(--text-secondary);
         }
         label {
             display: flex;
@@ -45,25 +203,23 @@
             align-items: center;
         }
         textarea {
+            border: 2px solid var(--border-primary);
+            color: var(--text-secondary);
+            border-radius: 10px;
+            text-align: left;
             height: 256px;
             width: 256px;
             font-family: monospace;
         }
-        textarea, input {
-            text-align: left;
-            margin: 1em;
-            padding: 0.25em;
-            font-size: 1em;
-        }
         .flex-container {
-            background-color: #d3cbd0;
+            background-color: var(--bg-secondary);
             display: flex;
             flex-flow: row wrap;
         }
         .section {
             margin: 0 auto;
-            background-color: #d3cbd0;
-            color: #594a54;
+            background-color: var(--bg-secondary);
+            color: var(--text-secondary);
             width: 256px;
             padding-bottom: 1em;
             display: flex;
@@ -79,6 +235,14 @@
             flex: 1;
             box-sizing: border-box;
         }
+        
+        .palette-container {
+            margin: 1.5em 0;
+            padding: 1em;
+            background: var(--bg-light);
+            border-radius: 8px;
+            max-width: 350px;
+        }
         @media (max-width: 768px) {
             .settings-container {
                 flex-direction: column;
@@ -90,29 +254,40 @@
                 width: 100%;
             }
         }
+        
+        /* 移動設備的響應式設計 */
+        @media (max-width: 768px) {
+            #preview {
+                max-width: 250px !important;
+            }
+        }
         #preview-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            transition: all 0.3s ease;
+            margin: 1.5em 0; 
+            background: var(--bg-light); 
+            border-radius: 8px; 
+            padding-top: 10px;
+            padding-bottom: 10px;
         }
-        #quantized-preview-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        #preview {
+        #preview-img, #preview-canvas {
             margin: 0 auto;
             width: 256px;
+            transition: transform 0.2s;
         }
-        #quantized-preview {
-            margin: 0 auto;
-            width: 256px;
-            margin-left: 10px;
+        /* 只有在可以切換顯示時才套用 hover 效果 */
+        #preview-img.clickable:hover, #preview-canvas.clickable:hover {
+            transform: scale(0.98);
+            transition: transform 0.2s;
+        }
+        /* 點擊後的縮放狀態 */
+        #preview-img.clickable.clicked, #preview-canvas.clickable.clicked {
+            transform: scale(0.98);
+            transition: transform 0.2s;
         }
         #file-list {
             list-style-type: none;
             padding: 0;
-            border: 2px dashed #594A54;
+            border: 2px dashed var(--border-primary);
             border-radius: 8px;
             margin-top: 10px;
             max-width: 400px;
@@ -122,8 +297,8 @@
             align-items: center;
             padding: 10px;
             margin: 5px;
-            background-color: #D3CBD0;
-            border: 1px solid #594A54;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
             border-radius: 5px;
             cursor: grab;
             transition: background-color 0.3s;
@@ -134,30 +309,44 @@
             margin-right: 10px;
         }
         #file-list li.drag-hover {
-            background-color: #9c758f;
-            border-color: #594A54;
+            background-color: var(--bg-hover);
+            border-color: var(--border-primary);
         }
         #file-list.dragging {
-            border: 2px dashed #594A54;
+            border: 2px dashed var(--border-primary);
         }
         .error {
-            color: #ff6b6b;
-            background-color: #ffe6e6;
+            color: var(--error-color);
+            background-color: var(--error-bg);
             padding: 10px;
             border-radius: 5px;
             margin: 10px 0;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            max-width: 90vw;
+            word-wrap: break-word;
         }
         .success {
-            color: #51cf66;
-            background-color: #ebfbee;
+            color: var(--success-color);
+            background-color: var(--success-bg);
             padding: 10px;
             border-radius: 5px;
             margin: 10px 0;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            max-width: 90vw;
+            word-wrap: break-word;
         }
         #mergeSpriteFileList {
         list-style-type: none;
         padding: 0;
-        border: 2px dashed #594A54;
+        border: 2px dashed var(--border-primary);
         border-radius: 8px;
         margin-top: 10px;
         max-width: 400px;
@@ -167,8 +356,8 @@
         align-items: center;
         padding: 10px;
         margin: 5px;
-        background-color: #D3CBD0;
-        border: 1px solid #594A54;
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-primary);
         border-radius: 5px;
         cursor: grab;
         transition: background-color 0.3s;
@@ -179,18 +368,18 @@
         margin-right: 10px;
         }
         #mergeSpriteFileList li.drag-hover {
-        background-color: #9c758f;
-        border-color: #594A54;
+        background-color: var(--bg-hover);
+        border-color: var(--border-primary);
         }
         #mergeSpriteFileList.dragging {
-        border: 2px dashed #594A54;
+        border: 2px dashed var(--border-primary);
         }
 
         
         #mergePictureFileList {
         list-style-type: none;
         padding: 0;
-        border: 2px dashed #594A54;
+        border: 2px dashed var(--border-primary);
         border-radius: 8px;
         margin-top: 10px;
         max-width: 400px;
@@ -200,8 +389,8 @@
         align-items: center;
         padding: 10px;
         margin: 5px;
-        background-color: #D3CBD0;
-        border: 1px solid #594A54;
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-primary);
         border-radius: 5px;
         cursor: grab;
         transition: background-color 0.3s;
@@ -212,11 +401,11 @@
         margin-right: 10px;
         }
         #mergePictureFileList li.drag-hover {
-        background-color: #9c758f;
-        border-color: #594A54;
+        background-color: var(--bg-hover);
+        border-color: var(--border-primary);
         }
         #mergePictureFileList.dragging {
-        border: 2px dashed #594A54;
+        border: 2px dashed var(--border-primary);
         }
         /* Tab 樣式 */
         .tab-layout {
@@ -224,7 +413,7 @@
             flex-direction: row;
             align-items: flex-start;
             width: 100%;
-            max-width: 900px;
+            max-width: 768px;
             margin: 0 auto;
             /* min-height: 600px; */ /* 移除固定高度 */
         }
@@ -237,7 +426,7 @@
             align-items: stretch;
             min-width: 140px;
             max-width: 200px;
-            background: #d3cbd0;
+            background: var(--bg-secondary);
             border-radius: 10px 0 0 10px;
             box-shadow: 2px 0 8px rgba(0,0,0,0.04);
             height: 600px;
@@ -264,8 +453,8 @@
             box-sizing: border-box;
             border: none;
             outline: none;
-            background: #bbaec0;
-            color: #594a54;
+            background: var(--bg-accent);
+            color: var(--text-secondary);
             font-size: 1.1em;
             text-align: left;
             padding: 12px 16px;
@@ -275,15 +464,15 @@
             margin: 0;
         }
         .accordion-btn.active, .accordion-btn:hover {
-            background: #594a54;
-            color: #fff;
+            background: var(--primary-color);
+            color: var(--text-white);
         }
         .accordion-panel {
             display: none;
             flex-direction: column;
             align-items: stretch;
             padding: 0;
-            background: #e7e0e7;
+            background: var(--bg-info);
             margin-bottom: 8px;
             width: 100%;
         }
@@ -292,15 +481,15 @@
             border-radius: 0;
             padding: 10px 16px;
             background: none;
-            color: #594a54;
+            color: var(--text-secondary);
             font-size: 1em;
             text-align: left;
             transition: background 0.2s, color 0.2s, border-color 0.2s;
         }
         .accordion-panel .tab-btn.active {
-            background: #594a54;
-            color: #d3cbd0;
-            border-left: 5px solid #f69f8f;
+            background: var(--primary-color);
+            color: var(--text-primary);
+            border-left: 5px solid var(--text-accent);
         }
         .tab-content {
             flex: 1;
@@ -309,14 +498,14 @@
             width: 100%;
             height: 600px;
             overflow-y: auto;
-            background: #d3cbd0;
+            background: var(--bg-secondary);
             border-radius: 0 10px 10px 0;
             box-sizing: border-box;
         }
         .tab-section { display: none; }
         .tab-section.active { display: block; }
         /* 響應式：手機版用下拉選單 */
-        @media (max-width: 900px) {
+        @media (max-width: 768px) {
             .tab-layout { flex-direction: column; min-height: 0; }
             .tab-bar { display: none !important; }
             #tab-select, #tab-category-select {
@@ -325,9 +514,9 @@
                 width: 90%;
                 max-width: 400px;
                 font-size: 1.1em;
-                background: #d3cbd0;
-                color: #594a54;
-                border: 1px solid #594a54;
+                background: var(--bg-secondary);
+                color: var(--text-secondary);
+                border: 1px solid var(--border-primary);
                 border-radius: 8px;
                 padding: 0.7em 1em;
                 box-shadow: 1px 1px 6px rgba(0,0,0,0.04);
@@ -343,8 +532,8 @@
             position: absolute;
             top: 18px;
             right: 24px;
-            background: #d3cbd0;
-            color: #594a54;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
             border: none;
             border-radius: 50%;
             width: 36px;
@@ -359,13 +548,13 @@
             z-index: 10;
         }
         .preview-arrow-btn {
-            color: #d3cbd0;
-            background: #594a54;
+            color: var(--text-primary);
+            background: var(--primary-color);
             border: none;
             border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            font-size: 1.5em;
+            width: 25px;
+            height: 25px;
+            font-size: 0.5em;
             cursor: pointer;
             box-shadow: 1px 1px 6px rgba(0,0,0,0.06);
             display: flex;
@@ -373,14 +562,16 @@
             justify-content: center;
             transition: background 0.2s, color 0.2s, transform 0.2s;
             z-index: 10;
+            margin: 0;
+            padding: 0;
         }
         .header-toggle-btn:hover {
-            background: #f69f8f;
-            color: #fff;
+            background: var(--bg-accent);
+            color: var(--text-white);
         }
         .preview-arrow-btn:hover {
-            background: #f69f8f;
-            color: #fff;
+            background: var(--bg-accent);
+            color: var(--text-white);
         }
         .header-collapsed {
             max-height: 0;
@@ -405,8 +596,7 @@
         <div class="header-content" id="headerContent">
             <h1>Mosi圖片轉房間數據產生器</h1>
             <p>轉換任何圖片至<a href="https://ebluvu.itch.io/mosi-ch">Mosi中文版</a>的房間數據</p>
-            <p><a href="https://ebluvu.notion.site/M-si-5216b6a6c587449cb18c31ddd0dee61b">關於</a>｜有任何疑問歡迎聯繫我</p>
-            <p style="color: #f69f8f; font-weight: bold;">✨ 純前端版本 - 無需伺服器，可直接在瀏覽器中運行 ✨</p>
+            <p><a href="https://ebluvu.notion.site/163642e52df080c794f3ea51a1612c57">關於</a>｜有任何疑問歡迎聯繫我</p>
         </div>
     </header>
 
@@ -425,8 +615,8 @@
           <button class="accordion-btn" type="button">合併工具</button>
           <div class="accordion-panel">
             <button class="tab-btn" data-tab="merge-rooms">房間合併工具</button>
-            <button class="tab-btn" data-tab="merge-sprite-section">合併精靈工具</button>
-            <button class="tab-btn" data-tab="merge-room-section">合併房間單色精靈工具</button>
+            <button class="tab-btn" data-tab="merge-sprite-section">精靈合併工具</button>
+            <button class="tab-btn" data-tab="merge-room-section">房間合併單色精靈工具</button>
             <button class="tab-btn" data-tab="merge-world-section">世界級合併工具</button>
             <button class="tab-btn" data-tab="merge-picture-section">插圖合併工具</button>
           </div>
@@ -446,8 +636,8 @@
         <option value="room-settings">房間設定</option>
         <option value="data">生成結果</option>
         <option value="merge-rooms">房間合併工具</option>
-        <option value="merge-sprite-section">合併精靈工具</option>
-        <option value="merge-room-section">合併房間單色精靈工具</option>
+        <option value="merge-sprite-section">精靈合併工具</option>
+        <option value="merge-room-section">房間合併單色精靈工具</option>
         <option value="merge-world-section">世界級合併工具</option>
         <option value="merge-picture-section">插圖合併工具</option>
         <option value="room-to-picture-section">房間轉插圖工具</option>
@@ -455,36 +645,50 @@
       </select>
       <div class="tab-content">
         <div class="flex-container">
-          <div class="section tab-section active" id="upload-img">
+          <div class="section tab-section active" id="upload-img" style="position: relative;">
             <h2>圖片</h2>
-            <div id="preview-container">
-                <img id="preview" alt="預覽" src="static/rest.png" style="max-width: 300px;">
-                <div id="quantized-preview-container" style="display:none; margin-top:8px; max-width: 300px;">
-                    <canvas id="quantized-preview" width="256" height="256"></canvas>
-                    <div id="preview-btn-container" style="display:flex; align-items: center; justify-content: space-between;">
-                        <button id="preview-prev-btn" class="preview-arrow-btn" style="display:none;">←</button>
-                        <span id="preview-index-label" style="margin:0 8px;"></span>
-                        <button id="preview-next-btn" class="preview-arrow-btn" style="display:none;">→</button>
-                    </div>
-                </div>
+            <div id="preview-container" style="display: block;">
+              <img id="preview-img" alt="預覽" src="static/rest.png" style="max-width: 300px; display: block;">
+              <canvas id="preview-canvas" width="256" height="256" style="display:none;"></canvas>
+              <div id="palette-preview" style="margin: 0.5em 0; display: none;"></div>
+              <div id="preview-btn-container" style="display:flex; align-items: center; justify-content: space-between; margin-top:10px;">
+                <button id="preview-prev-btn" class="preview-arrow-btn" style="margin-left:10px;"><</button>
+                <span id="preview-index-label" style="margin:0 8px;"></span>
+                <button id="preview-next-btn" class="preview-arrow-btn" style="margin-right:10px;">></button>
+              </div>
             </div>
-            <form id="upload-form">
+            <form id="upload-form" style="margin: 1em 0;">
                 <input type="file" id="file" name="file" accept="image/*" required multiple>
                 <button type="submit">載入圖片</button>
             </form>
-            <div id="palette-section" style="margin: 1.5em 0; padding: 1em; background: #f5f5f5; border-radius: 8px; max-width: 350px;">
-                <div id="palette-preview" style="margin: 0.5em 0;"></div>
+            <div id="palette-section" class="palette-container">
+                <div style="margin: 0.5em 0; font-size: 0.9em; color: var(--text-light);">
+                    <label>色階化方法：
+                        <select id="quantizeMethod">
+                            <option value="lab">LAB 色彩空間（預設）</option>
+                            <option value="hsl">HSL 色彩空間</option>
+                        </select>
+                    </label>
+                </div>
+                <div id="current-palette-status" style="margin: 0.5em 0; padding: 0.5em; border-left: 4px solid var(--text-accent);">
+                    當前調色盤：<span id="current-palette-name">無</span>
+                </div>
                 <textarea id="paletteTextImport" placeholder="貼上調色盤 JSON 文字..." style="width:90%;height:48px;margin-bottom:4px;"></textarea><br>
                 <button id="paletteTextImportBtn" style="margin: 0.5em 0;" type="button">從文字匯入調色盤</button>
                 <label>上傳調色盤：<input type="file" id="paletteFile" accept=".mosipalette"></label>
             </div>
-            <div id="auto-palette-section" style="margin: 1.5em 0; padding: 1em; background: #f5f5f5; border-radius: 8px; max-width: 350px; display: none;">
-              <h3 style="color:#594a54;">自動產生調色盤</h3>
-              <label style="margin-bottom:0.5em; color:#594a54;">調色盤名稱：<input type="text" id="autoPaletteName" value="自動產生調色盤" style="width: 10em;" /></label>
-              <button id="autoPaletteBtn" style="margin:0.5em 0;">自動偵測圖片顏色</button>
-              <div id="auto-multi-palette-section" style="margin: 0.5em 0 1em 0; display:none;">
-                <div style="font-weight:bold; color:#594a54; margin-bottom:0.3em;">自動偵測調色盤候選：</div>
-                <div id="multi-palette-preview"></div>
+            <div id="auto-palette-section" class="palette-container" style="display: none;">
+              <h3 style="color:var(--text-secondary);">智能調色盤生成</h3>
+              <label style="margin-bottom:0.5em; color:var(--text-secondary);">調色盤名稱：<input type="text" id="autoPaletteName" value="智能調色盤" style="width: 10em;" /></label>
+              <button id="autoPaletteBtn" style="margin:0.5em 0;">偵測圖片顏色</button>
+                              <div id="color-selection-section" style="margin: 0.5em 0 1em 0; display:none;">
+                <div style="font-weight:bold; color:var(--text-secondary); margin-bottom:0.3em;">選擇顏色：</div>
+                <div id="color-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(40px, 1fr)); gap:4px; margin-bottom:0.5em;"></div>
+                <div style="font-size:0.9em; color:var(--text-light); margin-bottom:0.5em;">
+                  已選擇: <span id="selected-count">0</span>/8 個顏色
+                </div>
+
+                <button id="confirmPaletteBtn" style="margin:0.5em 0; display:none;">確認生成調色盤</button>
               </div>
               <textarea id="autoPaletteResult" style="width:90%;height:90px;display:none;"></textarea>
               <button id="autoPaletteDownloadBtn" style="margin: 0.5em 0;display:none;">下載調色盤數據</button>
@@ -492,7 +696,7 @@
             <div id="image-info" style="display: none;">
                 <p>圖片尺寸: <span id="image-size"></span></p>
                 <p>建議組合:</p>
-                <div id="suggestions" style="text-align: left; margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 5px; max-height: 200px; overflow-y: auto;"></div>
+                <div id="suggestions" style="text-align: left; margin: 10px 0; padding: 10px; background: var(--bg-lighter); border-radius: 5px; max-height: 200px; overflow-y: auto;"></div>
             </div>
         </div>
           <form id="generate-form" style="width:100%;">
@@ -515,25 +719,21 @@
                             <option value="5">5</option>
                             <option value="6">6</option>
                             <option value="7">7</option>
-                            <option value="8">8</option>
                         </select>
                     </label><br>
                     <div id="batch-sprite-settings" style="display:none;"></div>
-                    <small style="color: #666;">※ 精靈尺寸最大為 24×24</small>
-                    <small style="color: #2196F3; display: block; margin-top: 5px;">💡 修改精靈尺寸會自動計算房間尺寸</small>
+                    <small style="color: var(--text-light);">※ 精靈尺寸最大為 24×24</small>
+                    <small style="color: var(--text-info); display: block; margin-top: 5px;">💡 修改精靈尺寸會自動計算房間尺寸</small>
                 </div>
                 <div class="section tab-section" id="room-settings">
                     <h2>房間設定</h2>
-                    <label>房間名稱: <input type="text" id="roomName" value="room-1"></label><br>
+                    <label>房間(檔案)名稱: <input type="text" id="roomName" value="room-1"></label><br>
                     <label>調色盤名稱: <input type="text" id="paletteName" value="palette-1"></label><br>
-                    <label>樂曲名稱: <input type="text" id="musicName" value="song-1"></label><br>
+                    <label>音樂名稱: <input type="text" id="musicName" value="song-1"></label><br>
                     <label>房間寬度: <input type="number" id="roomWidth" value="8" min="1" max="24"></label><br>
-                    <label>房間長度: <input type="number" id="roomHeight" value="8" min="1" max="24"></label><br>
-                    <button type="button" id="generate-room-btn">生成房間數據</button>
-                    <button type="button" id="generate-picture-btn">生成插圖數據</button>
-                    <button type="button" id="clearButton">重置數據</button>
-                    <small style="color: #666;">※ 房間尺寸最大為 24×24</small>
-                    <small style="color: #2196F3; display: block; margin-top: 5px;">💡 修改房間尺寸會自動計算精靈尺寸</small>
+                    <label>房間高度: <input type="number" id="roomHeight" value="8" min="1" max="24"></label><br>
+                    <small style="color: var(--text-light);">※ 房間尺寸最大為 24×24</small>
+                    <small style="color: var(--text-info); display: block; margin-top: 5px;">💡 修改房間尺寸會自動計算精靈尺寸</small>
                 </div>
             </div>
         </form>
@@ -544,6 +744,9 @@
             </div>
             <textarea id="output" readonly></textarea>
             <button id="download-btn" style="display: none;">下載檔案</button>
+            <button type="button" id="generate-room-btn">生成房間數據</button>
+            <button type="button" id="generate-picture-btn">生成插圖數據</button>
+            <button type="button" id="clearButton">重置數據</button>
         </div>
           <div class="section tab-section" id="merge-rooms">
             <h2>房間合併工具</h2>
@@ -557,7 +760,7 @@
             <button id="merge-download-btn" style="display: none;">下載合併後數據</button>
         </div>
           <div class="section tab-section" id="merge-sprite-section">
-            <h2>合併精靈工具</h2>
+            <h2>精靈合併工具</h2>
             <input type="file" id="mergeSpriteInput" accept=".mosisprite,.json" multiple style="margin-bottom:10px;">
             <ul id="mergeSpriteFileList"></ul>
             <div id="mergeSpriteAttrSelect" style="display:none; margin:10px 0;"></div>
@@ -565,7 +768,7 @@
             <button id="mergeSpriteBtn" style="margin-top:10px; display:none;">合併並下載多色精靈</button>
         </div>
           <div class="section tab-section" id="merge-room-section">
-            <h2>合併房間單色精靈工具</h2>
+            <h2>房間合併單色精靈工具</h2>
             <input type="file" id="mergeRoomInput" accept=".mosiroom,.json" style="margin-bottom:10px;">
             <div id="mergeRoomError" class="error" style="display:none;"></div>
             <button id="mergeRoomBtn" style="margin-top:10px; display:none;">合併並下載新房間檔案</button>
@@ -588,13 +791,13 @@
           <h2>房間轉插圖工具</h2>
           <input type="file" id="roomToPictureInput" accept=".mosiroom,.json" style="margin-bottom:10px;">
           <div id="roomToPictureError" class="error" style="display:none;"></div>
-          <button id="roomToPicturePictureBtn" style="margin-top:10px; display:none;">下載插圖（mosigraphic）</button>
+          <button id="roomToPicturePictureBtn" style="margin-top:10px; display:none;">下載插圖檔案</button>
         </div>
         <div class="section tab-section" id="textbox-skin-section">
           <h2>對話框皮膚轉換工具</h2>
-          <p style="margin-bottom:1em; color:#594a54;">根據 3x3 房間與精靈數據，自動產生對話框皮膚檔案</p>
-          <label style="display:block; margin-bottom:0.5em;">選擇 .mosiroom 檔案：<input type="file" id="roomFile" accept=".mosiroom,application/json"></label>
-          <label style="display:block; margin-bottom:0.5em;">選擇 .mosisprite 檔案：<input type="file" id="spriteFile" accept=".mosisprite,application/json"></label>
+                      <p style="margin-bottom:1em; color:var(--text-secondary);">根據 3x3 房間與精靈數據，自動產生對話框皮膚檔案</p>
+          <label style="display:block; margin-bottom:0.5em;">選擇房間檔案：<input type="file" id="roomFile" accept=".mosiroom,application/json"></label>
+          <label style="display:block; margin-bottom:0.5em;">選擇精靈檔案：<input type="file" id="spriteFile" accept=".mosisprite,application/json"></label>
           <button id="convertTextboxSkinBtn" style="margin-bottom:1em;">下載對話框皮膚</button>
           <div id="textboxSkinResult"></div>
         </div>
@@ -613,10 +816,13 @@
         let paletteName = "";
         // ========== 新增：全域 tab 狀態同步變數 ==========
         let currentTabId = 'upload-img';
+        // === 新預覽切換與按鈕控制 ===
+        let currentPreviewIndex = 0;
+        let showingCanvas = false; // 多色模式下 true=canvas, false=img
 
         const uploadForm = document.getElementById("upload-form");
         const generateForm = document.getElementById("generate-form");
-        const preview = document.getElementById("preview");
+        const preview = document.getElementById("preview-img");
         const output = document.getElementById("output");
         const downloadBtn = document.getElementById("download-btn");
         const mergeFilesInput = document.getElementById("merge-files");
@@ -643,60 +849,9 @@
             userHasManualInput = false; // <--- 新增：重新上傳圖片時重設
             // 禁用生成按鈕直到全部載入
             disableGenerateButtons();
-            // 預覽第一張
+            // 預覽第一張（用於初始化 UI）
             const firstFile = files[0];
-            const img = new Image();
-            img.onload = function() {
-                preview.src = URL.createObjectURL(firstFile);
-                preview.style.display = "block";
-                generateForm.style.display = "block";
-                imageSize.textContent = `${img.width} x ${img.height}`;
-                const suggestions = calculateSuggestions(img.width, img.height);
-                displaySuggestions(suggestions);
-                imageInfo.style.display = "block";
-                if (suggestions.length > 0) {
-                    const firstSuggestion = suggestions[0];
-                    document.getElementById("spriteWidth").value = firstSuggestion.spriteWidth;
-                    document.getElementById("spriteHeight").value = firstSuggestion.spriteHeight;
-                    document.getElementById("roomWidth").value = firstSuggestion.roomWidth;
-                    document.getElementById("roomHeight").value = firstSuggestion.roomHeight;
-                }
-                // ===== palette 色階化預覽 =====
-                const qContainer = document.getElementById('quantized-preview-container');
-                const qCanvas = document.getElementById('quantized-preview');
-                if (currentPalette) {
-                  // 取得原圖像素
-                  const ctx = document.createElement('canvas').getContext('2d');
-                  ctx.canvas.width = img.width;
-                  ctx.canvas.height = img.height;
-                  ctx.drawImage(img, 0, 0);
-                  const imgData = ctx.getImageData(0, 0, img.width, img.height);
-                  // 色階化
-                  const quantized = quantizeToPalette(imgData.data, currentPalette);
-                  // 顯示預覽
-                  qCanvas.width = img.width;
-                  qCanvas.height = img.height;
-                  qContainer.style.display = "block";
-                  drawQuantizedPreview(qCanvas, img.width, img.height, quantized, currentPalette);
-                  // 儲存 quantized 結果到 currentImages[0].quantized
-                  if (!currentImages[0]) currentImages[0] = {};
-                  currentImages[0].quantized = quantized;
-                  currentImages[0].quantizedWidth = img.width;
-                  currentImages[0].quantizedHeight = img.height;
-                } else {
-                  qContainer.style.display = "none";
-                  if (currentImages[0]) {
-                    delete currentImages[0].quantized;
-                    delete currentImages[0].quantizedWidth;
-                    delete currentImages[0].quantizedHeight;
-                  }
-                }
-                showMessage('圖片載入成功！', 'success');
-            };
-            img.onerror = function() {
-                showMessage('圖片載入失敗，請檢查檔案格式', 'error');
-            };
-            img.src = URL.createObjectURL(firstFile);
+            
             // 批量模式下預先載入所有圖片
             if (batchMode) {
                 let loaded = 0;
@@ -704,45 +859,14 @@
                 files.forEach((file, idx) => {
                     const img = new Image();
                     img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        ctx.drawImage(img, 0, 0);
-                        currentImages[idx] = {
-                            width: img.width,
-                            height: img.height,
-                            canvas: canvas,
-                            context: ctx,
-                            fileName: file.name,
-                            spriteName: `sprite${idx+1}`,
-                            colorIndex: 1
-                        };
-                        // ===== 新增：多圖也要 quantized =====
-                        if (currentPalette) {
-                            const imgData = ctx.getImageData(0, 0, img.width, img.height);
-                            currentImages[idx].quantized = quantizeToPalette(imgData.data, currentPalette);
-                            currentImages[idx].quantizedWidth = img.width;
-                            currentImages[idx].quantizedHeight = img.height;
-                            console.log('[批量模式] quantized 寫入 currentImages['+idx+']', {
-                              quantized: currentImages[idx].quantized.slice(0, 32),
-                              quantizedLen: currentImages[idx].quantized.length
-                            });
-                        }
+                        currentImages[idx] = processImageToCanvas(img, file.name, idx);
                         loaded++;
                         if (loaded === files.length) {
-                            allImagesLoaded = true;
-                            enableGenerateButtons();
-                            showMessage('所有圖片已載入完成，可生成數據', 'success');
-                            renderBatchSpriteSettings();
-                            currentPreviewIndex = 0;
-                            updateQuantizedPreview();
-                            updateColorIndexAndPaletteNameUI();
-                            updatePreviewVisibility();
-                            showAutoPaletteSection(true);
+                            handleImageLoadComplete(true);
                         }
                     };
                     img.onerror = function() {
+                        resetAutoPaletteButton();
                         showMessage(`第${idx+1}張圖片載入失敗`, 'error');
                     };
                     img.src = URL.createObjectURL(file);
@@ -751,37 +875,12 @@
                 // 單圖模式
                 const img = new Image();
                 img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    ctx.drawImage(img, 0, 0);
-                    currentImages = [{
-                        width: img.width,
-                        height: img.height,
-                        canvas: canvas,
-                        context: ctx,
-                        fileName: firstFile.name
-                    }];
-                    // ===== 修正：單圖模式也要存 quantized =====
-                    if (currentPalette) {
-                        const imgData = ctx.getImageData(0, 0, img.width, img.height);
-                        currentImages[0].quantized = quantizeToPalette(imgData.data, currentPalette);
-                        currentImages[0].quantizedWidth = img.width;
-                        currentImages[0].quantizedHeight = img.height;
-                        console.log('[單圖模式] quantized 寫入 currentImages[0]', {
-                          quantized: currentImages[0].quantized.slice(0, 32),
-                          quantizedLen: currentImages[0].quantized.length
-                        });
-                    }
-                    allImagesLoaded = true;
-                    enableGenerateButtons();
-                    renderBatchSpriteSettings();
-                    currentPreviewIndex = 0;
-                    updateQuantizedPreview();
-                    updateColorIndexAndPaletteNameUI();
-                    updatePreviewVisibility();
-                    showAutoPaletteSection(true);
+                    currentImages = [processImageToCanvas(img, firstFile.name, 0)];
+                    handleImageLoadComplete(false);
+                };
+                img.onerror = function() {
+                    resetAutoPaletteButton();
+                    showMessage('圖片載入失敗，請檢查檔案格式', 'error');
                 };
                 img.src = URL.createObjectURL(firstFile);
             }
@@ -849,23 +948,44 @@
                             spriteName: currentImages[i].spriteName || data.spriteName,
                             colorIndex: currentImages[i].colorIndex || data.colorIndex
                         };
+
                         let resultData;
+                        console.log(`處理第${i+1}張圖片:`, {
+                          hasPalette: !!currentPalette,
+                          hasQuantized: !!currentImages[i].quantized,
+                          type: type,
+                          imageData: currentImages[i]
+                        });
                         if (currentPalette && currentImages[i].quantized) {
                           // 多色模式
-                          if (type === 'picture') {
-                            resultData = processQuantizedToPictureData(currentImages[i], dataPerImg, currentPalette);
-                          } else {
-                            resultData = processQuantizedToRoomData(currentImages[i], dataPerImg, currentPalette);
+                          console.log('使用多色模式處理');
+                          try {
+                            if (type === 'picture') {
+                              resultData = processQuantizedToPictureData(currentImages[i], dataPerImg, currentPalette);
+                            } else {
+                              resultData = processQuantizedToRoomData(currentImages[i], dataPerImg, currentPalette);
+                            }
+
+                          } catch (error) {
+                            console.error('多色模式處理失敗:', error);
+                            throw error;
                           }
-                          console.log('[generateMainData] 多色模式', {i, resultData});
+          
                         } else {
                           // 單色模式
-                          if (type === 'picture') {
-                            resultData = processImageToPictureData(currentImages[i], dataPerImg);
-                          } else {
-                            resultData = processImageToRoomData(currentImages[i], dataPerImg);
+                          console.log('使用單色模式處理');
+                          try {
+                            if (type === 'picture') {
+                              resultData = processImageToPictureData(currentImages[i], dataPerImg);
+                            } else {
+                              resultData = processImageToRoomData(currentImages[i], dataPerImg);
+                            }
+
+                          } catch (error) {
+                            console.error('單色模式處理失敗:', error);
+                            throw error;
                           }
-                          console.log('[generateMainData] 單色模式', {i, resultData});
+          
                         }
                         batchResults.push({
                             data: resultData,
@@ -893,20 +1013,37 @@
                 batchBtn.style.margin = '1em';
                 downloadBtn.parentNode.insertBefore(batchBtn, downloadBtn.nextSibling);
                 batchBtn.onclick = function() {
-                    console.log('batchResults:', batchResults);
+        
                     if (!batchResults.length) {
                         showMessage('沒有可下載的數據', 'error');
                         return;
                     }
                     batchResults.forEach((r, idx) => {
                         let ext = ".json";
+                        let mimeType = "application/json";
                         let minified = false;
-                        if (r.data && r.data.type === "picture") { ext = ".mosigraphic"; minified = true; }
-                        else if (r.data && r.data.frameList) { ext = ".mosisprite"; minified = true; }
-                        else if (r.data && (r.data.roomName || r.data.name) && r.data.tileList) { ext = ".mosiroom"; minified = true; }
-                        else if (r.data && r.data.roomList) { ext = ".mosi"; minified = true; }
+                        if (r.data && r.data.type === "picture") { 
+                            ext = ".mosigraphic"; 
+                            mimeType = "application/octet-stream";
+                            minified = true; 
+                        }
+                        else if (r.data && r.data.frameList) { 
+                            ext = ".mosisprite"; 
+                            mimeType = "application/octet-stream";
+                            minified = true; 
+                        }
+                        else if (r.data && (r.data.roomName || r.data.name) && r.data.tileList) { 
+                            ext = ".mosiroom"; 
+                            mimeType = "application/octet-stream";
+                            minified = true; 
+                        }
+                        else if (r.data && r.data.roomList) { 
+                            ext = ".mosi"; 
+                            mimeType = "application/octet-stream";
+                            minified = true; 
+                        }
                         let content = minified ? JSON.stringify(r.data) : JSON.stringify(r.data, null, 4);
-                        const blob = new Blob([content], { type: "application/json" });
+                        const blob = new Blob([content], { type: mimeType });
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement("a");
                         a.href = url;
@@ -948,7 +1085,7 @@
                   } else {
                     resultData = processQuantizedToRoomData(currentImages[0], data, currentPalette);
                   }
-                  console.log('[generateMainData] 多色模式 resultData', resultData);
+  
                 } else {
                   // 單色模式
                   if (type === 'picture') {
@@ -956,7 +1093,7 @@
                   } else {
                     resultData = processImageToRoomData(currentImages[0], data);
                   }
-                  console.log('[generateMainData] 單色模式 resultData', resultData);
+  
                 }
                 output.value = (resultData && (resultData.frameList || resultData.tileList || resultData.roomList))
                     ? JSON.stringify(resultData)
@@ -972,7 +1109,7 @@
             }
         }
 
-        // 圖片處理函數
+        // 圖片處理函數（單色模式）
         function processImageToRoomData(image, data) {
             const { width: imgWidth, height: imgHeight, context } = image;
             const { spriteWidth, spriteHeight, roomWidth, roomHeight } = data;
@@ -1090,19 +1227,36 @@
         downloadBtn.addEventListener("click", () => {
             const roomName = document.getElementById("roomName").value || "room_data";
             let ext = ".json";
+            let mimeType = "application/json";
             let minified = false;
             let obj = null;
             try {
                 obj = JSON.parse(output.value);
-                if (obj && obj.type === "picture") { ext = ".mosigraphic"; minified = true; }
-                else if (obj && obj.frameList) { ext = ".mosisprite"; minified = true; }
-                else if (obj && (obj.roomName || obj.name) && obj.tileList) { ext = ".mosiroom"; minified = true; }
-                else if (obj && obj.roomList) { ext = ".mosi"; minified = true; }
+                if (obj && obj.type === "picture") { 
+                    ext = ".mosigraphic"; 
+                    mimeType = "application/octet-stream";
+                    minified = true; 
+                }
+                else if (obj && obj.frameList) { 
+                    ext = ".mosisprite"; 
+                    mimeType = "application/octet-stream";
+                    minified = true; 
+                }
+                else if (obj && (obj.roomName || obj.name) && obj.tileList) { 
+                    ext = ".mosiroom"; 
+                    mimeType = "application/octet-stream";
+                    minified = true; 
+                }
+                else if (obj && obj.roomList) { 
+                    ext = ".mosi"; 
+                    mimeType = "application/octet-stream";
+                    minified = true; 
+                }
             } catch {}
             let content = "";
             if (minified && obj) content = JSON.stringify(obj);
             else content = output.value;
-            const blob = new Blob([content], { type: "application/json" });
+            const blob = new Blob([content], { type: mimeType });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
@@ -1115,7 +1269,7 @@
         document.getElementById("clearButton").addEventListener("click", function () {
             // 清空圖片預覽
             const fileInput = document.getElementById("file");
-            const preview = document.getElementById("preview");
+            const preview = document.getElementById("preview-img");
             fileInput.value = "";
             preview.src = "static/rest.png";
             
@@ -1137,6 +1291,44 @@
             allImagesLoaded = false;
             const batchBtn = document.getElementById('batch-download-btn');
             if (batchBtn) batchBtn.style.display = 'none';
+            
+            // ===== 新增：重置調色盤相關數據 =====
+            currentPalette = null;
+            paletteName = "";
+            showPalettePreview([]);
+            updateColorIndexAndPaletteNameUI();
+            updateCurrentPaletteStatus();
+            renderBatchSpriteSettings();
+            updatePreview();
+            
+            // 隱藏顏色選擇界面
+            const colorSelectionSection = document.getElementById('color-selection-section');
+            if (colorSelectionSection) colorSelectionSection.style.display = 'none';
+            
+            // 隱藏自動調色盤結果和下載按鈕
+            const autoPaletteResult = document.getElementById('autoPaletteResult');
+            const autoPaletteDownloadBtn = document.getElementById('autoPaletteDownloadBtn');
+            if (autoPaletteResult) autoPaletteResult.style.display = 'none';
+            if (autoPaletteDownloadBtn) autoPaletteDownloadBtn.style.display = 'none';
+            
+            // 清空文字匯入調色盤輸入框
+            const paletteTextImport = document.getElementById('paletteTextImport');
+            if (paletteTextImport) paletteTextImport.value = '';
+            
+            // 清空調色盤檔案上傳
+            const paletteFile = document.getElementById('paletteFile');
+            if (paletteFile) paletteFile.value = '';
+            
+            // 重置自動調色盤名稱輸入框
+            const autoPaletteName = document.getElementById('autoPaletteName');
+            if (autoPaletteName) autoPaletteName.value = '智能調色盤';
+            
+            // 重置自動偵測按鈕狀態
+            const autoPaletteBtn = document.getElementById('autoPaletteBtn');
+            if (autoPaletteBtn) {
+              autoPaletteBtn.textContent = '偵測圖片顏色';
+              autoPaletteBtn.disabled = false;
+            }
             
             showMessage('數據已清除！', 'success');
             batchResults = [];
@@ -1214,14 +1406,15 @@
             const mergeOutput = document.getElementById("merge-output");
             let obj = null;
             let minified = false;
+            let mimeType = "application/json";
             try {
                 obj = JSON.parse(mergeOutput.value);
-                if (obj && obj.frameList) minified = true;
-                else if (obj && (obj.roomName || obj.name) && obj.tileList) minified = true;
-                else if (obj && obj.roomList) minified = true;
+                if (obj && obj.frameList) { minified = true; mimeType = "application/octet-stream"; }
+                else if (obj && (obj.roomName || obj.name) && obj.tileList) { minified = true; mimeType = "application/octet-stream"; }
+                else if (obj && obj.roomList) { minified = true; mimeType = "application/octet-stream"; }
             } catch {}
             let content = (minified && obj) ? JSON.stringify(obj) : mergeOutput.value;
-            const blob = new Blob([content], { type: "application/json" });
+            const blob = new Blob([content], { type: mimeType });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
@@ -1295,8 +1488,8 @@
             messageDiv.className = type;
             messageDiv.textContent = message;
             
-            // 插入到頁面頂部
-            document.body.insertBefore(messageDiv, document.body.firstChild);
+            // 插入到頁面
+            document.body.appendChild(messageDiv);
             
             // 3秒後自動移除
             setTimeout(() => {
@@ -1304,6 +1497,28 @@
                     messageDiv.remove();
                 }
             }, 3000);
+        }
+        
+        // 處理 file input 的顯示文字
+        function setupFileInputs() {
+            const fileInputs = document.querySelectorAll('input[type="file"]');
+            fileInputs.forEach(input => {
+                // 設定初始文字
+                input.setAttribute('data-original-text', '選擇檔案');
+                
+                // 監聽檔案選擇事件
+                input.addEventListener('change', function() {
+                    const files = this.files;
+                    if (files.length > 0) {
+                        // 顯示選中的檔案名稱
+                        const fileNames = Array.from(files).map(file => file.name).join(', ');
+                        this.setAttribute('data-original-text', fileNames);
+                    } else {
+                        // 恢復原始文字
+                        this.setAttribute('data-original-text', '選擇檔案');
+                    }
+                });
+            });
         }
 
         // 計算建議的精靈和房間尺寸組合
@@ -1433,7 +1648,7 @@
             const suggestionsDiv = document.getElementById("suggestions");
             
             if (suggestions.length === 0) {
-                suggestionsDiv.innerHTML = '<p style="color: #666;">無法找到合適的組合，請手動調整尺寸</p>';
+                suggestionsDiv.innerHTML = '<p style="color: var(--text-light);">無法找到合適的組合，請手動調整尺寸</p>';
                 return;
             }
             
@@ -1442,13 +1657,13 @@
             suggestions.forEach((suggestion, index) => {
                 const isRecommended = index === 0;
                 const style = isRecommended ? 
-                    'background: #e8f5e8; border: 2px solid #4CAF50;' : 
-                    'background: #f9f9f9; border: 1px solid #ddd;';
+                    'background: var(--success-bg); border: 2px solid var(--success-color);' : 
+                    'background: var(--bg-light); border: 1px solid var(--border-light);';
                 
                 // 添加縮放信息
                 let scaleInfo = '';
                 if (suggestion.scale !== 1) {
-                    scaleInfo = `<div style="font-size: 0.8em; color: #ff6b35;">
+                    scaleInfo = `<div style="font-size: 0.8em; color: var(--warning-color);">
                         📏 原圖: ${suggestion.originalSize} → 縮放: ${suggestion.scale.toFixed(2)}x
                     </div>`;
                 }
@@ -1457,10 +1672,10 @@
                     <div class="suggestion-item" 
                          style="${style} padding: 8px; margin: 5px 0; border-radius: 4px; cursor: pointer;"
                          onclick="selectSuggestion(${suggestion.spriteWidth}, ${suggestion.spriteHeight}, ${suggestion.roomWidth}, ${suggestion.roomHeight})">
-                        <div style="font-weight: bold; color: #333;">
+                        <div style="font-weight: bold; color: var(--text-secondary);">
                             ${isRecommended ? '⭐ ' : ''}${suggestion.description}
                         </div>
-                        <div style="font-size: 0.9em; color: #666;">
+                        <div style="font-size: 0.9em; color: var(--text-light);">
                             評分: ${suggestion.score} | 總精靈數: ${suggestion.roomWidth * suggestion.roomHeight}
                         </div>
                         ${scaleInfo}
@@ -1631,7 +1846,7 @@
                 right: 20px;
                 padding: 10px 15px;
                 border-radius: 5px;
-                color: white;
+                color: var(--text-white);
                 font-size: 14px;
                 z-index: 1000;
                 max-width: 300px;
@@ -1640,9 +1855,9 @@
             
             // 根據類型設定顏色
             if (type === 'warning') {
-                infoDiv.style.backgroundColor = '#ff9800';
+                infoDiv.style.backgroundColor = 'var(--warning-color)';
             } else {
-                infoDiv.style.backgroundColor = '#2196F3';
+                infoDiv.style.backgroundColor = 'var(--info-color)';
             }
             
             infoDiv.textContent = message;
@@ -1658,7 +1873,7 @@
             }, 3000);
         }
 
-        // ====== 全域動畫幀補齊函數 ======
+        // ====== 全域工具函數 ======
         function padFrames(frames, maxLen) {
             if (frames.length === maxLen) return frames.slice();
             if (maxLen === 2) {
@@ -1677,14 +1892,146 @@
             while (arr.length < maxLen) arr.push(JSON.parse(JSON.stringify(arr[arr.length - 1])));
             return arr;
         }
+        
+        // 通用檔案列表渲染函數
+        function renderGenericFileList(fileList, items, itemType = '精靈') {
+            fileList.innerHTML = '';
+            items.forEach((item, i) => {
+                const li = document.createElement('li');
+                li.textContent = `${item.file.name} (${item.data.name || ''})`;
+                li.draggable = true;
+                li.dataset.idx = i;
+                fileList.appendChild(li);
+            });
+        }
+        
+        // 通用屬性選擇渲染函數
+        function renderGenericAttrSelect(attrSelect, items, attrSourceIdx, itemType = '精靈') {
+            attrSelect.style.display = '';
+            attrSelect.innerHTML = `選擇要保留屬性的${itemType}：`;
+            const select = document.createElement('select');
+            items.forEach((item, i) => {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = `${item.file.name} (${item.data.name || ''})`;
+                select.appendChild(opt);
+            });
+            select.value = attrSourceIdx;
+            select.onchange = e => { attrSourceIdx = Number(e.target.value); };
+            attrSelect.appendChild(select);
+        }
+        
+        // 通用節流函數
+        function createThrottledFunction(func) {
+            let ticking = false;
+            return function() {
+                if (!ticking) {
+                    requestAnimationFrame(() => {
+                        func();
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            };
+        }
+        
+        // 通用圖片處理函數
+        function processImageToCanvas(img, fileName, index = 0) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            
+            const imageData = {
+                width: img.width,
+                height: img.height,
+                canvas: canvas,
+                context: ctx,
+                fileName: fileName,
+                spriteName: `sprite${index+1}`,
+                colorIndex: 1
+            };
+            
+            // 如果有調色盤，進行色階化
+            if (currentPalette) {
+                const imgData = ctx.getImageData(0, 0, img.width, img.height);
+                const quantizeMethod = document.getElementById('quantizeMethod').value;
+                const useHsl = quantizeMethod === 'hsl';
+                imageData.quantized = quantizeToPalette(imgData.data, currentPalette, useHsl);
+                imageData.quantizedWidth = img.width;
+                imageData.quantizedHeight = img.height;
+            }
+            
+            return imageData;
+        }
+        
+        // 通用圖片載入完成處理函數
+        function handleImageLoadComplete(isBatchMode = false) {
+            allImagesLoaded = true;
+            enableGenerateButtons();
+            
+            const firstImg = currentImages[0];
+            generateForm.style.display = "block";
+            imageSize.textContent = `${firstImg.width} x ${firstImg.height}`;
+            const suggestions = calculateSuggestions(firstImg.width, firstImg.height);
+            displaySuggestions(suggestions);
+            imageInfo.style.display = "block";
+            
+            if (suggestions.length > 0) {
+                const firstSuggestion = suggestions[0];
+                document.getElementById("spriteWidth").value = firstSuggestion.spriteWidth;
+                document.getElementById("spriteHeight").value = firstSuggestion.spriteHeight;
+                document.getElementById("roomWidth").value = firstSuggestion.roomWidth;
+                document.getElementById("roomHeight").value = firstSuggestion.roomHeight;
+            }
+            
+            showMessage(isBatchMode ? '所有圖片已載入完成，可生成數據' : '圖片載入成功！', 'success');
+            renderBatchSpriteSettings();
+            currentPreviewIndex = 0;
+            updatePreview();
+            updateColorIndexAndPaletteNameUI();
+            updateCurrentPaletteStatus();
+            showAutoPaletteSection(true);
+            
+            resetAutoPaletteButton();
+        }
+        
+        // 重新處理所有已載入的圖片以應用新的調色盤
+        function reprocessImagesWithPalette() {
+            if (!currentPalette || currentImages.length === 0) return;
+            
+            const quantizeMethod = document.getElementById('quantizeMethod').value;
+            const useHsl = quantizeMethod === 'hsl';
+            
+            currentImages.forEach((imageData, index) => {
+                if (imageData.canvas) {
+                    const ctx = imageData.canvas.getContext('2d');
+                    const imgData = ctx.getImageData(0, 0, imageData.width, imageData.height);
+                    imageData.quantized = quantizeToPalette(imgData.data, currentPalette, useHsl);
+                    imageData.quantizedWidth = imageData.width;
+                    imageData.quantizedHeight = imageData.height;
+                }
+            });
+        }
+        
+        // 重置自動偵測按鈕狀態
+        function resetAutoPaletteButton() {
+            const autoPaletteBtn = document.getElementById('autoPaletteBtn');
+            if (autoPaletteBtn) {
+                autoPaletteBtn.textContent = '自動偵測圖片顏色';
+                autoPaletteBtn.disabled = false;
+            }
+        }
 
-        // ===== 合併精靈工具 =====
+        // ===== 精靈合併工具 =====
         (function(){
             const input = document.getElementById('mergeSpriteInput');
             const fileList = document.getElementById('mergeSpriteFileList');
             const attrSelect = document.getElementById('mergeSpriteAttrSelect');
             const errorDiv = document.getElementById('mergeSpriteError');
             const mergeBtn = document.getElementById('mergeSpriteBtn');
+            // 精靈合併工具的拖曳排序處理
             let sprites = [];
             let attrSourceIdx = 0;
 
@@ -1704,8 +2051,8 @@
                 if (dragIdx !== null && targetIdx !== dragIdx) {
                     const moved = sprites.splice(dragIdx, 1)[0];
                     sprites.splice(targetIdx, 0, moved);
-                    renderFileList();
-                    renderAttrSelect();
+                    renderGenericFileList(fileList, sprites, '精靈');
+                    renderGenericAttrSelect(attrSelect, sprites, attrSourceIdx, '精靈');
                 }
                 dragIdx = null;
             });
@@ -1740,35 +2087,12 @@
                     errorDiv.style.display = '';
                     return;
                 }
-                renderFileList();
-                renderAttrSelect();
+                renderGenericFileList(fileList, sprites, '精靈');
+                renderGenericAttrSelect(attrSelect, sprites, attrSourceIdx, '精靈');
                 mergeBtn.style.display = '';
             });
 
-            function renderFileList() {
-                fileList.innerHTML = '';
-                sprites.forEach((s, i) => {
-                    const li = document.createElement('li');
-                    li.textContent = `${s.file.name} (${s.data.name || ''})`;
-                    li.draggable = true;
-                    li.dataset.idx = i;
-                    fileList.appendChild(li);
-                });
-            }
-            function renderAttrSelect() {
-                attrSelect.style.display = '';
-                attrSelect.innerHTML = '選擇要保留屬性的精靈：';
-                const select = document.createElement('select');
-                sprites.forEach((s, i) => {
-                    const opt = document.createElement('option');
-                    opt.value = i;
-                    opt.textContent = `${s.file.name} (${s.data.name || ''})`;
-                    select.appendChild(opt);
-                });
-                select.value = attrSourceIdx;
-                select.onchange = e => { attrSourceIdx = Number(e.target.value); };
-                attrSelect.appendChild(select);
-            }
+            // 使用通用函數，無需重複定義
 
             mergeBtn.onclick = function() {
                 errorDiv.style.display = 'none';
@@ -1826,7 +2150,7 @@
                 const fileName = sprites[idx].file.name.replace(/\.(json|mosisprite)?$/, "") + ".mosisprite";
                 // 壓成一行
                 const content = JSON.stringify(merged);
-                const blob = new Blob([content], {type:'application/json'});
+                const blob = new Blob([content], {type:'application/octet-stream'});
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
                 a.download = fileName;
@@ -1834,7 +2158,7 @@
             };
         })();
 
-        // ===== 合併房間單色精靈工具 =====
+        // ===== 房間合併單色精靈工具 =====
         (function(){
             const input = document.getElementById('mergeRoomInput');
             const errorDiv = document.getElementById('mergeRoomError');
@@ -1925,7 +2249,7 @@
                                 break;
                             }
                         }
-                        console.log(`[合併房間單色精靈] (${x},${y}) sprites:`, scriptLog, '→ 採用 scriptList:', mergedScriptList);
+        
                         const mergedSprite = {
                             name: mergedName,
                             isAvatar: false,
@@ -1943,7 +2267,7 @@
                         mergedSprite.isItem = topSprite.isItem;
                         mergedSprite.isTransparent = topSprite.isTransparent;
                         mergedSprite.scriptList = mergedScriptList;
-                        console.log('[合併房間單色精靈] mergedSprite(屬性設定後):', JSON.parse(JSON.stringify(mergedSprite)));
+        
                         room.spriteList.push(mergedSprite);
                         // 只 log 除 frameList 以外的屬性
                         const { frameList, ...spriteInfo } = mergedSprite;
@@ -1994,12 +2318,12 @@
                             }
                         });
                     }
-                    // ===== 合併房間單色精靈工具下載檔名修正 =====
+                    // ===== 房間合併單色精靈工具下載檔名修正 =====
                     let downloadName = (fileName || "merged_room")
                       .replace(/\.(json|mosiroom)?$/, "") + ".mosiroom";
                     // 壓成一行
                     const content = JSON.stringify(room);
-                    const blob = new Blob([content], {type:'application/json'});
+                    const blob = new Blob([content], {type:'application/octet-stream'});
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);
                     a.download = downloadName;
@@ -2118,7 +2442,7 @@
                                     break;
                                 }
                             }
-                            console.log(`[世界級合併] (${x},${y}) sprites:`, scriptLog, '→ 採用 scriptList:', mergedScriptList);
+            
                             const mergedSprite = {
                                 name: mergedName,
                                 isAvatar: topSprite.isAvatar,
@@ -2196,7 +2520,7 @@
                       .replace(/\.(json|mosi)?$/, "") + ".mosi";
                     // 壓成一行
                     const content = JSON.stringify(world);
-                    const blob = new Blob([content], {type:'application/json'});
+                    const blob = new Blob([content], {type:'application/octet-stream'});
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);
                     a.download = downloadName;
@@ -2216,6 +2540,7 @@
             const attrSelect = document.getElementById('mergePictureAttrSelect');
             const errorDiv = document.getElementById('mergePictureError');
             const mergeBtn = document.getElementById('mergePictureBtn');
+            // 插圖合併工具的拖曳排序處理
             let sprites = [];
             let attrSourceIdx = 0;
 
@@ -2235,8 +2560,8 @@
                 if (dragIdx !== null && targetIdx !== dragIdx) {
                     const moved = sprites.splice(dragIdx, 1)[0];
                     sprites.splice(targetIdx, 0, moved);
-                    renderFileList();
-                    renderAttrSelect();
+                    renderGenericFileList(fileList, sprites, '插圖');
+                    renderGenericAttrSelect(attrSelect, sprites, attrSourceIdx, '插圖');
                 }
                 dragIdx = null;
             });
@@ -2271,35 +2596,12 @@
                     errorDiv.style.display = '';
                     return;
                 }
-                renderFileList();
-                renderAttrSelect();
+                renderGenericFileList(fileList, sprites, '插圖');
+                renderGenericAttrSelect(attrSelect, sprites, attrSourceIdx, '插圖');
                 mergeBtn.style.display = '';
             });
 
-            function renderFileList() {
-                fileList.innerHTML = '';
-                sprites.forEach((s, i) => {
-                    const li = document.createElement('li');
-                    li.textContent = `${s.file.name} (${s.data.name || ''})`;
-                    li.draggable = true;
-                    li.dataset.idx = i;
-                    fileList.appendChild(li);
-                });
-            }
-            function renderAttrSelect() {
-                attrSelect.style.display = '';
-                attrSelect.innerHTML = '選擇要保留屬性的插圖：';
-                const select = document.createElement('select');
-                sprites.forEach((s, i) => {
-                    const opt = document.createElement('option');
-                    opt.value = i;
-                    opt.textContent = `${s.file.name} (${s.data.name || ''})`;
-                    select.appendChild(opt);
-                });
-                select.value = attrSourceIdx;
-                select.onchange = e => { attrSourceIdx = Number(e.target.value); };
-                attrSelect.appendChild(select);
-            }
+            // 使用通用函數，無需重複定義
 
             mergeBtn.onclick = function() {
                 errorDiv.style.display = 'none';
@@ -2347,7 +2649,7 @@
                 const fileName = (src.name || 'merged_picture').replace(/\.(json|mosigraphic)?$/, "") + ".mosigraphic";
                 // 壓成一行
                 const content = JSON.stringify(merged);
-                const blob = new Blob([content], {type:'application/json'});
+                const blob = new Blob([content], {type:'application/octet-stream'});
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
                 a.download = fileName;
@@ -2382,7 +2684,7 @@
                     const picture = roomToPictureData(roomData);
                     const fileName = (picture.name || 'picture').replace(/\.(json|mosigraphic)?$/, "") + ".mosigraphic";
                     const content = JSON.stringify(picture);
-                    const blob = new Blob([content], {type:'application/json'});
+                    const blob = new Blob([content], {type:'application/octet-stream'});
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);
                     a.download = fileName;
@@ -2397,6 +2699,22 @@
         // Tab 切換邏輯
         function setTab(tabId) {
             currentTabId = tabId;
+            
+            // 移除舊的 sticky/fixed 事件監聽
+            if (window.stickyScrollHandler) {
+                window.removeEventListener('scroll', window.stickyScrollHandler);
+                window.removeEventListener('resize', window.stickyScrollHandler);
+                window.stickyScrollHandler = null;
+            }
+            if (window.stickyTabContentHandler) {
+                const tabContent = document.querySelector('.tab-content');
+                if (tabContent) {
+                    tabContent.removeEventListener('scroll', window.stickyTabContentHandler);
+                }
+                window.removeEventListener('resize', window.stickyTabContentHandler);
+                window.stickyTabContentHandler = null;
+            }
+            
             // 切換內容
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
@@ -2441,6 +2759,14 @@
                 }
                 tabSel.value = tabId;
             }
+            
+            // 只在 upload-img 分頁初始化 sticky/fixed
+            if (tabId === 'upload-img') {
+                initStickyPreview();
+            }
+            
+            updateColorIndexAndPaletteNameUI();
+            updateCurrentPaletteStatus();
         }
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.onclick = function() {
@@ -2475,19 +2801,19 @@
             return Object.values(scriptList).some(v => typeof v === 'string' && v.trim() !== '');
         }
 
-        // 新增：批量精靈設定區
+        // 新增：批量設定區
         function renderBatchSpriteSettings() {
             const batchDiv = document.getElementById('batch-sprite-settings');
             if (!batchMode || !currentImages.length) {
                 batchDiv.style.display = 'none';
                 batchDiv.innerHTML = '';
-                document.getElementById('spriteName').style.display = '';
+                document.getElementById('spriteName').parentNode.style.display = '';
                 document.getElementById('colorIndex').parentNode.style.display = '';
                 return;
             }
             batchDiv.style.display = '';
-            batchDiv.innerHTML = '<b>批量精靈設定：</b>';
-            document.getElementById('spriteName').style.display = 'none';
+            batchDiv.innerHTML = '<b>批量設定：</b>';
+            document.getElementById('spriteName').parentNode.style.display = 'none';
             document.getElementById('colorIndex').parentNode.style.display = 'none';
             // 建立每張圖的設定欄
             currentImages.forEach((img, idx) => {
@@ -2522,7 +2848,7 @@
                   label2.textContent = '顏色:';
                   label2.style.margin = '0 4px';
                   const colorSel = document.createElement('select');
-                  for (let i=1; i<=8; i++) {
+                  for (let i=1; i<=7; i++) {
                       const opt = document.createElement('option');
                       opt.value = i;
                       opt.textContent = i;
@@ -2624,25 +2950,7 @@
             Object.values(colorFrameMap).forEach(frames => {
                 if (Array.isArray(frames)) maxFrameLen = Math.max(maxFrameLen, frames.length);
             });
-            // 幀補齊：合併工具 padFrames 特殊規則
-            function padFrames(frames, maxLen) {
-                if (frames.length === maxLen) return frames.slice();
-                if (maxLen === 2) {
-                    return [frames[0], frames[0]];
-                }
-                if (maxLen === 3) {
-                    if (frames.length === 1) return [frames[0], frames[0], frames[0]];
-                    if (frames.length === 2) return [frames[0], frames[1], frames[0]];
-                }
-                if (maxLen === 4) {
-                    if (frames.length === 1) return [frames[0], frames[0], frames[0], frames[0]];
-                    if (frames.length === 2) return [frames[0], frames[1], frames[0], frames[1]];
-                    if (frames.length === 3) return [frames[0], frames[1], frames[1], frames[2]];
-                }
-                const arr = frames.slice();
-                while (arr.length < maxLen) arr.push(JSON.parse(JSON.stringify(arr[arr.length - 1])));
-                return arr;
-            }
+            // 使用全域的 padFrames 函數
             const paddedColorFrameMap = {};
             Object.entries(colorFrameMap).forEach(([name, frames]) => {
                 paddedColorFrameMap[name] = padFrames(frames, maxFrameLen);
@@ -2861,9 +3169,9 @@
             // 新增：顯示 isTransparent 屬性
             let info = '';
             if (typeof skin.isTransparent !== 'undefined') {
-              info = `<div style="color:#2196F3;">isTransparent: <b>${skin.isTransparent}</b></div>`;
+              info = `<div style="color:var(--text-info);">isTransparent: <b>${skin.isTransparent}</b></div>`;
             }
-            const blob = new Blob([JSON.stringify(skin)], {type: 'application/json'});
+            const blob = new Blob([JSON.stringify(skin)], {type: 'application/octet-stream'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -2910,7 +3218,7 @@
                 const obj = JSON.parse(ev.target.result);
                 paletteName = obj.name || "palette";
                 let colorList = obj.colorList || [];
-                colorList = distinctColorsMaxDistance(colorList.map(hexToRgb), 8);
+                // 直接使用原始顏色，不進行智能去重
                 if (colorList.length < 2) {
                   showMessage('調色盤顏色數量需至少2色', 'error');
                   currentPalette = null;
@@ -2918,14 +3226,34 @@
                   showPalettePreview([]);
                   return;
                 }
-                currentPalette = colorList;
-                showPalettePreview(colorList);
+                // 確保 currentPalette 是 RGB 陣列格式
+                currentPalette = colorList.map(color => {
+                  if (Array.isArray(color)) {
+                    return color;
+                  } else if (typeof color === 'string') {
+                    return hexToRgb(color);
+                  } else {
+                    return [0, 0, 0];
+                  }
+                });
+                showPalettePreview(currentPalette);
                 showMessage('調色盤載入成功', 'success');
+                // 在成功載入後更新狀態顯示
+                updateColorIndexAndPaletteNameUI();
+                updateCurrentPaletteStatus();
+                renderBatchSpriteSettings();
+                // 重新處理所有已載入的圖片以應用新的調色盤
+                reprocessImagesWithPalette();
+                // 調色盤載入後自動切換到 canvas 預覽
+                showingCanvas = true;
+                updatePreview();
               } catch (err) {
                 showMessage('palette 解析失敗: ' + err, 'error');
                 currentPalette = null;
                 paletteName = "";
                 showPalettePreview([]);
+                updateColorIndexAndPaletteNameUI();
+                updateCurrentPaletteStatus();
               }
             };
             reader.readAsText(file);
@@ -2934,9 +3262,9 @@
             currentPalette = null;
             paletteName = "";
             showPalettePreview([]);
+            updateColorIndexAndPaletteNameUI();
+            updateCurrentPaletteStatus();
           }
-          updateColorIndexAndPaletteNameUI();
-          updatePreviewVisibility();
         });
         function hexToRgb(hex) {
           hex = hex.replace('#', '');
@@ -2948,16 +3276,35 @@
           const div = document.getElementById('palette-preview');
           if (!colorList || colorList.length === 0) {
             div.innerHTML = '';
+            div.style.display = 'none';
             return;
           }
-          div.innerHTML = colorList.map(c =>
-            `<span style="display:inline-block;width:24px;height:24px;background:rgb(${c.join(',')});margin-right:2px;"></span>`
-          ).join('');
+          div.style.display = 'block';
+          div.innerHTML = colorList.map(c => {
+            // 處理不同格式的顏色：RGB陣列或十六進制字串
+            let rgb;
+            if (Array.isArray(c)) {
+              rgb = c;
+            } else if (typeof c === 'string') {
+              rgb = hexToRgb(c);
+            } else {
+              return '';
+            }
+            return `<span style="display:inline-block;width:24px;height:24px;background:rgb(${rgb.join(',')});margin-right:2px;"></span>`;
+          }).join('');
         }
         // ===== 圖片色階化（palette） =====
-        function quantizeToPalette(imageData, palette) {
-          // 預先轉換 palette 為 LAB
-          const paletteLab = palette.map(([r, g, b]) => rgbToLab(r, g, b));
+        function quantizeToPalette(imageData, palette, useHsl = false) {
+          let paletteColors, pixelColor;
+          
+          if (useHsl) {
+            // 使用 HSL 色彩空間
+            paletteColors = palette.map(([r, g, b]) => rgbToHsl(r, g, b));
+          } else {
+            // 使用 LAB 色彩空間（預設）
+            paletteColors = palette.map(([r, g, b]) => rgbToLab(r, g, b));
+          }
+          
           const result = [];
           for (let i = 0; i < imageData.length; i += 4) {
             const r = imageData[i], g = imageData[i+1], b = imageData[i+2], a = imageData[i+3];
@@ -2965,10 +3312,29 @@
               result.push(0); // 透明歸 0
               continue;
             }
-            const lab = rgbToLab(r, g, b);
+            
+            if (useHsl) {
+              pixelColor = rgbToHsl(r, g, b);
+            } else {
+              pixelColor = rgbToLab(r, g, b);
+            }
+            
             let minDist = Infinity, idx = 0;
-            for (let j = 0; j < paletteLab.length; j++) {
-              const dist = labDist(lab, paletteLab[j]);
+            for (let j = 0; j < paletteColors.length; j++) {
+              let dist;
+              if (useHsl) {
+                // HSL 距離計算（考慮色相環）
+                const hueDiff = Math.abs(pixelColor[0] - paletteColors[j][0]);
+                const satDiff = Math.abs(pixelColor[1] - paletteColors[j][1]);
+                const lightDiff = Math.abs(pixelColor[2] - paletteColors[j][2]);
+                
+                // 色相差異需要考慮環形距離
+                const hueDist = Math.min(hueDiff, 360 - hueDiff);
+                dist = Math.sqrt(hueDist * hueDist + satDiff * satDiff + lightDiff * lightDiff);
+              } else {
+                dist = labDist(pixelColor, paletteColors[j]);
+              }
+              
               if (dist < minDist) { minDist = dist; idx = j; }
             }
             result.push(idx);
@@ -2991,9 +3357,11 @@
 
         // ===== 多色模式：quantized 轉房間/插圖數據 =====
         function processQuantizedToRoomData(image, data, palette) {
+          // 先用 data 解構變數
+          const { spriteWidth, spriteHeight, roomWidth, roomHeight } = data;
+          
           // 直接用 quantized 陣列切割成 tileList 與 spriteList
           const { quantized, quantizedWidth, quantizedHeight } = image;
-          const { spriteWidth, spriteHeight, roomWidth, roomHeight } = data;
           const requiredWidth = roomWidth * spriteWidth;
           const requiredHeight = roomHeight * spriteHeight;
           // 若 quantized 尺寸與需求不同，需縮放
@@ -3014,6 +3382,7 @@
           // 切割成 sprite
           const spritesPerRow = Math.floor(w / spriteWidth);
           const totalSprites = spritesPerRow * Math.floor(h / spriteHeight);
+
           if (roomWidth * roomHeight > totalSprites) {
             throw new Error(`房間尺寸過大，圖片只能提供 ${totalSprites} 個精靈，但房間需要 ${roomWidth * roomHeight} 個`);
           }
@@ -3024,12 +3393,23 @@
           for (let spriteIndex = 0; spriteIndex < roomWidth * roomHeight; spriteIndex++) {
             const x = (spriteIndex % spritesPerRow) * spriteWidth;
             const y = Math.floor(spriteIndex / spritesPerRow) * spriteHeight;
+
             // 取得精靈區域的 quantized
             const frame = [];
-            for (let sy = 0; sy < spriteHeight; sy++) {
-              for (let sx = 0; sx < spriteWidth; sx++) {
-                frame.push(qArr[(y+sy)*w + (x+sx)]);
+            try {
+              for (let sy = 0; sy < spriteHeight; sy++) {
+                for (let sx = 0; sx < spriteWidth; sx++) {
+                  const index = (y+sy)*w + (x+sx);
+                  if (index >= qArr.length) {
+                    console.error('索引超出範圍:', { index, qArrLength: qArr.length, y, sy, x, sx, w });
+                    throw new Error(`索引超出範圍: ${index} >= ${qArr.length}`);
+                  }
+                  frame.push(qArr[index]);
+                }
               }
+            } catch (error) {
+              console.error('處理精靈時出錯:', error);
+              throw error;
             }
             // 檢查是否為全透明
             if (frame.some(px => px !== 0)) {
@@ -3057,6 +3437,7 @@
               });
             }
           }
+
           return {
             name: data.roomName,
             paletteName: data.paletteName,
@@ -3105,52 +3486,12 @@
           };
         }
 
-        let currentPreviewIndex = 0;
-        function updateQuantizedPreview() {
-          if (!currentImages.length) return;
-          const idx = currentPreviewIndex;
-          const img = currentImages[idx];
-          const qCanvas = document.getElementById('quantized-preview');
-          const label = document.getElementById('preview-index-label');
-          const prevBtn = document.getElementById('preview-prev-btn');
-          const nextBtn = document.getElementById('preview-next-btn');
-          if (img && img.quantized) {
-            qCanvas.width = img.quantizedWidth;
-            qCanvas.height = img.quantizedHeight;
-            drawQuantizedPreview(qCanvas, img.quantizedWidth, img.quantizedHeight, img.quantized, currentPalette);
-            label.textContent = `${idx+1} / ${currentImages.length}`;
-          } else {
-            label.textContent = '';
-            const ctx = qCanvas.getContext('2d');
-            ctx.clearRect(0, 0, qCanvas.width, qCanvas.height);
-          }
-          if (batchMode && currentImages.length > 1) {
-            prevBtn.style.display = '';
-            nextBtn.style.display = '';
-            prevBtn.disabled = (idx === 0);
-            nextBtn.disabled = (idx === currentImages.length-1);
-          } else {
-            prevBtn.style.display = 'none';
-            nextBtn.style.display = 'none';
-          }
-        }
-        document.getElementById('preview-prev-btn').onclick = function() {
-          if (currentPreviewIndex > 0) {
-            currentPreviewIndex--;
-            updateQuantizedPreview();
-          }
-        };
-        document.getElementById('preview-next-btn').onclick = function() {
-          if (currentPreviewIndex < currentImages.length-1) {
-            currentPreviewIndex++;
-            updateQuantizedPreview();
-          }
-        };
-        // 在圖片上傳完成、或 batchMode 時呼叫 updateQuantizedPreview()
+
+        // 在圖片上傳完成、或 batchMode 時呼叫 updatePreview()
         // 單圖模式
         if (!batchMode) {
           currentPreviewIndex = 0;
-          updateQuantizedPreview();
+          updatePreview();
         }
         // 批量模式下預先載入所有圖片
         if (batchMode) {
@@ -3176,13 +3517,13 @@
                     // ===== 新增：多圖也要 quantized =====
                     if (currentPalette) {
                         const imgData = ctx.getImageData(0, 0, img.width, img.height);
-                        currentImages[idx].quantized = quantizeToPalette(imgData.data, currentPalette);
+                        // 根據用戶選擇的色彩空間進行色階化
+                        const quantizeMethod = document.getElementById('quantizeMethod').value;
+                        const useHsl = quantizeMethod === 'hsl';
+                        currentImages[idx].quantized = quantizeToPalette(imgData.data, currentPalette, useHsl);
                         currentImages[idx].quantizedWidth = img.width;
                         currentImages[idx].quantizedHeight = img.height;
-                        console.log('[批量模式] quantized 寫入 currentImages['+idx+']', {
-                          quantized: currentImages[idx].quantized.slice(0, 32),
-                          quantizedLen: currentImages[idx].quantized.length
-                        });
+                        
                     }
                     loaded++;
                     if (loaded === files.length) {
@@ -3191,9 +3532,9 @@
                         showMessage('所有圖片已載入完成，可生成數據', 'success');
                         renderBatchSpriteSettings();
                         currentPreviewIndex = 0;
-                        updateQuantizedPreview();
+                        updatePreview();
                         updateColorIndexAndPaletteNameUI();
-                        updatePreviewVisibility();
+                        updateCurrentPaletteStatus();
                         showAutoPaletteSection(true);
                     }
                 };
@@ -3204,40 +3545,48 @@
             });
         }
 
+        // 新增：更新當前調色盤狀態顯示
+        function updateCurrentPaletteStatus() {
+          const statusElement = document.getElementById('current-palette-name');
+          if (statusElement) {
+            if (currentPalette && paletteName) {
+              statusElement.textContent = paletteName;
+              statusElement.style.color = 'var(--text-accent)';
+            } else {
+              statusElement.textContent = '無';
+              statusElement.style.color = 'var(--text-light)';
+            }
+          }
+        }
+
         // 新增：palette 控制顏色索引與 paletteName UI 顯示/隱藏
         function updateColorIndexAndPaletteNameUI() {
           const colorIndexRow = document.getElementById('colorIndex').parentNode;
           const paletteNameRow = document.getElementById('paletteName').parentNode;
           const batchDiv = document.getElementById('batch-sprite-settings');
+          
           if (currentPalette) {
-            // 多色模式，隱藏顏色索引與 paletteName
+            // 多色模式
             colorIndexRow.style.display = 'none';
             if (paletteNameRow) paletteNameRow.style.display = 'none';
-            if (batchDiv) batchDiv.style.display = 'none';
-            // 單圖模式也隱藏顏色索引
-            document.getElementById('colorIndex').parentNode.style.display = 'none';
-          } else {
-            // 單色模式，顯示
-            colorIndexRow.style.display = '';
-            if (paletteNameRow) paletteNameRow.style.display = '';
+            // 多圖模式下顯示批量設定區（但不顯示顏色索引）
             if (batchDiv) batchDiv.style.display = batchMode ? '' : 'none';
-            document.getElementById('colorIndex').parentNode.style.display = '';
+          } else {
+            // 單色模式
+            if (batchMode) {
+              // 多圖模式：隱藏預設顏色索引，顯示批量設定區
+              colorIndexRow.style.display = 'none';
+              if (batchDiv) batchDiv.style.display = '';
+            } else {
+              // 單圖模式：顯示預設顏色索引，隱藏批量設定區
+              colorIndexRow.style.display = '';
+              if (batchDiv) batchDiv.style.display = 'none';
+            }
+            if (paletteNameRow) paletteNameRow.style.display = '';
           }
         }
 
-        function updatePreviewVisibility() {
-          const imgPreview = document.getElementById('preview');
-          const qContainer = document.getElementById('quantized-preview-container');
-          if (currentPalette) {
-            // 多色模式：只顯示 quantized canvas
-            imgPreview.style.display = 'none';
-            qContainer.style.display = 'block';
-          } else {
-            // 單色模式：只顯示圖片
-            imgPreview.style.display = 'block';
-            qContainer.style.display = 'none';
-          }
-        }
+
 
         function showAutoPaletteSection(show) {
           document.getElementById('auto-palette-section').style.display = show ? '' : 'none';
@@ -3264,13 +3613,13 @@
           });
         }
         // 新增簡易 k-means 分群函數
-        function getPaletteKMeans(imageData, maxColors=8, maxIter=10) {
+        function getPaletteKMeans(imageData, maxColors=16, maxIter=10) {
           const pixels = [];
           for (let i=0; i<imageData.length; i+=4) {
             if (imageData[i+3] < 128) continue;
             pixels.push([imageData[i], imageData[i+1], imageData[i+2]]);
           }
-          if (pixels.length === 0) return ['#000000', '#ffffff'];
+          if (pixels.length === 0) return ['var(--transparent-black)', 'var(--transparent-white)'];
           // 隨機初始化中心
           const centers = [];
           for (let i=0; i<maxColors; i++) {
@@ -3342,43 +3691,420 @@
         function colorDist(a, b) {
           return Math.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2 + (a[2]-b[2])**2);
         }
+        
+        // ===== 新增：RGB 轉 HSL 函數 =====
+        function rgbToHsl(r, g, b) {
+          r /= 255;
+          g /= 255;
+          b /= 255;
+          
+          const max = Math.max(r, g, b);
+          const min = Math.min(r, g, b);
+          let h, s, l = (max + min) / 2;
+          
+          if (max === min) {
+            h = s = 0; // 無色相
+          } else {
+            const d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            
+            switch (max) {
+              case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+              case g: h = (b - r) / d + 2; break;
+              case b: h = (r - g) / d + 4; break;
+            }
+            h /= 6;
+          }
+          
+          return [h * 360, s * 100, l * 100]; // 色相(0-360), 飽和度(0-100), 明度(0-100)
+        }
+        
+        // ===== 新增：HSL 轉 RGB 函數 =====
+        function hslToRgb(h, s, l) {
+          h /= 360;
+          s /= 100;
+          l /= 100;
+          
+          const hue2rgb = (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1/6) return p + (q - p) * 6 * t;
+            if (t < 1/2) return q;
+            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+          };
+          
+          let r, g, b;
+          
+          if (s === 0) {
+            r = g = b = l; // 無色相
+          } else {
+            const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            const p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1/3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1/3);
+          }
+          
+          return [
+            Math.round(r * 255),
+            Math.round(g * 255),
+            Math.round(b * 255)
+          ];
+        }
+        
+                 // ===== 新增：智能顏色選擇函數 =====
+                  function smartColorSelection(colors, maxColors=8) {
+                      if (!colors.length) return [];
+           
+           // 簡化的去重處理：使用更直接的 RGB 距離檢測
+           const uniqueColors = [];
+           for (const color of colors) {
+             const rgb = Array.isArray(color) ? color : hexToRgbArr(color);
+             
+             // 檢查是否與已存在的顏色過於相似
+             let isDuplicate = false;
+             for (const existing of uniqueColors) {
+               const existingRgb = Array.isArray(existing) ? existing : hexToRgbArr(existing);
+               
+               // 使用 RGB 歐幾里得距離
+               const distance = Math.sqrt(
+                 Math.pow(rgb[0] - existingRgb[0], 2) +
+                 Math.pow(rgb[1] - existingRgb[1], 2) +
+                 Math.pow(rgb[2] - existingRgb[2], 2)
+               );
+               
+               // 對於淺色系使用更嚴格的標準
+               const isLightColor = rgb[0] > 240 && rgb[1] > 240 && rgb[2] > 240;
+               const isExistingLight = existingRgb[0] > 240 && existingRgb[1] > 240 && existingRgb[2] > 240;
+               
+               const threshold = (isLightColor && isExistingLight) ? 15 : 40;
+               
+               if (distance < threshold) {
+                 isDuplicate = true;
+                 break;
+               }
+             }
+             
+             if (!isDuplicate) {
+               uniqueColors.push(color);
+             }
+           }
+           
+           // 如果去重後的顏色數量少於等於 maxColors，直接返回
+           if (uniqueColors.length <= maxColors) {
+             
+             return uniqueColors.map(c => typeof c === 'string' ? c : rgbToHex(...c));
+           }
+          
+          // 簡化的選擇邏輯：按 RGB 值排序
+          const colorsWithRgb = uniqueColors.map((color, index) => {
+            const rgb = Array.isArray(color) ? color : hexToRgbArr(color);
+            return {
+              original: color,
+              rgb: rgb,
+              index: index
+            };
+          });
+          
+          // 按 RGB 總和排序，優先選擇顏色較深的顏色
+          colorsWithRgb.sort((a, b) => {
+            const sumA = a.rgb[0] + a.rgb[1] + a.rgb[2];
+            const sumB = b.rgb[0] + b.rgb[1] + b.rgb[2];
+            return sumA - sumB; // 優先選擇較深的顏色
+          });
+          
+          // 選擇前 maxColors 個顏色，但避免過於相似的顏色
+          const selectedColors = [];
+          for (const color of colorsWithRgb) {
+            if (selectedColors.length >= maxColors) break;
+            
+            // 檢查是否與已選顏色過於相似
+            let tooClose = false;
+            for (const selected of selectedColors) {
+              const distance = Math.sqrt(
+                Math.pow(color.rgb[0] - selected.rgb[0], 2) +
+                Math.pow(color.rgb[1] - selected.rgb[1], 2) +
+                Math.pow(color.rgb[2] - selected.rgb[2], 2)
+              );
+              
+              // 對於淺色系使用更嚴格的標準
+              const isLightColor = color.rgb[0] > 240 && color.rgb[1] > 240 && color.rgb[2] > 240;
+              const isSelectedLight = selected.rgb[0] > 240 && selected.rgb[1] > 240 && selected.rgb[2] > 240;
+              const threshold = (isLightColor && isSelectedLight) ? 20 : 50;
+              
+              if (distance < threshold) {
+                tooClose = true;
+                break;
+              }
+            }
+            
+            if (!tooClose) {
+              selectedColors.push(color);
+            }
+          }
+          
+          // 確保不超過 maxColors 數量
+          const finalColors = selectedColors.slice(0, maxColors);
+          
+          
+          // 轉換回原始格式
+          return finalColors.map(color => 
+            typeof color.original === 'string' ? color.original : rgbToHex(...color.rgb)
+          );
+        }
+        // 全局變數：存儲偵測到的所有顏色
+        let detectedColors = [];
+        let selectedColors = [];
+        
+        // 固定預覽容器的 JavaScript 控制
+        function initStickyPreview() {
+            // 檢查是否在圖片上傳分頁
+            if (currentTabId !== 'upload-img') return;
+            
+            const previewContainer = document.getElementById('preview-container');
+            if (!previewContainer) return;
+            
+            // 檢查是否為手機版
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                // 手機版：使用簡單的 fixed 定位
+                let isFixed = false;
+                let originalTop = 0;
+                let initialized = false;
+                
+                function updateSticky() {
+                    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    
+                    // 確保在頁面完全載入後才初始化
+                    if (!initialized) {
+                        // 等待一下確保元素完全渲染
+                        setTimeout(() => {
+                            originalTop = previewContainer.offsetTop;
+                            initialized = true;
+                        }, 100);
+                        return;
+                    }
+                    
+                    if (!isFixed) {
+                        // 檢查是否需要變成 fixed - 當圖片預覽完全離開畫面頂部時
+                        const previewRect = previewContainer.getBoundingClientRect();
+                        // 等到圖片預覽完全離開畫面頂部才變成 fixed
+                        if (previewRect.bottom <= 0) {
+                            isFixed = true;
+                            previewContainer.style.position = 'fixed';
+                            previewContainer.style.top = '20px';
+                            previewContainer.style.left = '50%';
+                            previewContainer.style.transform = 'translateX(-50%)';
+                            previewContainer.style.zIndex = '100';
+                            previewContainer.style.background = 'var(--bg-light)';
+                            previewContainer.style.paddingTop = '10px';
+                            previewContainer.style.paddingBottom = '10px';
+                            previewContainer.style.borderRadius = '8px';
+                            previewContainer.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                            previewContainer.style.maxWidth = '95vw';
+                        }
+                    } else {
+                        // 檢查是否需要移除 fixed - 當滾動回到原始位置附近時
+                        if (scrollTop < originalTop - 10) {
+                            isFixed = false;
+                            previewContainer.style.position = '';
+                            previewContainer.style.top = '';
+                            previewContainer.style.left = '';
+                            previewContainer.style.transform = '';
+                            previewContainer.style.zIndex = '';
+                            previewContainer.style.background = '';
+                            previewContainer.style.paddingTop = '';
+                            previewContainer.style.paddingBottom = '';
+                            previewContainer.style.borderRadius = '';
+                            previewContainer.style.boxShadow = '';
+                            previewContainer.style.maxWidth = '';
+                        }
+                    }
+                }
+                
+                // 使用通用節流函數
+                const throttledUpdate = createThrottledFunction(updateSticky);
+                
+                // 儲存事件監聽器到全域變數，以便後續移除
+                window.stickyScrollHandler = throttledUpdate;
+                window.addEventListener('scroll', throttledUpdate);
+                window.addEventListener('resize', throttledUpdate);
+                updateSticky();
+                
+            } else {
+                // 桌面版：使用 JavaScript 控制的 sticky，與手機版邏輯一致
+                let isSticky = false;
+                let originalTop = 0;
+                let initialized = false;
+                
+                function updateDesktopSticky() {
+                    // 桌面版要偵測 tab-content 的滾動，不是 window 的滾動
+                    const tabContent = document.querySelector('.tab-content');
+                    const scrollTop = tabContent ? tabContent.scrollTop : 0;
+                    
+                    // 確保在頁面完全載入後才初始化
+                    if (!initialized) {
+                        setTimeout(() => {
+                            originalTop = previewContainer.offsetTop;
+                            initialized = true;
+                        }, 100);
+                        return;
+                    }
+                    
+                    if (!isSticky) {
+                        // 檢查是否需要變成 sticky - 當圖片預覽完全離開畫面頂部時
+                        const previewRect = previewContainer.getBoundingClientRect();
+                        if (previewRect.bottom <= 0) {
+                            isSticky = true;
+                            previewContainer.style.position = 'sticky';
+                            previewContainer.style.top = '10px';
+                            previewContainer.style.zIndex = '100';
+                            previewContainer.style.background = 'var(--bg-light)';
+                            previewContainer.style.paddingTop = '10px';
+                            previewContainer.style.paddingBottom = '10px';
+                            previewContainer.style.borderRadius = '8px';
+                            previewContainer.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                            previewContainer.style.maxWidth = '90vw';
+                        }
+                    } else {
+                        // 檢查是否需要移除 sticky - 當滾動回到原始位置附近時
+                        if (scrollTop < originalTop - 10) {
+                            isSticky = false;
+                            previewContainer.style.position = '';
+                            previewContainer.style.top = '';
+                            previewContainer.style.zIndex = '';
+                            previewContainer.style.background = '';
+                            previewContainer.style.paddingTop = '';
+                            previewContainer.style.paddingBottom = '';
+                            previewContainer.style.borderRadius = '';
+                            previewContainer.style.boxShadow = '';
+                            previewContainer.style.maxWidth = '';
+                        }
+                    }
+                }
+                
+                // 使用通用節流函數
+                const throttledUpdate = createThrottledFunction(updateDesktopSticky);
+                
+                // 儲存事件監聽器到全域變數，以便後續移除
+                window.stickyScrollHandler = throttledUpdate;
+                window.stickyTabContentHandler = throttledUpdate;
+                
+                // 桌面版要監聽 tab-content 的滾動事件
+                const tabContent = document.querySelector('.tab-content');
+                if (tabContent) {
+                    tabContent.addEventListener('scroll', throttledUpdate);
+                }
+                window.addEventListener('resize', throttledUpdate);
+                updateDesktopSticky();
+            }
+        }
+        
         document.getElementById('autoPaletteBtn').onclick = function() {
           if (!currentImages.length) {
             alert('請先上傳圖片');
             return;
           }
-          const img = currentImages[currentPreviewIndex] || currentImages[0];
-          let ctx = img.context;
-          if (!ctx && img.canvas) ctx = img.canvas.getContext('2d');
-          if (!ctx) {
-            alert('無法取得圖片像素');
+          
+          // ===== 顯示載入中提示 =====
+          const btn = document.getElementById('autoPaletteBtn');
+          const originalText = btn.textContent;
+          btn.textContent = '載入中...';
+          btn.disabled = true;
+          showMessage('正在分析圖片顏色，請稍候...', 'success');
+          
+          // 使用 setTimeout 讓 UI 有時間更新
+          setTimeout(() => {
+            try {
+              const img = currentImages[currentPreviewIndex] || currentImages[0];
+              let ctx = img.context;
+              if (!ctx && img.canvas) ctx = img.canvas.getContext('2d');
+              if (!ctx) {
+                alert('無法取得圖片像素');
+                return;
+              }
+              const w = img.width || img.canvas.width;
+              const h = img.height || img.canvas.height;
+              const imageData = ctx.getImageData(0,0,w,h).data;
+              
+              // 智能偵測圖片中的所有主要顏色
+              showMessage('正在智能分析圖片顏色...', 'success');
+              
+              // 使用 K-means 產生候選顏色
+              let centers = getPaletteKMeans(imageData, 128, 15); // 產生更多候選顏色
+              let centersRgb = centers.map(hex => hexToRgbArr(hex));
+              
+              // 智能去重和排序，但不限制數量
+              detectedColors = smartColorSelection(centersRgb, 25); // 增加到25個顏色供選擇
+              
+              
+              // 顯示顏色選擇界面
+              showColorSelectionInterface();
+              
+              // ===== 恢復按鈕狀態並切換文字 =====
+              btn.textContent = '重新偵測顏色';
+              btn.disabled = false;
+              showMessage(`偵測完成！請從 ${detectedColors.length} 個顏色中選擇 2-8 個顏色`, 'success');
+              
+            } catch (error) {
+              // ===== 錯誤處理 =====
+              btn.textContent = '偵測圖片顏色';
+              btn.disabled = false;
+              showMessage('顏色分析失敗：' + error.message, 'error');
+              console.error('自動偵測顏色錯誤:', error);
+            }
+          }, 10);
+        };
+        // 確認生成調色盤
+        document.getElementById('confirmPaletteBtn').onclick = function() {
+          if (selectedColors.length < 2) {
+            showMessage('請至少選擇2個顏色', 'error');
             return;
           }
-          const w = img.width || img.canvas.width;
-          const h = img.height || img.canvas.height;
-          const imageData = ctx.getImageData(0,0,w,h).data;
-          // 產生三組不同 palette
-          const paletteList = [];
-          for (let i = 0; i < 3; i++) {
-            // 每組用不同 K-means 隨機中心
-            let centers = getPaletteKMeans(imageData, 32, 10);
-            let colors = distinctColorsMaxDistance(centers, 8);
-            if (colors.length < 2) colors = ['#000000', '#ffffff'];
-            paletteList.push(colors.map(c => typeof c === 'string' ? c : rgbToHex(...c)));
-          }
-          // 顯示 palette 多組預覽區塊
-          showMultiPalettePreview(paletteList);
-          // 預設選第一組
-          currentPalette = paletteList[0].map(hexToRgb);
-          showPalettePreview(currentPalette);
-          // 隱藏 JSON 結果和下載按鈕，等選擇後才顯示
-          document.getElementById('autoPaletteResult').style.display = 'none';
-          document.getElementById('autoPaletteDownloadBtn').style.display = 'none';
+          
+          // 設定調色盤名稱
+          paletteName = document.getElementById('autoPaletteName').value || '智能調色盤';
+          
+          // 設定 currentPalette（將十六進制顏色轉換為 RGB 陣列）
+          currentPalette = selectedColors.map(color => {
+            if (Array.isArray(color)) {
+              return color;
+            } else if (typeof color === 'string') {
+              return hexToRgb(color);
+            } else {
+              console.error('未知的顏色格式:', color);
+              return [0, 0, 0];
+            }
+          });
+          
+          // 更新 UI 顯示
+          updateColorIndexAndPaletteNameUI();
+          updateCurrentPaletteStatus();
+          
+          // 生成調色盤數據
+          const paletteObj = { name: paletteName, colorList: selectedColors };
+          const result = JSON.stringify(paletteObj);
+          document.getElementById('autoPaletteResult').value = result;
+          document.getElementById('autoPaletteResult').style.display = '';
+          document.getElementById('autoPaletteDownloadBtn').style.display = '';
+          
+          showMessage(`已生成調色盤，包含 ${selectedColors.length} 個顏色`, 'success');
+          
+          // 重新處理所有已載入的圖片以應用新的調色盤
+          reprocessImagesWithPalette();
+          // 調色盤載入後自動切換到 canvas 預覽
+          showingCanvas = true;
+          updatePreview();
         };
+        
+
+        
         document.getElementById('autoPaletteDownloadBtn').onclick = function() {
           const text = document.getElementById('autoPaletteResult').value;
-          const name = document.getElementById('autoPaletteName').value || '自動產生調色盤';
-          const blob = new Blob([text], {type:'application/json'});
+          const name = document.getElementById('autoPaletteName').value || '智能調色盤';
+          const blob = new Blob([text], {type:'application/octet-stream'});
           const a = document.createElement('a');
           a.href = URL.createObjectURL(blob);
           a.download = name + '.mosipalette';
@@ -3388,6 +4114,16 @@
         };
         // 在圖片 onload（單圖/多圖）後呼叫 showAutoPaletteSection(true)
         // 在清除按鈕時呼叫 showAutoPaletteSection(false)
+
+        // 新增：色彩空間選擇變更事件
+        document.getElementById('quantizeMethod').addEventListener('change', function() {
+          // 當用戶改變色彩空間選擇時，重新計算色階化
+          if (currentImages.length && currentPalette) {
+            reprocessImagesWithPalette();
+            updatePreview();
+            showMessage(`已切換到 ${this.value === 'hsl' ? 'HSL' : 'LAB'} 色彩空間`, 'success');
+          }
+        });
 
         // 新增：從文字匯入調色盤
         document.getElementById('paletteTextImportBtn').onclick = function() {
@@ -3400,47 +4136,43 @@
             const obj = JSON.parse(text);
             paletteName = obj.name || "palette";
             let colorList = obj.colorList || [];
-            colorList = distinctColorsMaxDistance(colorList.map(hexToRgb), 8);
+            // 直接使用原始顏色，不進行智能去重
             if (colorList.length < 2) {
               showMessage('調色盤顏色數量需至少2色', 'error');
               currentPalette = null;
               paletteName = "";
               showPalettePreview([]);
-              console.log('[palette] 解析失敗 palette 顏色數量不足:', colorList);
+              
               return;
             }
-            // colorList 需轉成 hex 字串
-            colorList = colorList.map(c => typeof c === 'string' ? c : rgbToHex(...c));
-            currentPalette = colorList.map(hexToRgb);
-            showPalettePreview(colorList.map(hexToRgb));
+            // 確保 currentPalette 是 RGB 陣列格式
+            currentPalette = colorList.map(color => {
+              if (Array.isArray(color)) {
+                return color;
+              } else if (typeof color === 'string') {
+                return hexToRgb(color);
+              } else {
+                return [0, 0, 0];
+              }
+            });
+            showPalettePreview(currentPalette);
             showMessage('調色盤匯入成功', 'success');
-            console.log('[palette] 文字匯入成功:', currentPalette, 'paletteName:', paletteName);
+            
           } catch (err) {
             showMessage('palette 解析失敗: ' + err, 'error');
             currentPalette = null;
             paletteName = "";
             showPalettePreview([]);
-            console.log('[palette] 文字匯入失敗:', err);
+            
           }
           updateColorIndexAndPaletteNameUI();
-          // ===== 新增：自動更新 canvas 預覽 =====
-          if (currentImages.length && currentImages[0] && currentImages[0].canvas) {
-            // 單圖或多圖都處理
-            for (let i = 0; i < currentImages.length; i++) {
-              const img = currentImages[i];
-              if (img && img.canvas && currentPalette) {
-                const ctx = img.context || img.canvas.getContext('2d');
-                const w = img.width || img.canvas.width;
-                const h = img.height || img.canvas.height;
-                const imgData = ctx.getImageData(0, 0, w, h);
-                img.quantized = quantizeToPalette(imgData.data, currentPalette);
-                img.quantizedWidth = w;
-                img.quantizedHeight = h;
-              }
-            }
-            updateQuantizedPreview();
-          }
-          updatePreviewVisibility();
+          updateCurrentPaletteStatus();
+          renderBatchSpriteSettings();
+          // 重新處理所有已載入的圖片以應用新的調色盤
+          reprocessImagesWithPalette();
+          // 調色盤載入後自動切換到 canvas 預覽
+          showingCanvas = true;
+          updatePreview();
         };
 
         // ========== 手機版 tab 分類下拉選單 ===========
@@ -3461,8 +4193,8 @@
             value: 'merge',
             children: [
               { label: '房間合併工具', value: 'merge-rooms' },
-              { label: '合併精靈工具', value: 'merge-sprite-section' },
-              { label: '合併房間單色精靈工具', value: 'merge-room-section' },
+              { label: '精靈合併工具', value: 'merge-sprite-section' },
+              { label: '房間合併單色精靈工具', value: 'merge-room-section' },
               { label: '世界級合併工具', value: 'merge-world-section' },
               { label: '插圖合併工具', value: 'merge-picture-section' },
             ]
@@ -3515,7 +4247,7 @@
         });
         // 響應式顯示/隱藏下拉選單
         function updateTabSelectVisibility() {
-          const isMobile = window.innerWidth <= 900;
+          const isMobile = window.innerWidth <= 768;
           document.getElementById('tab-category-select').style.display = isMobile ? '' : 'none';
           document.getElementById('tab-select').style.display = isMobile ? '' : 'none';
           // ====== 新增：切換顯示方式時自動同步當前 tab 狀態 ======
@@ -3550,68 +4282,123 @@
         setTab(document.getElementById('tab-select').value);
 
         // palette 多組預覽區塊
-        // 新增：多組 palette 預覽（獨立區塊）
-        function showMultiPalettePreview(paletteList) {
-          const section = document.getElementById('auto-multi-palette-section');
-          const container = document.getElementById('multi-palette-preview');
-          if (!container || !section) return;
+        // 新增：顏色選擇界面
+        function showColorSelectionInterface() {
+          const section = document.getElementById('color-selection-section');
+          const grid = document.getElementById('color-grid');
+          const selectedCount = document.getElementById('selected-count');
+          const confirmBtn = document.getElementById('confirmPaletteBtn');
+          
+          if (!section || !grid) return;
+          
+          // 重置選擇狀態
+          selectedColors = [];
+          selectedCount.textContent = '0';
+          confirmBtn.style.display = 'none';
+          
+          // 顯示顏色選擇區域
           section.style.display = '';
-          container.innerHTML = '';
-          paletteList.forEach((palette, idx) => {
-            const row = document.createElement('div');
-            row.style.display = 'flex';
-            row.style.alignItems = 'center';
-            row.style.marginBottom = '6px';
-            // 色條
-            const colorBar = document.createElement('div');
-            colorBar.style.display = 'flex';
-            palette.forEach(c => {
-              const swatch = document.createElement('span');
-              swatch.style.display = 'inline-block';
-              swatch.style.width = '24px';
-              swatch.style.height = '24px';
-              swatch.style.background = typeof c === 'string' ? c : `rgb(${c.join(',')})`;
-              swatch.style.marginRight = '2px';
-              colorBar.appendChild(swatch);
-            });
-            row.appendChild(colorBar);
-            // 選擇按鈕
-            const btn = document.createElement('button');
-            btn.textContent = '✓';
-            btn.style.margin = '1px';
-            btn.onclick = function() {
-              // 設定 currentPalette 並更新主預覽
-              currentPalette = palette.map(hexToRgb);
-              showPalettePreview(currentPalette);
-              showMessage(`已選擇第${idx+1}組調色盤`, 'success');
-              // 更新 quantized 預覽
-              if (currentImages.length && currentImages[0] && currentImages[0].canvas) {
-                for (let i = 0; i < currentImages.length; i++) {
-                  const img = currentImages[i];
-                  if (img && img.canvas && currentPalette) {
-                    const ctx = img.context || img.canvas.getContext('2d');
-                    const w = img.width || img.canvas.width;
-                    const h = img.height || img.canvas.height;
-                    const imgData = ctx.getImageData(0, 0, w, h);
-                    img.quantized = quantizeToPalette(imgData.data, currentPalette);
-                    img.quantizedWidth = w;
-                    img.quantizedHeight = h;
-                  }
+          grid.innerHTML = '';
+          
+          // 為每個偵測到的顏色創建選擇按鈕
+          detectedColors.forEach((color, index) => {
+            const colorBtn = document.createElement('div');
+            colorBtn.style.cssText = `
+              width: 40px;
+              height: 40px;
+              background: ${color};
+              border: 2px solid var(--border-light);
+              border-radius: 4px;
+              cursor: pointer;
+              position: relative;
+              transition: all 0.2s;
+            `;
+            
+            // 添加選中標記
+            const checkmark = document.createElement('div');
+            checkmark.style.cssText = `
+              position: absolute;
+              top: 2px;
+              right: 2px;
+              width: 12px;
+              height: 12px;
+              background: var(--transparent-white);
+              border-radius: 50%;
+              display: none;
+              align-items: center;
+              justify-content: center;
+              font-size: 8px;
+              color: var(--transparent-black);
+            `;
+            checkmark.textContent = '✓';
+            colorBtn.appendChild(checkmark);
+            
+            // 點擊事件
+            colorBtn.onclick = function() {
+              const isSelected = selectedColors.includes(color);
+              
+              if (isSelected) {
+                // 取消選擇
+                selectedColors = selectedColors.filter(c => c !== color);
+                colorBtn.style.border = '2px solid var(--border-light)';
+                checkmark.style.display = 'none';
+              } else {
+                // 選擇顏色
+                if (selectedColors.length >= 8) {
+                  showMessage('最多只能選擇8個顏色', 'error');
+                  return;
                 }
-                updateQuantizedPreview();
+                selectedColors.push(color);
+                colorBtn.style.border = '2px solid var(--transparent-black)';
+                checkmark.style.display = 'flex';
               }
-              updatePreviewVisibility();
-              // 選擇 palette 後才產生 JSON 結果和下載按鈕
-              const name = document.getElementById('autoPaletteName').value || '自動產生調色盤';
-              const paletteObj = { name, colorList: palette };
-              const result = JSON.stringify(paletteObj);
-              document.getElementById('autoPaletteResult').value = result;
-              document.getElementById('autoPaletteResult').style.display = '';
-              document.getElementById('autoPaletteDownloadBtn').style.display = '';
+              
+              // 更新計數
+              selectedCount.textContent = selectedColors.length;
+              
+              // 更新確認按鈕狀態
+              if (selectedColors.length >= 2) {
+                confirmBtn.style.display = '';
+              } else {
+                confirmBtn.style.display = 'none';
+              }
+              
+              // 即時預覽
+              updatePreviewWithSelectedColors();
             };
-            row.appendChild(btn);
-            container.appendChild(row);
+            
+            grid.appendChild(colorBtn);
           });
+        }
+        
+        // 新增：根據選擇的顏色更新預覽
+        function updatePreviewWithSelectedColors() {
+          if (selectedColors.length >= 2) {
+            currentPalette = selectedColors.map(hexToRgb);
+            showPalettePreview(currentPalette);
+            // 更新 quantized 預覽
+            if (currentImages.length && currentImages[0] && currentImages[0].canvas) {
+              for (let i = 0; i < currentImages.length; i++) {
+                const img = currentImages[i];
+                if (img && img.canvas && currentPalette) {
+                  const ctx = img.context || img.canvas.getContext('2d');
+                  const w = img.width || img.canvas.width;
+                  const h = img.height || img.canvas.height;
+                  const imgData = ctx.getImageData(0, 0, w, h);
+                  // 根據用戶選擇的色彩空間進行色階化
+                  const quantizeMethod = document.getElementById('quantizeMethod').value;
+                  const useHsl = quantizeMethod === 'hsl';
+                  img.quantized = quantizeToPalette(imgData.data, currentPalette, useHsl);
+                  img.quantizedWidth = w;
+                  img.quantizedHeight = h;
+                }
+              }
+              // palette 變成多色時自動切 canvas 預覽
+              showingCanvas = true;
+              updatePreview();
+              renderBatchSpriteSettings();
+            }
+          }
         }
 
         // ===== RGB 轉 LAB 色空間 =====
@@ -3647,6 +4434,117 @@
             (lab1[2] - lab2[2]) ** 2
           );
         }
+        
+        // 頁面載入完成後初始化
+        window.addEventListener('load', function() {
+            setupFileInputs();
+            // 初始化時隱藏按鈕容器（單圖模式）
+            document.getElementById('preview-btn-container').style.display = 'none';
+            // 初始化調色盤狀態顯示
+            updateCurrentPaletteStatus();
+            
+
+        });
+
+        function updatePreview() {
+          const imgEl = document.getElementById('preview-img');
+          const canvasEl = document.getElementById('preview-canvas');
+          const prevBtn = document.getElementById('preview-prev-btn');
+          const nextBtn = document.getElementById('preview-next-btn');
+          const label = document.getElementById('preview-index-label');
+          // 單色模式
+          if (!currentPalette) {
+            showingCanvas = false;
+            imgEl.style.display = '';
+            canvasEl.style.display = 'none';
+            if (!batchMode || currentImages.length <= 1) {
+              document.getElementById('preview-btn-container').style.display = 'none';
+            } else {
+              document.getElementById('preview-btn-container').style.display = 'flex';
+              prevBtn.disabled = (currentPreviewIndex === 0);
+              nextBtn.disabled = (currentPreviewIndex === currentImages.length-1);
+              label.textContent = `${currentPreviewIndex+1} / ${currentImages.length}`;
+            }
+            // 立即設定img src
+            if (currentImages[currentPreviewIndex] && currentImages[currentPreviewIndex].canvas) {
+              imgEl.src = currentImages[currentPreviewIndex].canvas.toDataURL();
+            }
+            imgEl.style.cursor = 'default';
+            imgEl.onclick = null;
+            canvasEl.onclick = null;
+            imgEl.classList.remove('clickable');
+            canvasEl.classList.remove('clickable');
+            imgEl.classList.remove('clicked');
+            canvasEl.classList.remove('clicked');
+          } else {
+            // 多色模式
+            if (showingCanvas) {
+              imgEl.style.display = 'none';
+              canvasEl.style.display = '';
+              // 畫canvas
+              const img = currentImages[currentPreviewIndex];
+              if (img && img.quantized) {
+                canvasEl.width = img.quantizedWidth;
+                canvasEl.height = img.quantizedHeight;
+                drawQuantizedPreview(canvasEl, img.quantizedWidth, img.quantizedHeight, img.quantized, currentPalette);
+              }
+              canvasEl.style.cursor = 'pointer';
+              canvasEl.onclick = () => { 
+                showingCanvas = false; 
+                canvasEl.classList.add('clicked');
+                showMessage('切換為原圖預覽', 'success');
+                setTimeout(() => {
+                  updatePreview();
+                }, 200);
+              };
+              canvasEl.onmouseleave = () => {
+                canvasEl.classList.remove('clicked');
+              };
+              canvasEl.classList.add('clickable');
+            } else {
+              imgEl.style.display = '';
+              canvasEl.style.display = 'none';
+              // 立即設定img src
+              if (currentImages[currentPreviewIndex] && currentImages[currentPreviewIndex].canvas) {
+                imgEl.src = currentImages[currentPreviewIndex].canvas.toDataURL();
+              }
+              imgEl.style.cursor = 'pointer';
+              imgEl.onclick = () => { 
+                showingCanvas = true; 
+                imgEl.classList.add('clicked');
+                showMessage('切換為色階化預覽', 'success');
+                setTimeout(() => {
+                  updatePreview();
+                }, 200);
+              };
+              imgEl.onmouseleave = () => {
+                imgEl.classList.remove('clicked');
+              };
+              imgEl.classList.add('clickable');
+            }
+            if (batchMode && currentImages.length > 1) {
+              document.getElementById('preview-btn-container').style.display = 'flex';
+              prevBtn.disabled = (currentPreviewIndex === 0);
+              nextBtn.disabled = (currentPreviewIndex === currentImages.length-1);
+              label.textContent = `${currentPreviewIndex+1} / ${currentImages.length}`;
+            } else {
+              document.getElementById('preview-btn-container').style.display = 'none';
+            }
+          }
+        }
+
+        document.getElementById('preview-prev-btn').onclick = function() {
+          if (currentPreviewIndex > 0) {
+            currentPreviewIndex--;
+            updatePreview();
+          }
+        };
+        document.getElementById('preview-next-btn').onclick = function() {
+          if (currentPreviewIndex < currentImages.length-1) {
+            currentPreviewIndex++;
+            updatePreview();
+          }
+        };
     </script>
 </body>
 </html> 
