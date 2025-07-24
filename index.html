@@ -642,14 +642,14 @@
             <div id="auto-palette-section" class="palette-container" style="display: none;">
               <h3 style="color:var(--main-color);">智能調色盤生成</h3>
               <button id="autoPaletteBtn" style="margin:0.5em 0;">偵測圖片顏色</button>
-                <div id="color-selection-section" style="margin: 0.5em 0 1em 0; display:none;">
+                <div id="color-selection-section" style="margin: 0.5em 0 0.5em 0; display:none;">
                 <div style="font-weight:bold; color:var(--main-color); margin-bottom:0.3em;">選擇顏色：</div>
                 <div id="color-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(40px, 1fr)); gap:4px; margin-bottom:0.5em;"></div>
                 <div style="font-size:0.9em; color:var(--secondary-color); margin-bottom:0.5em;">
                   已選擇: <span id="selected-count">0</span>/8 個顏色
                 </div>
                 <hr>
-                <label style="margin-bottom:0.5em; color:var(--main-color);">調色盤名稱：<input type="text" id="autoPaletteName" value="智能調色盤" style="width: 10em;" /></label>
+                <label style="color:var(--main-color);">調色盤名稱：<input type="text" id="autoPaletteName" value="智能調色盤" style="width: 10em;" /></label>
                 <button id="confirmPaletteBtn" style="margin:0.5em 0; display:none;">確認生成調色盤</button>
               </div>
               <textarea id="autoPaletteResult" style="width:90%;height:90px;display:none;"></textarea>
@@ -704,7 +704,7 @@
             <div id="preview-result-container" style="display: none;"></div>
             <button id="preview-result-btn" style="margin-top:10px; display:none;">預覽轉換結果</button>
             <hr>
-            <textarea id="output" readonly style="display: none;"></textarea>
+            <textarea id="output" style="display: none;"></textarea>
             <button id="download-btn" style="display: none;">下載檔案</button>
             <button type="button" id="generate-room-btn">生成房間數據</button>
             <button type="button" id="generate-picture-btn">生成插圖數據</button>
@@ -718,7 +718,7 @@
                 <ul id="file-list"></ul>
                 <button type="submit">合併房間數據</button>
             </form>
-            <textarea id="merge-output" style="display: none;" readonly></textarea>
+            <textarea id="merge-output" style="display: none;"></textarea>
             <button id="merge-download-btn" style="display: none;">下載合併後數據</button>
         </div>
           <div class="section tab-section" id="merge-sprite-section">
@@ -728,7 +728,7 @@
             <ul id="mergeSpriteFileList"></ul>
             <div id="mergeSpriteAttrSelect" style="display:none; margin:10px 0;"></div>
             <button id="mergeSpriteBtn" style="margin-top:10px; display:none;">合併精靈</button>
-            <textarea id="mergeSpriteOutput" style="display: none;" readonly></textarea>
+            <textarea id="mergeSpriteOutput" style="display: none;"></textarea>
             <button id="mergeSpriteDownloadBtn" style="display: none;">下載合併後數據</button>
         </div>
           <div class="section tab-section" id="merge-room-section">
@@ -741,7 +741,7 @@
             <input type="file" id="mergeRoomInput" accept=".mosiroom,.json" style="margin-bottom:10px;">
             <hr>
             <button id="mergeRoomBtn" style="margin-top:10px; display:none;">合併房間</button>
-            <textarea id="mergeRoomOutput" style="display: none;" readonly></textarea>
+            <textarea id="mergeRoomOutput" style="display: none;"></textarea>
             <button id="mergeRoomDownloadBtn" style="display: none;">下載合併後數據</button>
         </div>
         <div class="section tab-section" id="merge-world-section">
@@ -754,7 +754,7 @@
           <input type="file" id="mergeWorldInput" accept=".mosi,.json" style="margin-bottom:10px;">
             <hr>
             <button id="mergeWorldBtn" style="margin-top:10px; display:none;">合併世界</button>
-            <textarea id="mergeWorldOutput" style="display: none;" readonly></textarea>
+            <textarea id="mergeWorldOutput" style="display: none;"></textarea>
             <button id="mergeWorldDownloadBtn" style="display: none;">下載合併後數據</button>
         </div>
         <div class="section tab-section" id="merge-picture-section">
@@ -764,7 +764,7 @@
           <ul id="mergePictureFileList"></ul>
           <div id="mergePictureAttrSelect" style="display:none; margin:10px 0;"></div>
             <button id="mergePictureBtn" style="margin-top:10px; display:none;">合併插圖</button>
-            <textarea id="mergePictureOutput" style="display: none;" readonly></textarea>
+            <textarea id="mergePictureOutput" style="display: none;"></textarea>
             <button id="mergePictureDownloadBtn" style="display: none;">下載合併後數據</button>
         </div>
         <div class="section tab-section" id="room-to-picture-section">
@@ -777,7 +777,7 @@
           <input type="file" id="roomToPictureInput" accept=".mosiroom,.json" style="margin-bottom:10px;">
           <hr>
             <button id="roomToPicturePictureBtn" style="margin-top:10px; display:none;">轉換房間</button>
-            <textarea id="roomToPictureOutput" style="display: none;" readonly></textarea>
+            <textarea id="roomToPictureOutput" style="display: none;"></textarea>
             <button id="roomToPictureDownloadBtn" style="display: none;">下載轉換後數據</button>
         </div>
       <div class="section tab-section" id="textbox-skin-section">
@@ -796,7 +796,7 @@
           </div>
           <hr>
           <button id="convertTextboxSkinBtn" style="margin-bottom:1em;">轉換對話框皮膚</button>
-          <textarea id="textboxSkinOutput" style="display: none;" readonly></textarea>
+          <textarea id="textboxSkinOutput" style="display: none;"></textarea>
           <button id="textboxSkinDownloadBtn" style="display: none;">下載轉換後數據</button>
           <div id="textboxSkinResult"></div>
         </div>
