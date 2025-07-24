@@ -6,43 +6,25 @@
     <title>Mosi圖片轉房間數據產生器</title>
     <style>
         :root {
-            /* 主色調 */
-            --primary-color: #594a54;
-            --secondary-color: #d3cbd0;
-            --accent-color: #f69f8f;
-            
-            /* 背景色 */
-            --bg-primary: #594a54;
-            --bg-secondary: #d3cbd0;
-            --bg-light: #f5f5f5;
-            --bg-lighter: #f0f0f0;
-            --bg-accent: #bbaec0;
-            --bg-hover: #9c758f;
-            --bg-info: #e7e0e7;
-            
-            /* 文字色 */
-            --text-primary: #d3cbd0;
-            --text-secondary: #594a54;
-            --text-light: #666;
-            --text-white: #fff;
-            --text-accent: #f69f8f;
-            --text-info: #2196F3;
-            
-            /* 邊框色 */
-            --border-primary: #594a54;
-            --border-light: #ddd;
-            
-            /* 狀態色 */
+            /* 粉色系 */
+            --main-color: #ED87BE;
+            --secondary-color: #e1539b;
+            --bg-hover: #503B49;
+            --bg-light: #3F2D38;
+            --bg-color: #2F2429;
+            --success-color: #7fcbb3;
+            --error-color: #FF6D95;
+            /* 舊版 */
+            /*--main-color: #594a54;
+            --secondary-color: #f69f8f;
+            --text-color: #9c758f;
+            --bg-hover: #bbaec0;
+            --bg-light: #d3cbd0;
+            --bg-color: #f5f5f5;
             --success-color: #51cf66;
             --success-bg: #ebfbee;
             --error-color: #ff6b6b;
-            --error-bg: #ffe6e6;
-            --warning-color: #ff9800;
-            --info-color: #2196F3;
-            
-            /* 特殊色 */
-            --transparent-black: #000000;
-            --transparent-white: #ffffff;
+            --error-bg: #ffe6e6;*/
         }
         
         @font-face {
@@ -57,26 +39,29 @@
             text-align: center;
         }
         html, body {
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
+            background-color: var(--main-color);
+            color: var(--bg-light);
         }
         a {
-            color: var(--text-accent);
+            color: var(--secondary-color);
         }
         canvas {
             image-rendering: -moz-crisp-edges;
             image-rendering: pixelated;
         }
+        hr {
+            margin: 1em 0;
+            border-color: var(--main-color);
+        }
         input[type="text"], input[type=number] {
-            border: 2px solid var(--border-primary);
-            color: var(--text-secondary);
+            background-color: var(--bg-color);
+            border: 2px solid var(--main-color);
+            color: var(--main-color);
             margin: 1em;
             padding: 0.5em;
             font-size: 1em;
             border-radius: 10px;
         }
-        
-        /* Checkbox 特殊樣式 */
         input[type="checkbox"] {
             appearance: none;
             -webkit-appearance: none;
@@ -84,33 +69,31 @@
             width: 20px;
             height: 20px;
             margin: 1em;
-            border: 2px solid var(--border-primary);
+            border: 2px solid var(--main-color);
             border-radius: 10px;
-            background: var(--transparent-white);
+            background: var(--bg-color);
             cursor: pointer;
             position: relative;
             transition: background 0.2s, border-color 0.2s;
         }
-        
         input[type="checkbox"]:checked {
-            background: var(--primary-color);
-            border-color: var(--border-primary);
+            background: var(--main-color);
+            border-color: var(--main-color);
         }
-        
         input[type="checkbox"]:checked::after {
             content: '✓';
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: var(--text-white);
+            color: var(--bg-color);
             font-size: 14px;
             font-weight: bold;
         }
         button, select{
             border: none;
-            background: var(--primary-color);
-            color: var(--text-white);
+            background: var(--main-color);
+            color: var(--bg-color);
             width: 14em;
             margin: 1em;
             padding: 12px 16px;
@@ -119,8 +102,6 @@
             transition: background 0.2s, color 0.2s;
             border-radius: 10px;
         }
-        
-        /* File input 自定義樣式 */
         input[type="file"] {
             position: relative;
             overflow: hidden;
@@ -134,21 +115,16 @@
             z-index: 2;
             font-size: 1em;
         }
-        
-        /* 隱藏原生按鈕文字 */
         input[type="file"]::-webkit-file-upload-button {
             visibility: hidden;
             width: 0;
             height: 0;
         }
-        
         input[type="file"]::file-selector-button {
             visibility: hidden;
             width: 0;
             height: 0;
         }
-        
-        /* 創建自定義按鈕 */
         input[type="file"]::before {
             content: attr(data-original-text);
             position: absolute;
@@ -156,8 +132,8 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background: var(--primary-color);
-            color: var(--text-white);
+            background: var(--main-color);
+            color: var(--bg-color);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -172,28 +148,24 @@
             font-family: inherit;
             font-weight: inherit;
         }
-        
         input[type="file"]:hover::before {
-            background: var(--bg-accent);
-            color: var(--text-secondary);
+            background: var(--bg-hover);
+            color: var(--main-color);
         }
         button:hover, select:hover {
-            background: var(--bg-accent);
-            color: var(--text-secondary);
+            background: var(--bg-hover);
+            color: var(--main-color);
         }
-        
-        /* Select 選項樣式 - 使用更強制的方法 */
         select option {
-            background: var(--bg-accent);
-            color: var(--text-secondary);
+            background: var(--bg-hover);
+            color: var(--main-color);
             padding: 8px;
             font-size: 1em;
         }
-        
         select:focus {
             outline: none;
-            background: var(--bg-accent);
-            color: var(--text-secondary);
+            background: var(--bg-hover);
+            color: var(--main-color);
         }
         label {
             display: flex;
@@ -203,8 +175,9 @@
             align-items: center;
         }
         textarea {
-            border: 2px solid var(--border-primary);
-            color: var(--text-secondary);
+            background-color: var(--bg-color);
+            border: 2px solid var(--main-color);
+            color: var(--main-color);
             border-radius: 10px;
             text-align: left;
             height: 256px;
@@ -212,14 +185,14 @@
             font-family: monospace;
         }
         .flex-container {
-            background-color: var(--bg-secondary);
+            background-color: var(--bg-light);
             display: flex;
             flex-flow: row wrap;
         }
         .section {
             margin: 0 auto;
-            background-color: var(--bg-secondary);
-            color: var(--text-secondary);
+            background-color: var(--bg-light);
+            color: var(--main-color);
             width: 256px;
             padding-bottom: 1em;
             display: flex;
@@ -239,7 +212,7 @@
         .palette-container {
             margin: 1.5em 0;
             padding: 1em;
-            background: var(--bg-light);
+            background: var(--bg-color);
             border-radius: 8px;
             max-width: 350px;
         }
@@ -261,13 +234,62 @@
                 max-width: 250px !important;
             }
         }
-        #preview-container {
-            transition: all 0.3s ease;
+        #preview-container, #preview-result-container {
+            /*transition: all 0.3s ease;*/
             margin: 1.5em 0; 
-            background: var(--bg-light); 
+            background: var(--bg-color); 
             border-radius: 8px; 
             padding-top: 10px;
             padding-bottom: 10px;
+        }
+        
+        .preview-btn-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+        
+        .preview-arrow-btn {
+            color: var(--bg-light);
+            background: var(--main-color);
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            font-size: 0.5em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, color 0.2s, transform 0.2s;
+            z-index: 10;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .preview-arrow-btn:hover {
+            background: var(--bg-hover);
+            color: var(--bg-color);
+        }
+        
+        .preview-arrow-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .preview-index-label {
+            margin: 0 8px;
+            color: var(--main-color);
+        }
+        
+        .preview-canvas {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            image-rendering: pixelated;
         }
         #preview-img, #preview-canvas {
             margin: 0 auto;
@@ -284,129 +306,59 @@
             transform: scale(0.98);
             transition: transform 0.2s;
         }
-        #file-list {
+        #file-list, #mergeSpriteFileList, #mergePictureFileList {
             list-style-type: none;
             padding: 0;
-            border: 2px dashed var(--border-primary);
+            border: 2px dashed var(--main-color);
             border-radius: 8px;
             margin-top: 10px;
             max-width: 400px;
         }
-        #file-list li {
+        #file-list li, #mergeSpriteFileList li, #mergePictureFileList li {
             display: flex;
             align-items: center;
             padding: 10px;
             margin: 5px;
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-primary);
+            background-color: var(--bg-hover);
             border-radius: 5px;
             cursor: grab;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
         }
-        #file-list li img {
+        #file-list li img, #mergeSpriteFileList li img, #mergePictureFileList li img {
             width: 24px;
             height: 24px;
             margin-right: 10px;
         }
-        #file-list li.drag-hover {
-            background-color: var(--bg-hover);
-            border-color: var(--border-primary);
+        #file-list li.drag-hover, #mergeSpriteFileList li.drag-hover, #mergePictureFileList li.drag-hover {
+            background-color: var(--main-color);
+            color: var(--bg-color);
         }
-        #file-list.dragging {
-            border: 2px dashed var(--border-primary);
+        #file-list.dragging, #mergeSpriteFileList.dragging, #mergePictureFileList.dragging {
+            border: 2px dashed var(--main-color);
+        }
+        .error, .success {
+            padding: 10px;
+            border-radius: 10px;
+            margin: 10px 0;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            max-width: 90vw;
+            word-wrap: break-word;
         }
         .error {
             color: var(--error-color);
-            background-color: var(--error-bg);
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            max-width: 90vw;
-            word-wrap: break-word;
+            background-color: var(--bg-light);
+            border: 2px solid var(--error-color);
         }
         .success {
             color: var(--success-color);
-            background-color: var(--success-bg);
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            max-width: 90vw;
-            word-wrap: break-word;
-        }
-        #mergeSpriteFileList {
-        list-style-type: none;
-        padding: 0;
-        border: 2px dashed var(--border-primary);
-        border-radius: 8px;
-        margin-top: 10px;
-        max-width: 400px;
-        }
-        #mergeSpriteFileList li {
-        display: flex;
-        align-items: center;
-        padding: 10px;
-        margin: 5px;
-        background-color: var(--bg-secondary);
-        border: 1px solid var(--border-primary);
-        border-radius: 5px;
-        cursor: grab;
-        transition: background-color 0.3s;
-        }
-        #mergeSpriteFileList li img {
-        width: 24px;
-        height: 24px;
-        margin-right: 10px;
-        }
-        #mergeSpriteFileList li.drag-hover {
-        background-color: var(--bg-hover);
-        border-color: var(--border-primary);
-        }
-        #mergeSpriteFileList.dragging {
-        border: 2px dashed var(--border-primary);
+            background-color: var(--bg-light);
+            border: 2px solid var(--success-color);
         }
 
-        
-        #mergePictureFileList {
-        list-style-type: none;
-        padding: 0;
-        border: 2px dashed var(--border-primary);
-        border-radius: 8px;
-        margin-top: 10px;
-        max-width: 400px;
-        }
-        #mergePictureFileList li {
-        display: flex;
-        align-items: center;
-        padding: 10px;
-        margin: 5px;
-        background-color: var(--bg-secondary);
-        border: 1px solid var(--border-primary);
-        border-radius: 5px;
-        cursor: grab;
-        transition: background-color 0.3s;
-        }
-        #mergePictureFileList li img {
-        width: 24px;
-        height: 24px;
-        margin-right: 10px;
-        }
-        #mergePictureFileList li.drag-hover {
-        background-color: var(--bg-hover);
-        border-color: var(--border-primary);
-        }
-        #mergePictureFileList.dragging {
-        border: 2px dashed var(--border-primary);
-        }
         /* Tab 樣式 */
         .tab-layout {
             display: flex;
@@ -426,9 +378,8 @@
             align-items: stretch;
             min-width: 140px;
             max-width: 200px;
-            background: var(--bg-secondary);
+            background: var(--bg-light);
             border-radius: 10px 0 0 10px;
-            box-shadow: 2px 0 8px rgba(0,0,0,0.04);
             height: 600px;
             width: 100%;
             max-height: 90vh;
@@ -453,8 +404,8 @@
             box-sizing: border-box;
             border: none;
             outline: none;
-            background: var(--bg-accent);
-            color: var(--text-secondary);
+            background: var(--bg-hover);
+            color: var(--main-color);
             font-size: 1.1em;
             text-align: left;
             padding: 12px 16px;
@@ -464,15 +415,15 @@
             margin: 0;
         }
         .accordion-btn.active, .accordion-btn:hover {
-            background: var(--primary-color);
-            color: var(--text-white);
+            background: var(--main-color);
+            color: var(--bg-color);
         }
         .accordion-panel {
             display: none;
             flex-direction: column;
             align-items: stretch;
             padding: 0;
-            background: var(--bg-info);
+            background: var(--bg-color);
             margin-bottom: 8px;
             width: 100%;
         }
@@ -481,15 +432,14 @@
             border-radius: 0;
             padding: 10px 16px;
             background: none;
-            color: var(--text-secondary);
+            color: var(--main-color);
             font-size: 1em;
             text-align: left;
             transition: background 0.2s, color 0.2s, border-color 0.2s;
         }
         .accordion-panel .tab-btn.active {
-            background: var(--primary-color);
-            color: var(--text-primary);
-            border-left: 5px solid var(--text-accent);
+            background: var(--secondary-color);
+            color: var(--bg-color);
         }
         .tab-content {
             flex: 1;
@@ -498,7 +448,7 @@
             width: 100%;
             height: 600px;
             overflow-y: auto;
-            background: var(--bg-secondary);
+            background: var(--bg-light);
             border-radius: 0 10px 10px 0;
             box-sizing: border-box;
         }
@@ -510,16 +460,15 @@
             .tab-bar { display: none !important; }
             #tab-select, #tab-category-select {
                 display: block !important;
-                margin: 1em auto 0.5em auto;
+                margin: 1em auto 1em auto;
                 width: 90%;
                 max-width: 400px;
                 font-size: 1.1em;
-                background: var(--bg-secondary);
-                color: var(--text-secondary);
-                border: 1px solid var(--border-primary);
+                background: var(--bg-light);
+                color: var(--main-color);
+                border: 1px solid var(--main-color);
                 border-radius: 8px;
                 padding: 0.7em 1em;
-                box-shadow: 1px 1px 6px rgba(0,0,0,0.04);
             }
             .tab-content {
                 max-width: 100%;
@@ -532,15 +481,14 @@
             position: absolute;
             top: 18px;
             right: 24px;
-            background: var(--bg-secondary);
-            color: var(--text-secondary);
+            background: var(--bg-light);
+            color: var(--main-color);
             border: none;
             border-radius: 50%;
             width: 36px;
             height: 36px;
-            font-size: 1.5em;
+            font-size: 1em;
             cursor: pointer;
-            box-shadow: 1px 1px 6px rgba(0,0,0,0.06);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -548,15 +496,14 @@
             z-index: 10;
         }
         .preview-arrow-btn {
-            color: var(--text-primary);
-            background: var(--primary-color);
+            color: var(--bg-light);
+            background: var(--main-color);
             border: none;
             border-radius: 50%;
             width: 25px;
             height: 25px;
             font-size: 0.5em;
             cursor: pointer;
-            box-shadow: 1px 1px 6px rgba(0,0,0,0.06);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -566,12 +513,12 @@
             padding: 0;
         }
         .header-toggle-btn:hover {
-            background: var(--bg-accent);
-            color: var(--text-white);
+            background: var(--bg-hover);
+            color: var(--bg-color);
         }
         .preview-arrow-btn:hover {
-            background: var(--bg-accent);
-            color: var(--text-white);
+            background: var(--bg-hover);
+            color: var(--bg-color);
         }
         .header-collapsed {
             max-height: 0;
@@ -587,6 +534,20 @@
             transform: rotate(180deg);
         }
         header { position: relative; }
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+            background: var(--bg-color);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--main-color);
+            border-radius: 5px;
+            border: 2px solid var(--bg-color);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--bg-hover);
+        }
     </style>
     <link rel="icon" href="static/黑科技.png" type="image/x-icon">
 </head>
@@ -651,18 +612,19 @@
               <img id="preview-img" alt="預覽" src="static/rest.png" style="max-width: 300px; display: block;">
               <canvas id="preview-canvas" width="256" height="256" style="display:none;"></canvas>
               <div id="palette-preview" style="margin: 0.5em 0; display: none;"></div>
-              <div id="preview-btn-container" style="display:flex; align-items: center; justify-content: space-between; margin-top:10px;">
-                <button id="preview-prev-btn" class="preview-arrow-btn" style="margin-left:10px;"><</button>
-                <span id="preview-index-label" style="margin:0 8px;"></span>
-                <button id="preview-next-btn" class="preview-arrow-btn" style="margin-right:10px;">></button>
+              <div id="preview-btn-container" class="preview-btn-container">
+                <button id="preview-prev-btn" class="preview-arrow-btn"><</button>
+                <span id="preview-index-label" class="preview-index-label"></span>
+                <button id="preview-next-btn" class="preview-arrow-btn">></button>
               </div>
             </div>
             <form id="upload-form" style="margin: 1em 0;">
+                <label for="file">上傳一或多張圖片: </label>
                 <input type="file" id="file" name="file" accept="image/*" required multiple>
                 <button type="submit">載入圖片</button>
             </form>
             <div id="palette-section" class="palette-container">
-                <div style="margin: 0.5em 0; font-size: 0.9em; color: var(--text-light);">
+                <div style="margin: 0.5em 0; font-size: 0.9em; color: var(--secondary-color);">
                     <label>色階化方法：
                         <select id="quantizeMethod">
                             <option value="lab">LAB 色彩空間（預設）</option>
@@ -670,24 +632,24 @@
                         </select>
                     </label>
                 </div>
-                <div id="current-palette-status" style="margin: 0.5em 0; padding: 0.5em; border-left: 4px solid var(--text-accent);">
+                <div id="current-palette-status" style="margin: 0.5em 0; padding: 0.5em; border-left: 4px solid var(--secondary-color);">
                     當前調色盤：<span id="current-palette-name">無</span>
                 </div>
-                <textarea id="paletteTextImport" placeholder="貼上調色盤 JSON 文字..." style="width:90%;height:48px;margin-bottom:4px;"></textarea><br>
+                <textarea id="paletteTextImport" placeholder="貼上調色盤數據..." style="width:90%;height:48px;margin-bottom:4px;"></textarea><br>
                 <button id="paletteTextImportBtn" style="margin: 0.5em 0;" type="button">從文字匯入調色盤</button>
                 <label>上傳調色盤：<input type="file" id="paletteFile" accept=".mosipalette"></label>
             </div>
             <div id="auto-palette-section" class="palette-container" style="display: none;">
-              <h3 style="color:var(--text-secondary);">智能調色盤生成</h3>
-              <label style="margin-bottom:0.5em; color:var(--text-secondary);">調色盤名稱：<input type="text" id="autoPaletteName" value="智能調色盤" style="width: 10em;" /></label>
+              <h3 style="color:var(--main-color);">智能調色盤生成</h3>
               <button id="autoPaletteBtn" style="margin:0.5em 0;">偵測圖片顏色</button>
-                              <div id="color-selection-section" style="margin: 0.5em 0 1em 0; display:none;">
-                <div style="font-weight:bold; color:var(--text-secondary); margin-bottom:0.3em;">選擇顏色：</div>
+                <div id="color-selection-section" style="margin: 0.5em 0 1em 0; display:none;">
+                <div style="font-weight:bold; color:var(--main-color); margin-bottom:0.3em;">選擇顏色：</div>
                 <div id="color-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(40px, 1fr)); gap:4px; margin-bottom:0.5em;"></div>
-                <div style="font-size:0.9em; color:var(--text-light); margin-bottom:0.5em;">
+                <div style="font-size:0.9em; color:var(--secondary-color); margin-bottom:0.5em;">
                   已選擇: <span id="selected-count">0</span>/8 個顏色
                 </div>
-
+                <hr>
+                <label style="margin-bottom:0.5em; color:var(--main-color);">調色盤名稱：<input type="text" id="autoPaletteName" value="智能調色盤" style="width: 10em;" /></label>
                 <button id="confirmPaletteBtn" style="margin:0.5em 0; display:none;">確認生成調色盤</button>
               </div>
               <textarea id="autoPaletteResult" style="width:90%;height:90px;display:none;"></textarea>
@@ -696,7 +658,7 @@
             <div id="image-info" style="display: none;">
                 <p>圖片尺寸: <span id="image-size"></span></p>
                 <p>建議組合:</p>
-                <div id="suggestions" style="text-align: left; margin: 10px 0; padding: 10px; background: var(--bg-lighter); border-radius: 5px; max-height: 200px; overflow-y: auto;"></div>
+                <div id="suggestions" style="text-align: left; margin: 10px 0; padding: 10px; background: var(--bg-color); border-radius: 5px; max-height: 200px; overflow-y: auto;"></div>
             </div>
         </div>
           <form id="generate-form" style="width:100%;">
@@ -722,8 +684,8 @@
                         </select>
                     </label><br>
                     <div id="batch-sprite-settings" style="display:none;"></div>
-                    <small style="color: var(--text-light);">※ 精靈尺寸最大為 24×24</small>
-                    <small style="color: var(--text-info); display: block; margin-top: 5px;">💡 修改精靈尺寸會自動計算房間尺寸</small>
+                    <small style="color: var(--secondary-color);">※ 精靈尺寸最大為 24×24</small>
+                    <small style="color: var(--secondary-color); display: block; margin-top: 5px;">💡 修改精靈尺寸會自動計算房間尺寸</small>
                 </div>
                 <div class="section tab-section" id="room-settings">
                     <h2>房間設定</h2>
@@ -732,17 +694,17 @@
                     <label>音樂名稱: <input type="text" id="musicName" value="song-1"></label><br>
                     <label>房間寬度: <input type="number" id="roomWidth" value="8" min="1" max="24"></label><br>
                     <label>房間高度: <input type="number" id="roomHeight" value="8" min="1" max="24"></label><br>
-                    <small style="color: var(--text-light);">※ 房間尺寸最大為 24×24</small>
-                    <small style="color: var(--text-info); display: block; margin-top: 5px;">💡 修改房間尺寸會自動計算精靈尺寸</small>
+                    <small style="color: var(--secondary-color);">※ 房間尺寸最大為 24×24</small>
+                    <small style="color: var(--secondary-color); display: block; margin-top: 5px;">💡 修改房間尺寸會自動計算精靈尺寸</small>
                 </div>
             </div>
         </form>
           <div class="section tab-section" id="data">
             <h2>結果</h2>
-            <div style="margin-bottom: 1em;">
-              <label style="font-weight:bold;">輸出格式：</label>
-            </div>
-            <textarea id="output" readonly></textarea>
+            <div id="preview-result-container" style="display: none;"></div>
+            <button id="preview-result-btn" style="margin-top:10px; display:none;">預覽轉換結果</button>
+            <hr>
+            <textarea id="output" readonly style="display: none;"></textarea>
             <button id="download-btn" style="display: none;">下載檔案</button>
             <button type="button" id="generate-room-btn">生成房間數據</button>
             <button type="button" id="generate-picture-btn">生成插圖數據</button>
@@ -761,44 +723,81 @@
         </div>
           <div class="section tab-section" id="merge-sprite-section">
             <h2>精靈合併工具</h2>
+            <label for="mergeSpriteInput">上傳多個精靈數據: </label>
             <input type="file" id="mergeSpriteInput" accept=".mosisprite,.json" multiple style="margin-bottom:10px;">
             <ul id="mergeSpriteFileList"></ul>
             <div id="mergeSpriteAttrSelect" style="display:none; margin:10px 0;"></div>
-            <div id="mergeSpriteError" class="error" style="display:none;"></div>
-            <button id="mergeSpriteBtn" style="margin-top:10px; display:none;">合併並下載多色精靈</button>
+            <button id="mergeSpriteBtn" style="margin-top:10px; display:none;">合併精靈</button>
+            <textarea id="mergeSpriteOutput" style="display: none;" readonly></textarea>
+            <button id="mergeSpriteDownloadBtn" style="display: none;">下載合併後數據</button>
         </div>
           <div class="section tab-section" id="merge-room-section">
             <h2>房間合併單色精靈工具</h2>
+            <label for="mergeRoomInput">上傳一個房間數據: </label>
+            <div style="margin-top:10px;">
+                <textarea id="mergeRoomTextImport" placeholder="貼上房間數據..." style="width:90%;height:80px;margin-bottom:4px;"></textarea><br>
+                <button id="mergeRoomTextImportBtn" style="margin: 0.5em 0;" type="button">從文字匯入房間數據</button>
+            </div>
             <input type="file" id="mergeRoomInput" accept=".mosiroom,.json" style="margin-bottom:10px;">
-            <div id="mergeRoomError" class="error" style="display:none;"></div>
-            <button id="mergeRoomBtn" style="margin-top:10px; display:none;">合併並下載新房間檔案</button>
+            <hr>
+            <button id="mergeRoomBtn" style="margin-top:10px; display:none;">合併房間</button>
+            <textarea id="mergeRoomOutput" style="display: none;" readonly></textarea>
+            <button id="mergeRoomDownloadBtn" style="display: none;">下載合併後數據</button>
         </div>
         <div class="section tab-section" id="merge-world-section">
           <h2>世界級合併工具</h2>
+          <label for="mergeWorldInput">上傳一個世界數據: </label>
+          <div style="margin-top:10px;">
+              <textarea id="mergeWorldTextImport" placeholder="貼上世界數據..." style="width:90%;height:80px;margin-bottom:4px;"></textarea><br>
+              <button id="mergeWorldTextImportBtn" style="margin: 0.5em 0;" type="button">從文字匯入世界數據</button>
+          </div>
           <input type="file" id="mergeWorldInput" accept=".mosi,.json" style="margin-bottom:10px;">
-          <div id="mergeWorldError" class="error" style="display:none;"></div>
-          <button id="mergeWorldBtn" style="margin-top:10px; display:none;">合併並下載新世界檔案</button>
+            <hr>
+            <button id="mergeWorldBtn" style="margin-top:10px; display:none;">合併世界</button>
+            <textarea id="mergeWorldOutput" style="display: none;" readonly></textarea>
+            <button id="mergeWorldDownloadBtn" style="display: none;">下載合併後數據</button>
         </div>
         <div class="section tab-section" id="merge-picture-section">
           <h2>插圖合併工具</h2>
+          <label for="mergePictureInput">上傳多個插圖數據: </label>
           <input type="file" id="mergePictureInput" accept=".mosigraphic,.json" multiple style="margin-bottom:10px;">
           <ul id="mergePictureFileList"></ul>
           <div id="mergePictureAttrSelect" style="display:none; margin:10px 0;"></div>
-          <div id="mergePictureError" class="error" style="display:none;"></div>
-          <button id="mergePictureBtn" style="margin-top:10px; display:none;">合併並下載多色插圖</button>
+            <button id="mergePictureBtn" style="margin-top:10px; display:none;">合併插圖</button>
+            <textarea id="mergePictureOutput" style="display: none;" readonly></textarea>
+            <button id="mergePictureDownloadBtn" style="display: none;">下載合併後數據</button>
         </div>
         <div class="section tab-section" id="room-to-picture-section">
           <h2>房間轉插圖工具</h2>
+          <label for="roomToPictureInput">上傳一個房間數據: </label>
+          <div style="margin-top:10px;">
+              <textarea id="roomToPictureTextImport" placeholder="貼上房間數據..." style="width:90%;height:80px;margin-bottom:4px;"></textarea><br>
+              <button id="roomToPictureTextImportBtn" style="margin: 0.5em 0;" type="button">從文字匯入房間數據</button>
+          </div>
           <input type="file" id="roomToPictureInput" accept=".mosiroom,.json" style="margin-bottom:10px;">
-          <div id="roomToPictureError" class="error" style="display:none;"></div>
-          <button id="roomToPicturePictureBtn" style="margin-top:10px; display:none;">下載插圖檔案</button>
+          <hr>
+            <button id="roomToPicturePictureBtn" style="margin-top:10px; display:none;">轉換房間</button>
+            <textarea id="roomToPictureOutput" style="display: none;" readonly></textarea>
+            <button id="roomToPictureDownloadBtn" style="display: none;">下載轉換後數據</button>
         </div>
-        <div class="section tab-section" id="textbox-skin-section">
+      <div class="section tab-section" id="textbox-skin-section">
           <h2>對話框皮膚轉換工具</h2>
-                      <p style="margin-bottom:1em; color:var(--text-secondary);">根據 3x3 房間與精靈數據，自動產生對話框皮膚檔案</p>
-          <label style="display:block; margin-bottom:0.5em;">選擇房間檔案：<input type="file" id="roomFile" accept=".mosiroom,application/json"></label>
-          <label style="display:block; margin-bottom:0.5em;">選擇精靈檔案：<input type="file" id="spriteFile" accept=".mosisprite,application/json"></label>
-          <button id="convertTextboxSkinBtn" style="margin-bottom:1em;">下載對話框皮膚</button>
+          <div>
+            <label style="display:block; margin-bottom:0.5em;">選擇房間檔案：</label>
+            <textarea id="textboxSkinRoomTextImport" placeholder="貼上房間數據..." style="width:90%;height:80px;margin-bottom:4px;"></textarea><br>
+            <button id="textboxSkinRoomTextImportBtn" style="margin: 0.5em 0;" type="button">從文字匯入房間數據</button>
+            <input type="file" id="roomFile" accept=".mosiroom,application/json">
+          </div>
+          <div style="margin-top: 1em;">
+            <label style="display:block; margin-bottom:0.5em;">選擇精靈檔案：</label>
+            <textarea id="textboxSkinSpriteTextImport" placeholder="貼上精靈數據..." style="width:90%;height:80px;margin-bottom:4px;"></textarea><br>
+            <button id="textboxSkinSpriteTextImportBtn" style="margin: 0.5em 0;" type="button">從文字匯入精靈數據</button>
+            <input type="file" id="spriteFile" accept=".mosisprite,application/json">
+          </div>
+          <hr>
+          <button id="convertTextboxSkinBtn" style="margin-bottom:1em;">轉換對話框皮膚</button>
+          <textarea id="textboxSkinOutput" style="display: none;" readonly></textarea>
+          <button id="textboxSkinDownloadBtn" style="display: none;">下載轉換後數據</button>
           <div id="textboxSkinResult"></div>
         </div>
         </div>
@@ -842,6 +841,14 @@
             if (!files.length) {
                 showMessage('請選擇圖片檔案', 'error');
                 return;
+            }
+            // 新增：檢查每個檔案大小
+            const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+            for (const file of files) {
+                if (file.size > MAX_SIZE) {
+                    showMessage(`檔案 ${file.name} 超過 5MB，請選擇較小的圖片`, 'error');
+                    return;
+                }
             }
             currentImages = [];
             batchMode = files.length > 1;
@@ -1648,22 +1655,22 @@
             const suggestionsDiv = document.getElementById("suggestions");
             
             if (suggestions.length === 0) {
-                suggestionsDiv.innerHTML = '<p style="color: var(--text-light);">無法找到合適的組合，請手動調整尺寸</p>';
+                suggestionsDiv.innerHTML = '<p style="color: var(--secondary-color);">無法找到合適的組合，請手動調整尺寸</p>';
                 return;
             }
             
-            let html = '<div style="margin-bottom: 10px;"><strong>點擊選擇：</strong></div>';
+            let html = '<div style="margin-bottom: 10px;">點擊選擇：</div>';
             
             suggestions.forEach((suggestion, index) => {
                 const isRecommended = index === 0;
                 const style = isRecommended ? 
-                    'background: var(--success-bg); border: 2px solid var(--success-color);' : 
-                    'background: var(--bg-light); border: 1px solid var(--border-light);';
+                    'background: var(--bg-light); border: 2px solid var(--success-color);' : 
+                    'background: var(--bg-color); border: 1px solid var(--bg-light);';
                 
                 // 添加縮放信息
                 let scaleInfo = '';
                 if (suggestion.scale !== 1) {
-                    scaleInfo = `<div style="font-size: 0.8em; color: var(--warning-color);">
+                    scaleInfo = `<div style="font-size: 0.8em; color: var(--success-color);">
                         📏 原圖: ${suggestion.originalSize} → 縮放: ${suggestion.scale.toFixed(2)}x
                     </div>`;
                 }
@@ -1672,10 +1679,10 @@
                     <div class="suggestion-item" 
                          style="${style} padding: 8px; margin: 5px 0; border-radius: 4px; cursor: pointer;"
                          onclick="selectSuggestion(${suggestion.spriteWidth}, ${suggestion.spriteHeight}, ${suggestion.roomWidth}, ${suggestion.roomHeight})">
-                        <div style="font-weight: bold; color: var(--text-secondary);">
+                        <div style="color: var(--main-color);">
                             ${isRecommended ? '⭐ ' : ''}${suggestion.description}
                         </div>
-                        <div style="font-size: 0.9em; color: var(--text-light);">
+                        <div style="font-size: 0.9em; color: var(--secondary-color);">
                             評分: ${suggestion.score} | 總精靈數: ${suggestion.roomWidth * suggestion.roomHeight}
                         </div>
                         ${scaleInfo}
@@ -1755,8 +1762,7 @@
                         roomWidthInput.addEventListener("input", autoCalculateSpriteSize);
                         roomHeightInput.addEventListener("input", autoCalculateSpriteSize);
                     }, 100);
-                    // 顯示計算信息
-                    showCalculationInfo(`自動計算: ${roomWidth}×${roomHeight} 房間`);
+
                 } else {
                     // 如果超出限制，顯示警告
                     const maxRoomWidth = Math.min(24, Math.floor(currentImages[0].width / spriteWidth));
@@ -1772,9 +1778,6 @@
                             roomWidthInput.addEventListener("input", autoCalculateSpriteSize);
                             roomHeightInput.addEventListener("input", autoCalculateSpriteSize);
                         }, 100);
-                        showCalculationInfo(`已調整至最大可用尺寸: ${maxRoomWidth}×${maxRoomHeight} 房間`);
-                    } else {
-                        showCalculationInfo(`精靈尺寸過大，無法計算合適的房間尺寸`, 'warning');
                     }
                 }
             }
@@ -1804,8 +1807,7 @@
                         spriteWidthInput.addEventListener("input", autoCalculateRoomSize);
                         spriteHeightInput.addEventListener("input", autoCalculateRoomSize);
                     }, 100);
-                    // 顯示計算信息
-                    showCalculationInfo(`自動計算: ${spriteWidth}×${spriteHeight} 精靈`);
+
                 } else {
                     // 如果超出限制，顯示警告
                     const maxSpriteWidth = Math.min(24, Math.floor(currentImages[0].width / roomWidth));
@@ -1821,58 +1823,10 @@
                             spriteWidthInput.addEventListener("input", autoCalculateRoomSize);
                             spriteHeightInput.addEventListener("input", autoCalculateRoomSize);
                         }, 100);
-                        showCalculationInfo(`已調整至最大可用尺寸: ${maxSpriteWidth}×${maxSpriteHeight} 精靈`);
-                    } else {
-                        showCalculationInfo(`房間尺寸過大，無法計算合適的精靈尺寸`, 'warning');
                     }
                 }
             }
         }
-
-        // 顯示計算信息
-        function showCalculationInfo(message, type = 'info') {
-            // 移除舊的計算信息
-            const existingInfo = document.querySelector('.calculation-info');
-            if (existingInfo) {
-                existingInfo.remove();
-            }
-            
-            // 創建新的計算信息
-            const infoDiv = document.createElement('div');
-            infoDiv.className = 'calculation-info';
-            infoDiv.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 10px 15px;
-                border-radius: 5px;
-                color: var(--text-white);
-                font-size: 14px;
-                z-index: 1000;
-                max-width: 300px;
-                word-wrap: break-word;
-            `;
-            
-            // 根據類型設定顏色
-            if (type === 'warning') {
-                infoDiv.style.backgroundColor = 'var(--warning-color)';
-            } else {
-                infoDiv.style.backgroundColor = 'var(--info-color)';
-            }
-            
-            infoDiv.textContent = message;
-            
-            // 插入到頁面
-            document.body.appendChild(infoDiv);
-            
-            // 3秒後自動移除
-            setTimeout(() => {
-                if (infoDiv.parentNode) {
-                    infoDiv.remove();
-                }
-            }, 3000);
-        }
-
         // ====== 全域工具函數 ======
         function padFrames(frames, maxLen) {
             if (frames.length === maxLen) return frames.slice();
@@ -1898,7 +1852,7 @@
             fileList.innerHTML = '';
             items.forEach((item, i) => {
                 const li = document.createElement('li');
-                li.textContent = `${item.file.name} (${item.data.name || ''})`;
+                li.innerHTML = `<img src="static/file-icon.png" alt="File Icon"> ${item.file.name}`;
                 li.draggable = true;
                 li.dataset.idx = i;
                 fileList.appendChild(li);
@@ -2029,7 +1983,6 @@
             const input = document.getElementById('mergeSpriteInput');
             const fileList = document.getElementById('mergeSpriteFileList');
             const attrSelect = document.getElementById('mergeSpriteAttrSelect');
-            const errorDiv = document.getElementById('mergeSpriteError');
             const mergeBtn = document.getElementById('mergeSpriteBtn');
             // 精靈合併工具的拖曳排序處理
             let sprites = [];
@@ -2044,6 +1997,13 @@
             fileList.addEventListener('dragover', e => {
                 e.preventDefault();
                 e.dataTransfer.dropEffect = 'move';
+                const target = e.target.closest("li");
+                if (target) {
+                    // 先移除所有 drag-hover 類別
+                    fileList.querySelectorAll("li").forEach((li) => li.classList.remove("drag-hover"));
+                    // 再添加給目標元素
+                    target.classList.add("drag-hover");
+                }
             });
             fileList.addEventListener('drop', e => {
                 e.preventDefault();
@@ -2055,11 +2015,12 @@
                     renderGenericAttrSelect(attrSelect, sprites, attrSourceIdx, '精靈');
                 }
                 dragIdx = null;
+                // 移除所有 drag-hover 類別
+                fileList.querySelectorAll("li").forEach((li) => li.classList.remove("drag-hover"));
             });
 
             input.addEventListener('change', async e => {
                 sprites = [];
-                errorDiv.style.display = 'none';
                 attrSelect.style.display = 'none';
                 mergeBtn.style.display = 'none';
                 fileList.innerHTML = '';
@@ -2070,21 +2031,18 @@
                         const data = JSON.parse(text);
                         sprites.push({file, data});
                     } catch {
-                        errorDiv.textContent = `檔案 ${file.name} 解析失敗`;
-                        errorDiv.style.display = '';
+                        showMessage(`檔案 ${file.name} 解析失敗`, 'error');
                         return;
                     }
                 }
                 if (sprites.length < 2) {
-                    errorDiv.textContent = '請選擇至少兩個精靈檔案';
-                    errorDiv.style.display = '';
+                    showMessage('請選擇至少兩個精靈檔案', 'error');
                     return;
                 }
                 // 檢查長寬一致
                 const w = sprites[0].data.width, h = sprites[0].data.height;
                 if (!sprites.every(s => s.data.width === w && s.data.height === h)) {
-                    errorDiv.textContent = '所有精靈的寬高必須一致！';
-                    errorDiv.style.display = '';
+                    showMessage('所有精靈的寬高必須一致！', 'error');
                     return;
                 }
                 renderGenericFileList(fileList, sprites, '精靈');
@@ -2095,10 +2053,8 @@
             // 使用通用函數，無需重複定義
 
             mergeBtn.onclick = function() {
-                errorDiv.style.display = 'none';
                 if (sprites.length < 2) {
-                    errorDiv.textContent = '請選擇至少兩個精靈檔案';
-                    errorDiv.style.display = '';
+                    showMessage('請選擇至少兩個精靈檔案', 'error');
                     return;
                 }
                 // 處理單色和多色精靈的 frameList
@@ -2147,25 +2103,41 @@
                     scriptList: JSON.parse(JSON.stringify(src.scriptList || {}))
                 };
                 delete merged.colorIndex;
-                const fileName = sprites[idx].file.name.replace(/\.(json|mosisprite)?$/, "") + ".mosisprite";
-                // 壓成一行
-                const content = JSON.stringify(merged);
+                
+                // 顯示合併後數據
+                const mergeOutput = document.getElementById("mergeSpriteOutput");
+                mergeOutput.value = (merged && merged.frameList)
+                    ? JSON.stringify(merged)
+                    : JSON.stringify(merged, null, 4);
+                mergeOutput.style.display = "block";
+                
+                // 顯示下載按鈕
+                const mergeDownloadBtn = document.getElementById("mergeSpriteDownloadBtn");
+                mergeDownloadBtn.style.display = "block";
+                
+                showMessage('精靈合併成功！', 'success');
+            };
+            
+            // 精靈合併下載按鈕
+            document.getElementById("mergeSpriteDownloadBtn").addEventListener("click", () => {
+                const mergeOutput = document.getElementById("mergeSpriteOutput");
+                const fileName = sprites[attrSourceIdx].file.name.replace(/\.(json|mosisprite)?$/, "") + ".mosisprite";
+                const content = JSON.stringify(JSON.parse(mergeOutput.value));
                 const blob = new Blob([content], {type:'application/octet-stream'});
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
                 a.download = fileName;
                 a.click();
-            };
+                URL.revokeObjectURL(a.href);
+            });
         })();
 
         // ===== 房間合併單色精靈工具 =====
         (function(){
             const input = document.getElementById('mergeRoomInput');
-            const errorDiv = document.getElementById('mergeRoomError');
             const mergeBtn = document.getElementById('mergeRoomBtn');
             let roomData = null, fileName = '';
             input.onchange = async function(e) {
-                errorDiv.style.display = 'none';
                 mergeBtn.style.display = 'none';
                 if (!input.files[0]) return;
                 fileName = input.files[0].name;
@@ -2174,13 +2146,11 @@
                     roomData = JSON.parse(text);
                     mergeBtn.style.display = '';
                 } catch {
-                    errorDiv.textContent = '檔案格式錯誤，請上傳正確的 .mosiroom 檔案';
-                    errorDiv.style.display = '';
+                    showMessage('檔案格式錯誤，請上傳正確的 .mosiroom 檔案', 'error');
                     roomData = null;
                 }
             };
             mergeBtn.onclick = function() {
-                errorDiv.style.display = 'none';
                 if (!roomData) return;
                 try {
                     const room = JSON.parse(JSON.stringify(roomData));
@@ -2284,8 +2254,7 @@
                     // 移除被合併的 tile
                     room.tileList = room.tileList.filter(t => t);
                     if (mergedCount === 0) {
-                        errorDiv.textContent = '沒有需要合併的同格單色精靈';
-                        errorDiv.style.display = '';
+                        showMessage('沒有需要合併的同格單色精靈', 'error');
                         return;
                     }
                     // ====== 新增：合併精靈內容去重 ======
@@ -2318,20 +2287,55 @@
                             }
                         });
                     }
-                    // ===== 房間合併單色精靈工具下載檔名修正 =====
-                    let downloadName = (fileName || "merged_room")
-                      .replace(/\.(json|mosiroom)?$/, "") + ".mosiroom";
-                    // 壓成一行
-                    const content = JSON.stringify(room);
-                    const blob = new Blob([content], {type:'application/octet-stream'});
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(blob);
-                    a.download = downloadName;
-                    a.click();
+                    // 顯示合併後數據
+                    const mergeOutput = document.getElementById("mergeRoomOutput");
+                    mergeOutput.value = (room && room.tileList)
+                        ? JSON.stringify(room)
+                        : JSON.stringify(room, null, 4);
+                    mergeOutput.style.display = "block";
+                    
+                    // 顯示下載按鈕
+                    const mergeDownloadBtn = document.getElementById("mergeRoomDownloadBtn");
+                    mergeDownloadBtn.style.display = "block";
+                    
+                    showMessage('房間合併成功！', 'success');
                 } catch (e) {
-                    errorDiv.textContent = '合併失敗：' + e.message;
-                    errorDiv.style.display = '';
+                    showMessage('合併失敗：' + e.message, 'error');
                     console.error('合併房間單色精靈錯誤', e);
+                }
+            };
+            
+            // 房間合併單色精靈下載按鈕
+            document.getElementById("mergeRoomDownloadBtn").addEventListener("click", () => {
+                const mergeOutput = document.getElementById("mergeRoomOutput");
+                let downloadName = (fileName || "merged_room")
+                  .replace(/\.(json|mosiroom)?$/, "") + ".mosiroom";
+                const content = JSON.stringify(JSON.parse(mergeOutput.value));
+                const blob = new Blob([content], {type:'application/octet-stream'});
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = downloadName;
+                a.click();
+                URL.revokeObjectURL(a.href);
+            });
+            
+            // 房間合併單色精靈工具文字匯入
+            document.getElementById('mergeRoomTextImportBtn').onclick = function() {
+                const text = document.getElementById('mergeRoomTextImport').value.trim();
+                if (!text) {
+                    showMessage('請貼上房間數據', 'error');
+                    return;
+                }
+                try {
+                    const data = JSON.parse(text);
+                    roomData = data;
+                    // 嘗試從房間數據中提取名稱
+                    fileName = data.name || data.roomName || 'imported_room';
+                    mergeBtn.style.display = '';
+                    showMessage('房間數據匯入成功', 'success');
+                } catch (err) {
+                    showMessage('房間數據解析失敗: ' + err.message, 'error');
+                    roomData = null;
                 }
             };
         })();
@@ -2339,11 +2343,9 @@
         // ===== 世界級合併工具 =====
         (function(){
             const input = document.getElementById('mergeWorldInput');
-            const errorDiv = document.getElementById('mergeWorldError');
             const mergeBtn = document.getElementById('mergeWorldBtn');
             let worldData = null, fileName = '';
             input.onchange = async function(e) {
-                errorDiv.style.display = 'none';
                 mergeBtn.style.display = 'none';
                 if (!input.files[0]) return;
                 fileName = input.files[0].name;
@@ -2352,20 +2354,17 @@
                     worldData = JSON.parse(text);
                     mergeBtn.style.display = '';
                 } catch {
-                    errorDiv.textContent = '檔案格式錯誤，請上傳正確的 .mosi 世界檔案';
-                    errorDiv.style.display = '';
+                    showMessage('檔案格式錯誤，請上傳正確的 .mosi 世界檔案', 'error');
                     worldData = null;
                 }
             };
             mergeBtn.onclick = function() {
-                errorDiv.style.display = 'none';
                 if (!worldData) return;
                 try {
                     // 深拷貝世界數據，完整保留所有屬性
                     const world = JSON.parse(JSON.stringify(worldData));
                     if (!Array.isArray(world.roomList) || !Array.isArray(world.spriteList)) {
-                        errorDiv.textContent = '世界數據格式錯誤，缺少 roomList 或 spriteList';
-                        errorDiv.style.display = '';
+                        showMessage('世界數據格式錯誤，缺少 roomList 或 spriteList', 'error');
                         return;
                     }
                     // 建立 spriteName->sprite 映射
@@ -2515,20 +2514,78 @@
                             }
                         });
                     });
-                    // ===== 世界級合併工具下載檔名修正 =====
-                    let downloadName = (fileName || "merged_world")
-                      .replace(/\.(json|mosi)?$/, "") + ".mosi";
-                    // 壓成一行
-                    const content = JSON.stringify(world);
-                    const blob = new Blob([content], {type:'application/octet-stream'});
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(blob);
-                    a.download = downloadName;
-                    a.click();
+                    // 檢查數據大小
+                    const worldString = JSON.stringify(world);
+                    const dataSize = new Blob([worldString]).size;
+                    const maxSize = 5 * 1024 * 1024; // 5MB
+                    
+                    const mergeOutput = document.getElementById("mergeWorldOutput");
+                    const mergeDownloadBtn = document.getElementById("mergeWorldDownloadBtn");
+                    
+                    if (dataSize <= maxSize) {
+                        // 數據不大，顯示文字框
+                        mergeOutput.value = (world && world.roomList)
+                            ? JSON.stringify(world)
+                            : JSON.stringify(world, null, 4);
+                        mergeOutput.style.display = "block";
+                        mergeDownloadBtn.style.display = "block";
+                        showMessage('世界合併成功！', 'success');
+                    } else {
+                        // 數據太大，只顯示下載按鈕
+                        mergeOutput.style.display = "none";
+                        mergeDownloadBtn.style.display = "block";
+                        // 將數據存儲到全域變數供下載使用
+                        window.largeWorldData = world;
+                        showMessage(`世界合併成功！數據大小 ${(dataSize / 1024 / 1024).toFixed(1)}MB，已超過5MB，僅提供下載功能`, 'success');
+                    }
                 } catch (e) {
-                    errorDiv.textContent = '合併失敗：' + e.message;
-                    errorDiv.style.display = '';
+                    showMessage('合併失敗：' + e.message, 'error');
                     console.error('世界級合併錯誤', e);
+                }
+            };
+            
+            // 世界級合併下載按鈕
+            document.getElementById("mergeWorldDownloadBtn").addEventListener("click", () => {
+                let downloadName = (fileName || "merged_world")
+                  .replace(/\.(json|mosi)?$/, "") + ".mosi";
+                
+                let content;
+                if (window.largeWorldData) {
+                    // 大數據情況，使用存儲的數據
+                    content = JSON.stringify(window.largeWorldData);
+                    // 下載後清理
+                    delete window.largeWorldData;
+                } else {
+                    // 小數據情況，從文字框讀取
+                    const mergeOutput = document.getElementById("mergeWorldOutput");
+                    content = JSON.stringify(JSON.parse(mergeOutput.value));
+                }
+                
+                const blob = new Blob([content], {type:'application/octet-stream'});
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = downloadName;
+                a.click();
+                URL.revokeObjectURL(a.href);
+            });
+            
+            // 世界級合併工具文字匯入
+            document.getElementById('mergeWorldTextImportBtn').onclick = function() {
+                const text = document.getElementById('mergeWorldTextImport').value.trim();
+                if (!text) {
+                    showMessage('請貼上世界數據', 'error');
+                    return;
+                }
+                try {
+                    const data = JSON.parse(text);
+                    worldData = data;
+                    // 嘗試從世界數據中提取名稱
+                    fileName = data.name || data.worldName || 'imported_world';
+                    mergeBtn.style.display = '';
+                    showMessage('世界數據匯入成功', 'success');
+                } catch (err) {
+                    showMessage('世界數據解析失敗: ' + err.message, 'error');
+                    worldData = null;
                 }
             };
         })();
@@ -2538,7 +2595,6 @@
             const input = document.getElementById('mergePictureInput');
             const fileList = document.getElementById('mergePictureFileList');
             const attrSelect = document.getElementById('mergePictureAttrSelect');
-            const errorDiv = document.getElementById('mergePictureError');
             const mergeBtn = document.getElementById('mergePictureBtn');
             // 插圖合併工具的拖曳排序處理
             let sprites = [];
@@ -2553,6 +2609,13 @@
             fileList.addEventListener('dragover', e => {
                 e.preventDefault();
                 e.dataTransfer.dropEffect = 'move';
+                const target = e.target.closest("li");
+                if (target) {
+                    // 先移除所有 drag-hover 類別
+                    fileList.querySelectorAll("li").forEach((li) => li.classList.remove("drag-hover"));
+                    // 再添加給目標元素
+                    target.classList.add("drag-hover");
+                }
             });
             fileList.addEventListener('drop', e => {
                 e.preventDefault();
@@ -2564,11 +2627,12 @@
                     renderGenericAttrSelect(attrSelect, sprites, attrSourceIdx, '插圖');
                 }
                 dragIdx = null;
+                // 移除所有 drag-hover 類別
+                fileList.querySelectorAll("li").forEach((li) => li.classList.remove("drag-hover"));
             });
 
             input.addEventListener('change', async e => {
                 sprites = [];
-                errorDiv.style.display = 'none';
                 attrSelect.style.display = 'none';
                 mergeBtn.style.display = 'none';
                 fileList.innerHTML = '';
@@ -2579,21 +2643,18 @@
                         const data = JSON.parse(text);
                         sprites.push({file, data});
                     } catch {
-                        errorDiv.textContent = `檔案 ${file.name} 解析失敗`;
-                        errorDiv.style.display = '';
+                        showMessage(`檔案 ${file.name} 解析失敗`, 'error');
                         return;
                     }
                 }
                 if (sprites.length < 2) {
-                    errorDiv.textContent = '請選擇至少兩個插圖檔案';
-                    errorDiv.style.display = '';
+                    showMessage('請選擇至少兩個插圖檔案', 'error');
                     return;
                 }
                 // 檢查長寬一致
                 const w = sprites[0].data.width, h = sprites[0].data.height;
                 if (!sprites.every(s => s.data.width === w && s.data.height === h)) {
-                    errorDiv.textContent = '所有插圖的寬高必須一致！';
-                    errorDiv.style.display = '';
+                    showMessage('所有插圖的寬高必須一致！', 'error');
                     return;
                 }
                 renderGenericFileList(fileList, sprites, '插圖');
@@ -2604,10 +2665,8 @@
             // 使用通用函數，無需重複定義
 
             mergeBtn.onclick = function() {
-                errorDiv.style.display = 'none';
                 if (sprites.length < 2) {
-                    errorDiv.textContent = '請選擇至少兩個插圖檔案';
-                    errorDiv.style.display = '';
+                    showMessage('請選擇至少兩個插圖檔案', 'error');
                     return;
                 }
                 // 處理單色和多色插圖的 frameList
@@ -2646,25 +2705,41 @@
                 const src = sprites[idx].data;
                 // 合併 picture 物件，所有欄位都複製來源，只覆蓋 frameList
                 const merged = Object.assign({}, src, { frameList: mergedFrameList });
-                const fileName = (src.name || 'merged_picture').replace(/\.(json|mosigraphic)?$/, "") + ".mosigraphic";
-                // 壓成一行
-                const content = JSON.stringify(merged);
+                
+                // 顯示合併後數據
+                const mergeOutput = document.getElementById("mergePictureOutput");
+                mergeOutput.value = (merged && merged.frameList)
+                    ? JSON.stringify(merged)
+                    : JSON.stringify(merged, null, 4);
+                mergeOutput.style.display = "block";
+                
+                // 顯示下載按鈕
+                const mergeDownloadBtn = document.getElementById("mergePictureDownloadBtn");
+                mergeDownloadBtn.style.display = "block";
+                
+                showMessage('插圖合併成功！', 'success');
+            };
+            
+            // 插圖合併下載按鈕
+            document.getElementById("mergePictureDownloadBtn").addEventListener("click", () => {
+                const mergeOutput = document.getElementById("mergePictureOutput");
+                const fileName = (sprites[attrSourceIdx].data.name || 'merged_picture').replace(/\.(json|mosigraphic)?$/, "") + ".mosigraphic";
+                const content = JSON.stringify(JSON.parse(mergeOutput.value));
                 const blob = new Blob([content], {type:'application/octet-stream'});
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
                 a.download = fileName;
                 a.click();
-            };
+                URL.revokeObjectURL(a.href);
+            });
         })();
 
         // ===== 房間轉插圖工具 =====
         (function(){
             const input = document.getElementById('roomToPictureInput');
-            const errorDiv = document.getElementById('roomToPictureError');
             const pictureBtn = document.getElementById('roomToPicturePictureBtn');
             let roomData = null;
             input.onchange = async function(e) {
-                errorDiv.style.display = 'none';
                 pictureBtn.style.display = 'none';
                 if (!input.files[0]) return;
                 try {
@@ -2672,29 +2747,97 @@
                     roomData = JSON.parse(text);
                     pictureBtn.style.display = '';
                 } catch {
-                    errorDiv.textContent = '檔案格式錯誤，請上傳正確的 .mosiroom 檔案';
-                    errorDiv.style.display = '';
+                    showMessage('檔案格式錯誤，請上傳正確的 .mosiroom 檔案', 'error');
                     roomData = null;
                 }
             };
             pictureBtn.onclick = function() {
-                errorDiv.style.display = 'none';
                 if (!roomData) return;
                 try {
                     const picture = roomToPictureData(roomData);
-                    const fileName = (picture.name || 'picture').replace(/\.(json|mosigraphic)?$/, "") + ".mosigraphic";
-                    const content = JSON.stringify(picture);
-                    const blob = new Blob([content], {type:'application/octet-stream'});
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(blob);
-                    a.download = fileName;
-                    a.click();
+                    
+                    // 顯示轉換後數據
+                    const mergeOutput = document.getElementById("roomToPictureOutput");
+                    mergeOutput.value = (picture && picture.frameList)
+                        ? JSON.stringify(picture)
+                        : JSON.stringify(picture, null, 4);
+                    mergeOutput.style.display = "block";
+                    
+                    // 顯示下載按鈕
+                    const mergeDownloadBtn = document.getElementById("roomToPictureDownloadBtn");
+                    mergeDownloadBtn.style.display = "block";
+                    
+                    showMessage('房間轉插圖成功！', 'success');
                 } catch (e) {
-                    errorDiv.textContent = '轉換失敗：' + e.message;
-                    errorDiv.style.display = '';
+                    showMessage('轉換失敗：' + e.message, 'error');
+                }
+            };
+            
+            // 房間轉插圖下載按鈕
+            document.getElementById("roomToPictureDownloadBtn").addEventListener("click", () => {
+                const mergeOutput = document.getElementById("roomToPictureOutput");
+                const fileName = (roomData.name || 'picture').replace(/\.(json|mosigraphic)?$/, "") + ".mosigraphic";
+                const content = JSON.stringify(JSON.parse(mergeOutput.value));
+                const blob = new Blob([content], {type:'application/octet-stream'});
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = fileName;
+                a.click();
+                URL.revokeObjectURL(a.href);
+            });
+            
+            // 房間轉插圖工具文字匯入
+            document.getElementById('roomToPictureTextImportBtn').onclick = function() {
+                const text = document.getElementById('roomToPictureTextImport').value.trim();
+                if (!text) {
+                    showMessage('請貼上房間數據', 'error');
+                    return;
+                }
+                try {
+                    const data = JSON.parse(text);
+                    roomData = data;
+                    pictureBtn.style.display = '';
+                    showMessage('房間數據匯入成功', 'success');
+                } catch (err) {
+                    showMessage('房間數據解析失敗: ' + err.message, 'error');
+                    roomData = null;
                 }
             };
         })();
+
+        // ========== 手機版 tab 分類下拉選單 ===========
+        // 定義分類與子項
+        const tabCategories = [
+          {
+            label: '圖片工具',
+            value: 'img',
+            children: [
+              { label: '圖片上傳', value: 'upload-img' },
+              { label: '精靈設定', value: 'sprite-settings' },
+              { label: '房間設定', value: 'room-settings' },
+              { label: '生成結果', value: 'data' },
+            ]
+          },
+          {
+            label: '合併工具',
+            value: 'merge',
+            children: [
+              { label: '房間合併工具', value: 'merge-rooms' },
+              { label: '精靈合併工具', value: 'merge-sprite-section' },
+              { label: '房間合併單色精靈工具', value: 'merge-room-section' },
+              { label: '世界級合併工具', value: 'merge-world-section' },
+              { label: '插圖合併工具', value: 'merge-picture-section' },
+            ]
+          },
+          {
+            label: '轉換工具',
+            value: 'convert',
+            children: [
+              { label: '房間轉插圖工具', value: 'room-to-picture-section' },
+              { label: '對話框皮膚轉換工具', value: 'textbox-skin-section' },
+            ]
+          }
+        ];
 
         // Tab 切換邏輯
         function setTab(tabId) {
@@ -3154,38 +3297,99 @@
         document.getElementById('convertTextboxSkinBtn').onclick = async function() {
           const roomFile = document.getElementById('roomFile').files[0];
           const spriteFile = document.getElementById('spriteFile').files[0];
-          const resultDiv = document.getElementById('textboxSkinResult');
-          resultDiv.innerHTML = '';
-          if (!roomFile || !spriteFile) {
-            resultDiv.innerHTML = '<div class="error">請選擇 .mosiroom 與 .mosisprite 檔案</div>';
+          
+          let room, sprite;
+          
+          // 檢查是否有文字匯入的數據
+          if (window.importedRoomData && window.importedSpriteData) {
+            room = window.importedRoomData;
+            sprite = window.importedSpriteData;
+          } else if (roomFile && spriteFile) {
+            // 使用檔案上傳的數據
+            try {
+              [room, sprite] = await Promise.all([
+                readJsonFile(roomFile),
+                readJsonFile(spriteFile)
+              ]);
+            } catch (err) {
+              showMessage('檔案讀取失敗：' + err.message, 'error');
+              return;
+            }
+          } else {
+            showMessage('請選擇 .mosiroom 與 .mosisprite 檔案，或使用文字匯入功能', 'error');
             return;
           }
+          
           try {
-            const [room, sprite] = await Promise.all([
-              readJsonFile(roomFile),
-              readJsonFile(spriteFile)
-            ]);
             const skin = generateTextboxSkin(room, sprite);
-            // 新增：顯示 isTransparent 屬性
-            let info = '';
-            if (typeof skin.isTransparent !== 'undefined') {
-              info = `<div style="color:var(--text-info);">isTransparent: <b>${skin.isTransparent}</b></div>`;
-            }
-            const blob = new Blob([JSON.stringify(skin)], {type: 'application/octet-stream'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${skin.name}.mositextbox`;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-              document.body.removeChild(a);
-              URL.revokeObjectURL(url);
-            }, 100);
-            resultDiv.innerHTML = `<div class='success'>下載完成！${info}</div>`;
+            
+            // 顯示轉換後數據
+            const mergeOutput = document.getElementById("textboxSkinOutput");
+            mergeOutput.value = (skin && (skin.fillList || skin.indicatorList))
+                ? JSON.stringify(skin)
+                : JSON.stringify(skin, null, 4);
+            mergeOutput.style.display = "block";
+            
+            // 顯示下載按鈕
+            const mergeDownloadBtn = document.getElementById("textboxSkinDownloadBtn");
+            mergeDownloadBtn.style.display = "block";
+            
+            showMessage('對話框皮膚轉換成功！', 'success');
           } catch (err) {
-            resultDiv.innerHTML = `<div class=\"error\">${err}</div>`;
+            showMessage('轉換失敗：' + err.message, 'error');
           }
+        };
+        
+        // 對話框皮膚轉換下載按鈕
+        document.getElementById("textboxSkinDownloadBtn").addEventListener("click", () => {
+          const mergeOutput = document.getElementById("textboxSkinOutput");
+          const skin = JSON.parse(mergeOutput.value);
+          const blob = new Blob([JSON.stringify(skin)], {type: 'application/octet-stream'});
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${skin.name}.mositextbox`;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }, 100);
+        });
+        
+        // 對話框皮膚轉換工具文字匯入
+        document.getElementById('textboxSkinRoomTextImportBtn').onclick = function() {
+            const text = document.getElementById('textboxSkinRoomTextImport').value.trim();
+            if (!text) {
+                showMessage('請貼上房間數據', 'error');
+                return;
+            }
+            try {
+                const data = JSON.parse(text);
+                // 將房間數據存儲到全域變數，供轉換按鈕使用
+                window.importedRoomData = data;
+                showMessage('房間數據匯入成功', 'success');
+            } catch (err) {
+                showMessage('房間數據解析失敗: ' + err.message, 'error');
+                window.importedRoomData = null;
+            }
+        };
+        
+        document.getElementById('textboxSkinSpriteTextImportBtn').onclick = function() {
+            const text = document.getElementById('textboxSkinSpriteTextImport').value.trim();
+            if (!text) {
+                showMessage('請貼上精靈數據', 'error');
+                return;
+            }
+            try {
+                const data = JSON.parse(text);
+                // 將精靈數據存儲到全域變數，供轉換按鈕使用
+                window.importedSpriteData = data;
+                showMessage('精靈數據匯入成功', 'success');
+            } catch (err) {
+                showMessage('精靈數據解析失敗: ' + err.message, 'error');
+                window.importedSpriteData = null;
+            }
         };
 
         // Accordion 手風琴展開/收合邏輯
@@ -3551,10 +3755,10 @@
           if (statusElement) {
             if (currentPalette && paletteName) {
               statusElement.textContent = paletteName;
-              statusElement.style.color = 'var(--text-accent)';
+              statusElement.style.color = 'var(--secondary-color)';
             } else {
               statusElement.textContent = '無';
-              statusElement.style.color = 'var(--text-light)';
+              statusElement.style.color = 'var(--secondary-color)';
             }
           }
         }
@@ -3619,7 +3823,7 @@
             if (imageData[i+3] < 128) continue;
             pixels.push([imageData[i], imageData[i+1], imageData[i+2]]);
           }
-          if (pixels.length === 0) return ['var(--transparent-black)', 'var(--transparent-white)'];
+          if (pixels.length === 0) return ['var(--main-color)', 'var(--bg-color)'];
           // 隨機初始化中心
           const centers = [];
           for (let i=0; i<maxColors; i++) {
@@ -3894,15 +4098,11 @@
                         if (previewRect.bottom <= 0) {
                             isFixed = true;
                             previewContainer.style.position = 'fixed';
-                            previewContainer.style.top = '20px';
+                            previewContainer.style.top = '-10px';
                             previewContainer.style.left = '50%';
                             previewContainer.style.transform = 'translateX(-50%)';
                             previewContainer.style.zIndex = '100';
-                            previewContainer.style.background = 'var(--bg-light)';
-                            previewContainer.style.paddingTop = '10px';
-                            previewContainer.style.paddingBottom = '10px';
-                            previewContainer.style.borderRadius = '8px';
-                            previewContainer.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                            previewContainer.style.boxShadow = '0 2px 8px var(--bg-hover)';
                             previewContainer.style.maxWidth = '95vw';
                         }
                     } else {
@@ -3914,10 +4114,6 @@
                             previewContainer.style.left = '';
                             previewContainer.style.transform = '';
                             previewContainer.style.zIndex = '';
-                            previewContainer.style.background = '';
-                            previewContainer.style.paddingTop = '';
-                            previewContainer.style.paddingBottom = '';
-                            previewContainer.style.borderRadius = '';
                             previewContainer.style.boxShadow = '';
                             previewContainer.style.maxWidth = '';
                         }
@@ -3961,11 +4157,7 @@
                             previewContainer.style.position = 'sticky';
                             previewContainer.style.top = '10px';
                             previewContainer.style.zIndex = '100';
-                            previewContainer.style.background = 'var(--bg-light)';
-                            previewContainer.style.paddingTop = '10px';
-                            previewContainer.style.paddingBottom = '10px';
-                            previewContainer.style.borderRadius = '8px';
-                            previewContainer.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                            previewContainer.style.boxShadow = '0 2px 8px var(--bg-hover)';
                             previewContainer.style.maxWidth = '90vw';
                         }
                     } else {
@@ -3975,10 +4167,6 @@
                             previewContainer.style.position = '';
                             previewContainer.style.top = '';
                             previewContainer.style.zIndex = '';
-                            previewContainer.style.background = '';
-                            previewContainer.style.paddingTop = '';
-                            previewContainer.style.paddingBottom = '';
-                            previewContainer.style.borderRadius = '';
                             previewContainer.style.boxShadow = '';
                             previewContainer.style.maxWidth = '';
                         }
@@ -4129,7 +4317,7 @@
         document.getElementById('paletteTextImportBtn').onclick = function() {
           const text = document.getElementById('paletteTextImport').value.trim();
           if (!text) {
-            showMessage('請貼上調色盤 JSON 文字', 'error');
+            showMessage('請貼上調色盤數據', 'error');
             return;
           }
           try {
@@ -4174,40 +4362,6 @@
           showingCanvas = true;
           updatePreview();
         };
-
-        // ========== 手機版 tab 分類下拉選單 ===========
-        // 定義分類與子項
-        const tabCategories = [
-          {
-            label: '圖片工具',
-            value: 'img',
-            children: [
-              { label: '圖片上傳', value: 'upload-img' },
-              { label: '精靈設定', value: 'sprite-settings' },
-              { label: '房間設定', value: 'room-settings' },
-              { label: '生成結果', value: 'data' },
-            ]
-          },
-          {
-            label: '合併工具',
-            value: 'merge',
-            children: [
-              { label: '房間合併工具', value: 'merge-rooms' },
-              { label: '精靈合併工具', value: 'merge-sprite-section' },
-              { label: '房間合併單色精靈工具', value: 'merge-room-section' },
-              { label: '世界級合併工具', value: 'merge-world-section' },
-              { label: '插圖合併工具', value: 'merge-picture-section' },
-            ]
-          },
-          {
-            label: '轉換工具',
-            value: 'convert',
-            children: [
-              { label: '房間轉插圖工具', value: 'room-to-picture-section' },
-              { label: '對話框皮膚轉換工具', value: 'textbox-skin-section' },
-            ]
-          }
-        ];
         // 初始化下拉選單
         function initMobileTabSelect() {
           const catSel = document.getElementById('tab-category-select');
@@ -4307,7 +4461,7 @@
               width: 40px;
               height: 40px;
               background: ${color};
-              border: 2px solid var(--border-light);
+              border: 2px solid var(--bg-light);
               border-radius: 4px;
               cursor: pointer;
               position: relative;
@@ -4322,13 +4476,13 @@
               right: 2px;
               width: 12px;
               height: 12px;
-              background: var(--transparent-white);
+              background: var(--bg-color);
               border-radius: 50%;
               display: none;
               align-items: center;
               justify-content: center;
               font-size: 8px;
-              color: var(--transparent-black);
+              color: var(--main-color);
             `;
             checkmark.textContent = '✓';
             colorBtn.appendChild(checkmark);
@@ -4340,7 +4494,7 @@
               if (isSelected) {
                 // 取消選擇
                 selectedColors = selectedColors.filter(c => c !== color);
-                colorBtn.style.border = '2px solid var(--border-light)';
+                colorBtn.style.border = '2px solid var(--bg-light)';
                 checkmark.style.display = 'none';
               } else {
                 // 選擇顏色
@@ -4349,7 +4503,7 @@
                   return;
                 }
                 selectedColors.push(color);
-                colorBtn.style.border = '2px solid var(--transparent-black)';
+                colorBtn.style.border = '2px solid var(--main-color)';
                 checkmark.style.display = 'flex';
               }
               
@@ -4452,6 +4606,14 @@
           const prevBtn = document.getElementById('preview-prev-btn');
           const nextBtn = document.getElementById('preview-next-btn');
           const label = document.getElementById('preview-index-label');
+          const previewResultBtn = document.getElementById('preview-result-btn');
+          
+          // 控制預覽轉換結果按鈕的顯示
+          if (currentImages.length > 0 && allImagesLoaded) {
+            previewResultBtn.style.display = 'block';
+          } else {
+            previewResultBtn.style.display = 'none';
+          }
           // 單色模式
           if (!currentPalette) {
             showingCanvas = false;
@@ -4545,6 +4707,171 @@
             updatePreview();
           }
         };
+
+        // 2. 獲取現有的預覽轉換結果按鈕和容器
+        const previewResultBtn = document.getElementById('preview-result-btn');
+        const previewResultContainer = document.getElementById('preview-result-container');
+
+        // 新增預覽結果相關變數
+        let currentPreviewResultIndex = 0;
+        let previewResultData = [];
+
+        previewResultBtn.onclick = function() {
+            if (!currentImages.length || !allImagesLoaded) {
+                showMessage('請先載入圖片', 'error');
+                return;
+            }
+            
+            // 清空預覽區
+            previewResultContainer.innerHTML = '';
+            previewResultContainer.style.display = 'block';
+            
+            // 取得設定
+            const data = {
+                spriteName: document.getElementById("spriteName").value,
+                spriteWidth: parseInt(document.getElementById("spriteWidth").value),
+                spriteHeight: parseInt(document.getElementById("spriteHeight").value),
+                isAvatar: document.getElementById("isAvatar").checked,
+                isWall: document.getElementById("isWall").checked,
+                isItem: document.getElementById("isItem").checked,
+                isTransparent: document.getElementById("isTransparent").checked,
+                colorIndex: parseInt(document.getElementById("colorIndex").value),
+                roomName: document.getElementById("roomName").value,
+                paletteName: paletteName || document.getElementById("paletteName").value,
+                musicName: document.getElementById("musicName").value,
+                roomWidth: parseInt(document.getElementById("roomWidth").value),
+                roomHeight: parseInt(document.getElementById("roomHeight").value)
+            };
+            
+            // 處理所有圖片
+            previewResultData = [];
+            let isMultiColor = !!(currentPalette && currentImages[0].quantized);
+            
+            for (let i = 0; i < currentImages.length; i++) {
+                try {
+                    let resultData;
+                    if (isMultiColor) {
+                        resultData = processQuantizedToRoomData(currentImages[i], data, currentPalette);
+                    } else {
+                        resultData = processImageToRoomData(currentImages[i], data);
+                    }
+                    previewResultData.push(resultData);
+                } catch (error) {
+                    showMessage(`第${i+1}張圖片預覽轉換失敗: ${error.message}`, 'error');
+                    return;
+                }
+            }
+            
+            // 重置索引並顯示預覽
+            currentPreviewResultIndex = 0;
+            updatePreviewResult();
+            
+            showMessage('轉換結果預覽成功！', 'success');
+        };
+
+        function updatePreviewResult() {
+            if (previewResultData.length === 0) return;
+            
+            const currentData = previewResultData[currentPreviewResultIndex];
+            const isMultiColor = !!(currentPalette && currentImages[0].quantized);
+            
+            // 清空預覽區
+            previewResultContainer.innerHTML = '';
+            
+            // 渲染當前預覽
+            renderRoomPreview(currentData, isMultiColor);
+            
+            // 建立預覽按鈕容器（多圖模式才顯示）
+            // 使用與現有預覽相同的邏輯：batchMode && currentImages.length > 1
+            if (batchMode && currentImages.length > 1) {
+                const btnContainer = document.createElement('div');
+                btnContainer.id = 'preview-result-btn-container';
+                btnContainer.className = 'preview-btn-container';
+                
+                const prevBtn = document.createElement('button');
+                prevBtn.className = 'preview-arrow-btn';
+                prevBtn.textContent = '<';
+                prevBtn.disabled = (currentPreviewResultIndex === 0);
+                prevBtn.onclick = function() {
+                    if (currentPreviewResultIndex > 0) {
+                        currentPreviewResultIndex--;
+                        updatePreviewResult();
+                    }
+                };
+                
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'preview-arrow-btn';
+                nextBtn.textContent = '>';
+                nextBtn.disabled = (currentPreviewResultIndex === previewResultData.length - 1);
+                nextBtn.onclick = function() {
+                    if (currentPreviewResultIndex < previewResultData.length - 1) {
+                        currentPreviewResultIndex++;
+                        updatePreviewResult();
+                    }
+                };
+                
+                const label = document.createElement('span');
+                label.className = 'preview-index-label';
+                label.textContent = `${currentPreviewResultIndex + 1} / ${previewResultData.length}`;
+                
+                btnContainer.appendChild(prevBtn);
+                btnContainer.appendChild(label);
+                btnContainer.appendChild(nextBtn);
+                
+                // 在渲染預覽後插入按鈕容器
+                previewResultContainer.appendChild(btnContainer);
+            }
+        }
+
+        function renderRoomPreview(roomData, isMultiColor) {
+            // 取得房間尺寸
+            const w = roomData.width || roomData.roomWidth;
+            const h = roomData.height || roomData.roomHeight;
+            const sw = roomData.spriteWidth;
+            const sh = roomData.spriteHeight;
+            const palette = isMultiColor ? (roomData.paletteName && currentPalette ? currentPalette : [[0,0,0],[255,255,255]]) : [[0,0,0],[255,255,255]];
+            // 建立 canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = w * sw;
+            canvas.height = h * sh;
+            canvas.className = 'preview-canvas';
+            const ctx = canvas.getContext('2d');
+            
+            // 先填滿背景色（索引0）
+            const bgColor = isMultiColor ? palette[0] || [255,255,255] : [255,255,255];
+            ctx.fillStyle = isMultiColor ? `rgb(${bgColor[0]},${bgColor[1]},${bgColor[2]})` : 'white';
+            ctx.fillRect(0, 0, w * sw, h * sh);
+            
+            // 建立 spriteName->sprite 映射
+            const spriteMap = {};
+            (roomData.spriteList||[]).forEach(s => { spriteMap[s.name] = s; });
+            // 填色
+            (roomData.tileList||[]).forEach(tile => {
+                const sprite = spriteMap[tile.spriteName];
+                if (!sprite) return;
+                const frame = sprite.frameList[0];
+                for (let sy = 0; sy < sh; sy++) {
+                    for (let sx = 0; sx < sw; sx++) {
+                        const px = tile.x * sw + sx;
+                        const py = tile.y * sh + sy;
+                        let colorIdx = frame[sy * sw + sx];
+                        if (isMultiColor) {
+                            if (colorIdx < 0 || colorIdx >= palette.length) colorIdx = 0;
+                            const [r,g,b] = palette[colorIdx] || [0,0,0];
+                            ctx.fillStyle = `rgb(${r},${g},${b})`;
+                        } else {
+                            ctx.fillStyle = colorIdx ? 'black' : 'white';
+                        }
+                        ctx.fillRect(px, py, 1, 1);
+                    }
+                }
+            });
+            
+            // 清空預覽區並重新組裝內容
+            previewResultContainer.innerHTML = '';
+            previewResultContainer.style.display = '';
+            previewResultContainer.appendChild(canvas);
+        }
     </script>
 </body>
 </html> 
