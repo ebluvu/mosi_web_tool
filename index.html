@@ -713,7 +713,7 @@
             <h2>房間合併工具</h2>
             <form id="merge-form">
                 <label for="merge-files">上傳多個房間數據: </label>
-                <input type="file" id="merge-files" name="merge-files" accept=".json,.mosiroom" multiple required>
+                <input type="file" id="merge-files" name="merge-files" accept=".mosiroom" multiple required>
                 <ul id="file-list"></ul>
                 <button type="submit">合併房間數據</button>
             </form>
@@ -723,7 +723,7 @@
           <div class="section tab-section" id="merge-sprite-section">
             <h2>精靈合併工具</h2>
             <label for="mergeSpriteInput">上傳多個精靈數據: </label>
-            <input type="file" id="mergeSpriteInput" accept=".mosisprite,.json" multiple style="margin-bottom:10px;">
+            <input type="file" id="mergeSpriteInput" accept=".mosisprite" multiple style="margin-bottom:10px;">
             <ul id="mergeSpriteFileList"></ul>
             <div id="mergeSpriteAttrSelect" style="display:none; margin:10px 0;"></div>
             <button id="mergeSpriteBtn" style="margin-top:10px; display:none;">合併精靈</button>
@@ -737,7 +737,7 @@
                 <textarea id="mergeRoomTextImport" placeholder="貼上房間數據..." style="width:90%;height:80px;margin-bottom:4px;"></textarea><br>
                 <button id="mergeRoomTextImportBtn" style="margin: 0.5em 0;" type="button">從文字匯入房間數據</button>
             </div>
-            <input type="file" id="mergeRoomInput" accept=".mosiroom,.json" style="margin-bottom:10px;">
+            <input type="file" id="mergeRoomInput" accept=".mosiroom" style="margin-bottom:10px;">
             <hr>
             <button id="mergeRoomBtn" style="margin-top:10px; display:none;">合併房間</button>
             <textarea id="mergeRoomOutput" style="display: none;"></textarea>
@@ -750,7 +750,7 @@
               <textarea id="mergeWorldTextImport" placeholder="貼上世界數據..." style="width:90%;height:80px;margin-bottom:4px;"></textarea><br>
               <button id="mergeWorldTextImportBtn" style="margin: 0.5em 0;" type="button">從文字匯入世界數據</button>
           </div>
-          <input type="file" id="mergeWorldInput" accept=".mosi,.json" style="margin-bottom:10px;">
+          <input type="file" id="mergeWorldInput" accept=".mosi" style="margin-bottom:10px;">
             <hr>
             <button id="mergeWorldBtn" style="margin-top:10px; display:none;">合併世界</button>
             <textarea id="mergeWorldOutput" style="display: none;"></textarea>
@@ -759,7 +759,7 @@
         <div class="section tab-section" id="merge-picture-section">
           <h2>插圖合併工具</h2>
           <label for="mergePictureInput">上傳多個插圖數據: </label>
-          <input type="file" id="mergePictureInput" accept=".mosigraphic,.json" multiple style="margin-bottom:10px;">
+          <input type="file" id="mergePictureInput" accept=".mosigraphic" multiple style="margin-bottom:10px;">
           <ul id="mergePictureFileList"></ul>
           <div id="mergePictureAttrSelect" style="display:none; margin:10px 0;"></div>
             <button id="mergePictureBtn" style="margin-top:10px; display:none;">合併插圖</button>
@@ -773,7 +773,7 @@
               <textarea id="roomToPictureTextImport" placeholder="貼上房間數據..." style="width:90%;height:80px;margin-bottom:4px;"></textarea><br>
               <button id="roomToPictureTextImportBtn" style="margin: 0.5em 0;" type="button">從文字匯入房間數據</button>
           </div>
-          <input type="file" id="roomToPictureInput" accept=".mosiroom,.json" style="margin-bottom:10px;">
+          <input type="file" id="roomToPictureInput" accept=".mosiroom" style="margin-bottom:10px;">
           <hr>
             <button id="roomToPicturePictureBtn" style="margin-top:10px; display:none;">轉換房間</button>
             <textarea id="roomToPictureOutput" style="display: none;"></textarea>
@@ -785,13 +785,13 @@
             <label style="display:block; margin-bottom:0.5em;">選擇房間檔案：</label>
             <textarea id="textboxSkinRoomTextImport" placeholder="貼上房間數據..." style="width:90%;height:80px;margin-bottom:4px;"></textarea><br>
             <button id="textboxSkinRoomTextImportBtn" style="margin: 0.5em 0;" type="button">從文字匯入房間數據</button>
-            <input type="file" id="roomFile" accept=".mosiroom,application/json">
+            <input type="file" id="roomFile" accept=".mosiroom">
           </div>
           <div style="margin-top: 1em;">
             <label style="display:block; margin-bottom:0.5em;">選擇精靈檔案：</label>
             <textarea id="textboxSkinSpriteTextImport" placeholder="貼上精靈數據..." style="width:90%;height:80px;margin-bottom:4px;"></textarea><br>
             <button id="textboxSkinSpriteTextImportBtn" style="margin: 0.5em 0;" type="button">從文字匯入精靈數據</button>
-            <input type="file" id="spriteFile" accept=".mosisprite,application/json">
+            <input type="file" id="spriteFile" accept=".mosisprite">
           </div>
           <hr>
           <button id="convertTextboxSkinBtn" style="margin-bottom:1em;">轉換對話框皮膚</button>
@@ -1025,30 +1025,9 @@
                         return;
                     }
                     batchResults.forEach((r, idx) => {
-                        let ext = ".json";
-                        let mimeType = "application/json";
-                        let minified = false;
-                        if (r.data && r.data.type === "picture") { 
-                            ext = ".mosigraphic"; 
-                            mimeType = "application/octet-stream";
-                            minified = true; 
-                        }
-                        else if (r.data && r.data.frameList) { 
-                            ext = ".mosisprite"; 
-                            mimeType = "application/octet-stream";
-                            minified = true; 
-                        }
-                        else if (r.data && (r.data.roomName || r.data.name) && r.data.tileList) { 
-                            ext = ".mosiroom"; 
-                            mimeType = "application/octet-stream";
-                            minified = true; 
-                        }
-                        else if (r.data && r.data.roomList) { 
-                            ext = ".mosi"; 
-                            mimeType = "application/octet-stream";
-                            minified = true; 
-                        }
-                        let content = minified ? JSON.stringify(r.data) : JSON.stringify(r.data, null, 4);
+                        let mimeType = "application/octet-stream";
+                        let ext = getFileExtension(r.data);
+                        let content = JSON.stringify(r.data);
                         const blob = new Blob([content], { type: mimeType });
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement("a");
@@ -1101,9 +1080,7 @@
                   }
   
                 }
-                output.value = (resultData && (resultData.frameList || resultData.tileList || resultData.roomList))
-                    ? JSON.stringify(resultData)
-                    : JSON.stringify(resultData, null, 4);
+                output.value = JSON.stringify(resultData);
                 output.style.display = "block";
                 downloadBtn.style.display = "block";
                 
@@ -1229,39 +1206,33 @@
             };
         }
 
+        // 根據數據類型決定副檔名的函數
+        function getFileExtension(data) {
+            if (data && data.type === "picture") { 
+                return ".mosigraphic"; 
+            }
+            else if (data && data.frameList) { 
+                return ".mosisprite"; 
+            }
+            else if (data && (data.roomName || data.name) && data.tileList) { 
+                return ".mosiroom"; 
+            }
+            else if (data && data.roomList) { 
+                return ".mosi"; 
+            }
+            return ".mosiroom"; // 預設
+        }
+
         // 下載按鈕處理
         downloadBtn.addEventListener("click", () => {
             const roomName = document.getElementById("roomName").value || "room_data";
-            let ext = ".json";
-            let mimeType = "application/json";
-            let minified = false;
+            let mimeType = "application/octet-stream";
             let obj = null;
             try {
                 obj = JSON.parse(output.value);
-                if (obj && obj.type === "picture") { 
-                    ext = ".mosigraphic"; 
-                    mimeType = "application/octet-stream";
-                    minified = true; 
-                }
-                else if (obj && obj.frameList) { 
-                    ext = ".mosisprite"; 
-                    mimeType = "application/octet-stream";
-                    minified = true; 
-                }
-                else if (obj && (obj.roomName || obj.name) && obj.tileList) { 
-                    ext = ".mosiroom"; 
-                    mimeType = "application/octet-stream";
-                    minified = true; 
-                }
-                else if (obj && obj.roomList) { 
-                    ext = ".mosi"; 
-                    mimeType = "application/octet-stream";
-                    minified = true; 
-                }
             } catch {}
-            let content = "";
-            if (minified && obj) content = JSON.stringify(obj);
-            else content = output.value;
+            let ext = getFileExtension(obj);
+            let content = output.value;
             const blob = new Blob([content], { type: mimeType });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
@@ -1402,9 +1373,7 @@
 
                 // 顯示合併後數據
                 const mergeOutput = document.getElementById("merge-output");
-                mergeOutput.value = (mergedData && (mergedData.frameList || mergedData.tileList || mergedData.roomList))
-                    ? JSON.stringify(mergedData)
-                    : JSON.stringify(mergedData, null, 4);
+                mergeOutput.value = JSON.stringify(mergedData);
                 mergeOutput.style.display = "block";
 
                 // 顯示下載按鈕
@@ -1423,16 +1392,8 @@
         document.getElementById("merge-download-btn").addEventListener("click", () => {
             const roomName = document.getElementById("roomName").value || "merged_room_data";
             const mergeOutput = document.getElementById("merge-output");
-            let obj = null;
-            let minified = false;
-            let mimeType = "application/json";
-            try {
-                obj = JSON.parse(mergeOutput.value);
-                if (obj && obj.frameList) { minified = true; mimeType = "application/octet-stream"; }
-                else if (obj && (obj.roomName || obj.name) && obj.tileList) { minified = true; mimeType = "application/octet-stream"; }
-                else if (obj && obj.roomList) { minified = true; mimeType = "application/octet-stream"; }
-            } catch {}
-            let content = (minified && obj) ? JSON.stringify(obj) : mergeOutput.value;
+            let mimeType = "application/octet-stream";
+            let content = mergeOutput.value;
             const blob = new Blob([content], { type: mimeType });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
@@ -2118,9 +2079,7 @@
                 
                 // 顯示合併後數據
                 const mergeOutput = document.getElementById("mergeSpriteOutput");
-                mergeOutput.value = (merged && merged.frameList)
-                    ? JSON.stringify(merged)
-                    : JSON.stringify(merged, null, 4);
+                mergeOutput.value = JSON.stringify(merged);
                 mergeOutput.style.display = "block";
                 
                 // 顯示下載按鈕
@@ -2133,8 +2092,8 @@
             // 精靈合併下載按鈕
             document.getElementById("mergeSpriteDownloadBtn").addEventListener("click", () => {
                 const mergeOutput = document.getElementById("mergeSpriteOutput");
-                const fileName = sprites[attrSourceIdx].file.name.replace(/\.(json|mosisprite)?$/, "") + ".mosisprite";
-                const content = JSON.stringify(JSON.parse(mergeOutput.value));
+                const fileName = sprites[attrSourceIdx].file.name.replace(/\.(mosisprite)?$/, "") + ".mosisprite";
+                const content = mergeOutput.value;
                 const blob = new Blob([content], {type:'application/octet-stream'});
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
@@ -2301,9 +2260,7 @@
                     }
                     // 顯示合併後數據
                     const mergeOutput = document.getElementById("mergeRoomOutput");
-                    mergeOutput.value = (room && room.tileList)
-                        ? JSON.stringify(room)
-                        : JSON.stringify(room, null, 4);
+                    mergeOutput.value = JSON.stringify(room);
                     mergeOutput.style.display = "block";
                     
                     // 顯示下載按鈕
@@ -2321,8 +2278,8 @@
             document.getElementById("mergeRoomDownloadBtn").addEventListener("click", () => {
                 const mergeOutput = document.getElementById("mergeRoomOutput");
                 let downloadName = (fileName || "merged_room")
-                  .replace(/\.(json|mosiroom)?$/, "") + ".mosiroom";
-                const content = JSON.stringify(JSON.parse(mergeOutput.value));
+                  .replace(/\.(mosiroom)?$/, "") + ".mosiroom";
+                const content = mergeOutput.value;
                 const blob = new Blob([content], {type:'application/octet-stream'});
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
@@ -2536,9 +2493,7 @@
                     
                     if (dataSize <= maxSize) {
                         // 數據不大，顯示文字框
-                        mergeOutput.value = (world && world.roomList)
-                            ? JSON.stringify(world)
-                            : JSON.stringify(world, null, 4);
+                        mergeOutput.value = JSON.stringify(world);
                         mergeOutput.style.display = "block";
                         mergeDownloadBtn.style.display = "block";
                         showMessage('世界合併成功！', 'success');
@@ -2559,7 +2514,7 @@
             // 世界級合併下載按鈕
             document.getElementById("mergeWorldDownloadBtn").addEventListener("click", () => {
                 let downloadName = (fileName || "merged_world")
-                  .replace(/\.(json|mosi)?$/, "") + ".mosi";
+                  .replace(/\.(mosi)?$/, "") + ".mosi";
                 
                 let content;
                 if (window.largeWorldData) {
@@ -2570,7 +2525,7 @@
                 } else {
                     // 小數據情況，從文字框讀取
                     const mergeOutput = document.getElementById("mergeWorldOutput");
-                    content = JSON.stringify(JSON.parse(mergeOutput.value));
+                    content = mergeOutput.value;
                 }
                 
                 const blob = new Blob([content], {type:'application/octet-stream'});
@@ -2720,9 +2675,7 @@
                 
                 // 顯示合併後數據
                 const mergeOutput = document.getElementById("mergePictureOutput");
-                mergeOutput.value = (merged && merged.frameList)
-                    ? JSON.stringify(merged)
-                    : JSON.stringify(merged, null, 4);
+                mergeOutput.value = JSON.stringify(merged);
                 mergeOutput.style.display = "block";
                 
                 // 顯示下載按鈕
@@ -2735,8 +2688,8 @@
             // 插圖合併下載按鈕
             document.getElementById("mergePictureDownloadBtn").addEventListener("click", () => {
                 const mergeOutput = document.getElementById("mergePictureOutput");
-                const fileName = (sprites[attrSourceIdx].data.name || 'merged_picture').replace(/\.(json|mosigraphic)?$/, "") + ".mosigraphic";
-                const content = JSON.stringify(JSON.parse(mergeOutput.value));
+                const fileName = (sprites[attrSourceIdx].data.name || 'merged_picture').replace(/\.(mosigraphic)?$/, "") + ".mosigraphic";
+                const content = mergeOutput.value;
                 const blob = new Blob([content], {type:'application/octet-stream'});
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
@@ -2770,9 +2723,7 @@
                     
                     // 顯示轉換後數據
                     const mergeOutput = document.getElementById("roomToPictureOutput");
-                    mergeOutput.value = (picture && picture.frameList)
-                        ? JSON.stringify(picture)
-                        : JSON.stringify(picture, null, 4);
+                    mergeOutput.value = JSON.stringify(picture);
                     mergeOutput.style.display = "block";
                     
                     // 顯示下載按鈕
@@ -2788,8 +2739,8 @@
             // 房間轉插圖下載按鈕
             document.getElementById("roomToPictureDownloadBtn").addEventListener("click", () => {
                 const mergeOutput = document.getElementById("roomToPictureOutput");
-                const fileName = (roomData.name || 'picture').replace(/\.(json|mosigraphic)?$/, "") + ".mosigraphic";
-                const content = JSON.stringify(JSON.parse(mergeOutput.value));
+                const fileName = (roomData.name || 'picture').replace(/\.(mosigraphic)?$/, "") + ".mosigraphic";
+                const content = mergeOutput.value;
                 const blob = new Blob([content], {type:'application/octet-stream'});
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
@@ -3171,14 +3122,14 @@
         }
 
         // 對話框皮膚轉換工具 JS
-        function readJsonFile(file) {
+        function readMosiFile(file) {
           return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = e => {
               try {
                 resolve(JSON.parse(e.target.result));
               } catch (err) {
-                reject('JSON 解析失敗: ' + err);
+                reject('檔案解析失敗: ' + err);
               }
             };
             reader.onerror = () => reject('檔案讀取失敗');
@@ -3320,8 +3271,8 @@
             // 使用檔案上傳的數據
             try {
               [room, sprite] = await Promise.all([
-                readJsonFile(roomFile),
-                readJsonFile(spriteFile)
+                readMosiFile(roomFile),
+                readMosiFile(spriteFile)
               ]);
             } catch (err) {
               showMessage('檔案讀取失敗：' + err.message, 'error');
@@ -3337,9 +3288,7 @@
             
             // 顯示轉換後數據
             const mergeOutput = document.getElementById("textboxSkinOutput");
-            mergeOutput.value = (skin && (skin.fillList || skin.indicatorList))
-                ? JSON.stringify(skin)
-                : JSON.stringify(skin, null, 4);
+            mergeOutput.value = JSON.stringify(skin);
             mergeOutput.style.display = "block";
             
             // 顯示下載按鈕
@@ -3356,7 +3305,7 @@
         document.getElementById("textboxSkinDownloadBtn").addEventListener("click", () => {
           const mergeOutput = document.getElementById("textboxSkinOutput");
           const skin = JSON.parse(mergeOutput.value);
-          const blob = new Blob([JSON.stringify(skin)], {type: 'application/octet-stream'});
+          const blob = new Blob([mergeOutput.value], {type: 'application/octet-stream'});
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
@@ -3390,18 +3339,18 @@
         document.getElementById('textboxSkinSpriteTextImportBtn').onclick = function() {
             const text = document.getElementById('textboxSkinSpriteTextImport').value.trim();
             if (!text) {
-                showMessage('請貼上精靈數據', 'error');
-                return;
-            }
+            showMessage('請貼上精靈數據', 'error');
+            return;
+          }
             try {
-                const data = JSON.parse(text);
-                // 將精靈數據存儲到全域變數，供轉換按鈕使用
-                window.importedSpriteData = data;
-                showMessage('精靈數據匯入成功', 'success');
-            } catch (err) {
-                showMessage('精靈數據解析失敗: ' + err.message, 'error');
-                window.importedSpriteData = null;
-            }
+            const data = JSON.parse(text);
+            // 將精靈數據存儲到全域變數，供轉換按鈕使用
+            window.importedSpriteData = data;
+            showMessage('精靈數據匯入成功', 'success');
+          } catch (err) {
+            showMessage('精靈數據解析失敗: ' + err.message, 'error');
+            window.importedSpriteData = null;
+          }
         };
 
         // Accordion 手風琴展開/收合邏輯
@@ -4285,7 +4234,7 @@
           
           // 生成調色盤數據
           const paletteObj = { name: paletteName, colorList: selectedColors };
-          const result = JSON.stringify(paletteObj);
+                      const result = JSON.stringify(paletteObj);
           document.getElementById('autoPaletteResult').value = result;
           document.getElementById('autoPaletteResult').style.display = '';
           document.getElementById('autoPaletteDownloadBtn').style.display = '';
@@ -4359,7 +4308,7 @@
             showMessage('調色盤匯入成功', 'success');
             
           } catch (err) {
-            showMessage('palette 解析失敗: ' + err, 'error');
+            showMessage('調色盤解析失敗: ' + err, 'error');
             currentPalette = null;
             paletteName = "";
             showPalettePreview([]);
