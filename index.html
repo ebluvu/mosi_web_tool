@@ -645,7 +645,7 @@
                 <div style="font-weight:bold; color:var(--main-color); margin-bottom:0.3em;">選擇顏色：</div>
                 <div id="color-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(40px, 1fr)); gap:4px; margin-bottom:0.5em;"></div>
                 <div style="font-size:0.9em; color:var(--secondary-color); margin-bottom:0.5em;">
-                  已選擇: <span id="selected-count">0</span>/8 個顏色
+                  已選擇: <span id="selected-count">0</span>/10 個顏色
                 </div>
                 <hr>
                 <label style="color:var(--main-color);">調色盤名稱：<input type="text" id="autoPaletteName" value="智能調色盤" style="width: 10em;" /></label>
@@ -673,13 +673,16 @@
                     <label>是否為透明化: <input type="checkbox" id="isTransparent"></label><br>
                     <label>顏色索引:
                         <select id="colorIndex">
-                            <option value="1">1</option>
+                            <option value="0">0</option>
+                            <option value="1" selected>1</option>
                             <option value="2">2</option>
                             <option value="3">3</option>
                             <option value="4">4</option>
                             <option value="5">5</option>
                             <option value="6">6</option>
                             <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
                         </select>
                     </label><br>
                     <div id="batch-sprite-settings" style="display:none;"></div>
@@ -3760,7 +3763,7 @@
           return '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('');
         }
         // 將 getMostFrequentColors 換成簡易分群法
-        function getPaletteByQuantize(imageData, maxColors=8, quant=32) {
+        function getPaletteByQuantize(imageData, maxColors=10, quant=32) {
           const colorMap = {};
           for (let i=0; i<imageData.length; i+=4) {
             const a = imageData[i+3];
@@ -3831,8 +3834,8 @@
           const num = parseInt(hex, 16);
           return [num>>16&255, num>>8&255, num&255];
         }
-        // 只做單純 8 色分散，不保留主色
-        function distinctColorsMaxDistance(colors, maxColors=8) {
+        // 只做單純 10 色分散，不保留主色
+        function distinctColorsMaxDistance(colors, maxColors=10) {
           if (!colors.length) return [];
           const arr = colors.map(c => Array.isArray(c) ? c : hexToRgbArr(c));
           const result = [arr[0]];
@@ -3919,7 +3922,7 @@
         }
         
                  // ===== 新增：智能顏色選擇函數 =====
-                  function smartColorSelection(colors, maxColors=8) {
+                  function smartColorSelection(colors, maxColors=10) {
                       if (!colors.length) return [];
            
            // 簡化的去重處理：使用更直接的 RGB 距離檢測
@@ -4459,8 +4462,8 @@
                 checkmark.style.display = 'none';
               } else {
                 // 選擇顏色
-                if (selectedColors.length >= 8) {
-                  showMessage('最多只能選擇8個顏色', 'error');
+                if (selectedColors.length >= 10) {
+                  showMessage('最多只能選擇10個顏色', 'error');
                   return;
                 }
                 selectedColors.push(color);
